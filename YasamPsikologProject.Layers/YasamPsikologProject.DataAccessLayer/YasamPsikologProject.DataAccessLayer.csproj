@@ -23,4 +23,11 @@
     <ProjectReference Include="..\YasamPsikologProject.EntityLayer\YasamPsikologProject.EntityLayer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Abstract\" />
+    <Folder Include="Concerete\" />
+    <Folder Include="EntityFramework\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>
