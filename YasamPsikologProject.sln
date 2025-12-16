@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YasamPsikologProject.API", "YasamPsikologProject.API", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YasamPsikologProject.Frontend", "YasamPsikologProject.Frontend", "{6FB3F949-F46C-40E8-A18A-338DC864DBA3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YasamPsikologProject.Layers", "YasamPsikologProject.Layers", "{4A2D969C-27F0-43AD-888D-57200DC2EF0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasamPsikologProject.WebApi", "YasamPsikologProject.API\YasamPsikologProject.WebApi\YasamPsikologProject.WebApi.csproj", "{FD6550CA-BA77-4FB9-A8B9-B66189C8F5DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasamPsikologProject.WebUi", "YasamPsikologProject.Frontend\YasamPsikologProject.WebUi\YasamPsikologProject.WebUi.csproj", "{67AA256A-4EAF-4D7E-B2E8-5FC2D66AEE3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasamPsikologProject.BussinessLayer", "YasamPsikologProject.Layers\YasamPsikologProject.BussinessLayer\YasamPsikologProject.BussinessLayer.csproj", "{07BD0E69-9078-4B83-9F53-4456A54B5C6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasamPsikologProject.DataAccessLayer", "YasamPsikologProject.Layers\YasamPsikologProject.DataAccessLayer\YasamPsikologProject.DataAccessLayer.csproj", "{DA5EAF96-CCE3-4D2B-AEB4-BC9EB2907C08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasamPsikologProject.EntityLayer", "YasamPsikologProject.Layers\YasamPsikologProject.EntityLayer\YasamPsikologProject.EntityLayer.csproj", "{69135107-1D0D-49B3-908C-1D67DD4BDABD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FD6550CA-BA77-4FB9-A8B9-B66189C8F5DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD6550CA-BA77-4FB9-A8B9-B66189C8F5DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD6550CA-BA77-4FB9-A8B9-B66189C8F5DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD6550CA-BA77-4FB9-A8B9-B66189C8F5DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67AA256A-4EAF-4D7E-B2E8-5FC2D66AEE3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67AA256A-4EAF-4D7E-B2E8-5FC2D66AEE3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67AA256A-4EAF-4D7E-B2E8-5FC2D66AEE3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67AA256A-4EAF-4D7E-B2E8-5FC2D66AEE3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07BD0E69-9078-4B83-9F53-4456A54B5C6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07BD0E69-9078-4B83-9F53-4456A54B5C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07BD0E69-9078-4B83-9F53-4456A54B5C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07BD0E69-9078-4B83-9F53-4456A54B5C6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA5EAF96-CCE3-4D2B-AEB4-BC9EB2907C08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA5EAF96-CCE3-4D2B-AEB4-BC9EB2907C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA5EAF96-CCE3-4D2B-AEB4-BC9EB2907C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA5EAF96-CCE3-4D2B-AEB4-BC9EB2907C08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69135107-1D0D-49B3-908C-1D67DD4BDABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69135107-1D0D-49B3-908C-1D67DD4BDABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69135107-1D0D-49B3-908C-1D67DD4BDABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69135107-1D0D-49B3-908C-1D67DD4BDABD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FD6550CA-BA77-4FB9-A8B9-B66189C8F5DC} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{67AA256A-4EAF-4D7E-B2E8-5FC2D66AEE3F} = {6FB3F949-F46C-40E8-A18A-338DC864DBA3}
+		{07BD0E69-9078-4B83-9F53-4456A54B5C6C} = {4A2D969C-27F0-43AD-888D-57200DC2EF0A}
+		{DA5EAF96-CCE3-4D2B-AEB4-BC9EB2907C08} = {4A2D969C-27F0-43AD-888D-57200DC2EF0A}
+		{69135107-1D0D-49B3-908C-1D67DD4BDABD} = {4A2D969C-27F0-43AD-888D-57200DC2EF0A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3A17B203-C6F1-4DE8-85C9-CE9B6C74AF0A}
+	EndGlobalSection
+EndGlobal
