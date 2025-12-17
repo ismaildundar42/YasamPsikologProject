@@ -24,18 +24,83 @@ namespace YasamPsikologProject.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var psychologists = await _psychologistService.GetAllActiveAsync();
-            return Ok(psychologists);
+            try
+            {
+                var psychologists = await _psychologistService.GetAllActiveAsync();
+                
+                // Entity'leri DTO'ya dönüştür
+                var dtos = psychologists.Select(p => new
+                {
+                    Id = p.Id,
+                    UserId = p.UserId,
+                    User = p.User == null ? null : new
+                    {
+                        Id = p.User.Id,
+                        FirstName = p.User.FirstName,
+                        LastName = p.User.LastName,
+                        Email = p.User.Email,
+                        PhoneNumber = p.User.PhoneNumber,
+                        Role = p.User.Role.ToString(),
+                        IsActive = p.User.IsActive,
+                        CreatedAt = p.User.CreatedAt
+                    },
+                    LicenseNumber = p.LicenseNumber,
+                    Specialization = p.Specialization,
+                    Biography = p.Biography,
+                    CalendarColor = p.CalendarColor,
+                    ConsultationFee = p.ConsultationFee,
+                    ConsultationDuration = p.ConsultationDuration,
+                    IsActive = p.IsActive
+                }).ToList();
+                
+                return Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Psikologlar listelenirken hata oluştu: {ex.Message}" });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var psychologist = await _psychologistService.GetByIdAsync(id);
-            if (psychologist == null)
-                return NotFound(new { message = "Psikolog bulunamadı." });
+            try
+            {
+                var psychologist = await _psychologistService.GetByIdAsync(id);
+                if (psychologist == null)
+                    return NotFound(new { message = "Psikolog bulunamadı." });
 
-            return Ok(psychologist);
+                // Entity'yi DTO'ya dönüştür
+                var dto = new
+                {
+                    Id = psychologist.Id,
+                    UserId = psychologist.UserId,
+                    User = psychologist.User == null ? null : new
+                    {
+                        Id = psychologist.User.Id,
+                        FirstName = psychologist.User.FirstName,
+                        LastName = psychologist.User.LastName,
+                        Email = psychologist.User.Email,
+                        PhoneNumber = psychologist.User.PhoneNumber,
+                        Role = psychologist.User.Role.ToString(),
+                        IsActive = psychologist.User.IsActive,
+                        CreatedAt = psychologist.User.CreatedAt
+                    },
+                    LicenseNumber = psychologist.LicenseNumber,
+                    Specialization = psychologist.Specialization,
+                    Biography = psychologist.Biography,
+                    CalendarColor = psychologist.CalendarColor,
+                    ConsultationFee = psychologist.ConsultationFee,
+                    ConsultationDuration = psychologist.ConsultationDuration,
+                    IsActive = psychologist.IsActive
+                };
+
+                return Ok(dto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Psikolog getirilirken hata oluştu: {ex.Message}" });
+            }
         }
 
         [HttpGet("user/{userId}")]
@@ -51,6 +116,12 @@ namespace YasamPsikologProject.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePsychologistDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(new { message = "Geçersiz veri.", errors = errors });
+            }
+
             try
             {
                 // Önce User oluştur
@@ -75,15 +146,39 @@ namespace YasamPsikologProject.WebApi.Controllers
                     LicenseNumber = dto.LicenseNumber,
                     Specialization = dto.Specialization,
                     CalendarColor = dto.CalendarColor ?? "#4CAF50",
+                    ConsultationFee = dto.ConsultationFee,
+                    ConsultationDuration = 50, // Varsayılan değer
                     IsActive = dto.IsActive
                 };
 
                 var createdPsychologist = await _psychologistService.CreateAsync(psychologist);
                 
-                // User bilgisiyle birlikte dön
-                createdPsychologist.User = createdUser;
+                // DTO formatında dön
+                var responseDto = new
+                {
+                    Id = createdPsychologist.Id,
+                    UserId = createdUser.Id,
+                    User = new
+                    {
+                        Id = createdUser.Id,
+                        FirstName = createdUser.FirstName,
+                        LastName = createdUser.LastName,
+                        Email = createdUser.Email,
+                        PhoneNumber = createdUser.PhoneNumber,
+                        Role = createdUser.Role.ToString(),
+                        IsActive = createdUser.IsActive,
+                        CreatedAt = createdUser.CreatedAt
+                    },
+                    LicenseNumber = createdPsychologist.LicenseNumber,
+                    Specialization = createdPsychologist.Specialization,
+                    Biography = createdPsychologist.Biography,
+                    CalendarColor = createdPsychologist.CalendarColor,
+                    ConsultationFee = createdPsychologist.ConsultationFee,
+                    ConsultationDuration = createdPsychologist.ConsultationDuration,
+                    IsActive = createdPsychologist.IsActive
+                };
                 
-                return CreatedAtAction(nameof(GetById), new { id = createdPsychologist.Id }, createdPsychologist);
+                return CreatedAtAction(nameof(GetById), new { id = createdPsychologist.Id }, responseDto);
             }
             catch (Exception ex)
             {
@@ -92,15 +187,70 @@ namespace YasamPsikologProject.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Psychologist psychologist)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdatePsychologistDto dto)
         {
-            if (id != psychologist.Id)
-                return BadRequest(new { message = "ID uyuşmazlığı." });
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(new { message = "Geçersiz veri.", errors = errors });
+            }
 
             try
             {
-                var updatedPsychologist = await _psychologistService.UpdateAsync(psychologist);
-                return Ok(updatedPsychologist);
+                // Mevcut psikolog kaydını getir
+                var existing = await _psychologistService.GetByIdAsync(id);
+                if (existing == null)
+                    return NotFound(new { message = "Psikolog bulunamadı." });
+
+                // User bilgilerini güncelle
+                var user = existing.User;
+                if (user != null)
+                {
+                    user.FirstName = dto.FirstName;
+                    user.LastName = dto.LastName;
+                    user.Email = dto.Email;
+                    user.PhoneNumber = dto.PhoneNumber;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    
+                    await _userService.UpdateAsync(user);
+                }
+
+                // Psychologist bilgilerini güncelle
+                existing.LicenseNumber = dto.LicenseNumber;
+                existing.Specialization = dto.Specialization;
+                existing.CalendarColor = dto.CalendarColor ?? "#4CAF50";
+                existing.ConsultationFee = dto.ConsultationFee;
+                existing.IsActive = dto.IsActive;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                var updatedPsychologist = await _psychologistService.UpdateAsync(existing);
+                
+                // DTO formatında dön
+                var responseDto = new
+                {
+                    Id = updatedPsychologist.Id,
+                    UserId = updatedPsychologist.UserId,
+                    User = user == null ? null : new
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        Role = user.Role.ToString(),
+                        IsActive = user.IsActive,
+                        CreatedAt = user.CreatedAt
+                    },
+                    LicenseNumber = updatedPsychologist.LicenseNumber,
+                    Specialization = updatedPsychologist.Specialization,
+                    Biography = updatedPsychologist.Biography,
+                    CalendarColor = updatedPsychologist.CalendarColor,
+                    ConsultationFee = updatedPsychologist.ConsultationFee,
+                    ConsultationDuration = updatedPsychologist.ConsultationDuration,
+                    IsActive = updatedPsychologist.IsActive
+                };
+                
+                return Ok(responseDto);
             }
             catch (Exception ex)
             {

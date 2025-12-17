@@ -5,17 +5,18 @@ using YasamPsikologProject.WebUi.Models.ViewModels;
 
 namespace YasamPsikologProject.WebUi.Controllers
 {
+    [Route("Admin/[controller]")]
     public class AppointmentController : Controller
     {
-        private readonly IAppointmentService _appointmentService;
-        private readonly IPsychologistService _psychologistService;
-        private readonly IClientService _clientService;
+        private readonly IApiAppointmentService _appointmentService;
+        private readonly IApiPsychologistService _psychologistService;
+        private readonly IApiClientService _clientService;
         private readonly ILogger<AppointmentController> _logger;
 
         public AppointmentController(
-            IAppointmentService appointmentService,
-            IPsychologistService psychologistService,
-            IClientService clientService,
+            IApiAppointmentService appointmentService,
+            IApiPsychologistService psychologistService,
+            IApiClientService clientService,
             ILogger<AppointmentController> logger)
         {
             _appointmentService = appointmentService;
@@ -24,6 +25,9 @@ namespace YasamPsikologProject.WebUi.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        [Route("")]
+        [Route("Index")]
         public async Task<IActionResult> Index()
         {
             ViewData["PageTitle"] = "Randevu Yönetimi";
@@ -47,6 +51,8 @@ namespace YasamPsikologProject.WebUi.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("Calendar")]
         public async Task<IActionResult> Calendar()
         {
             ViewData["PageTitle"] = "Randevu Takvimi";
@@ -107,6 +113,8 @@ namespace YasamPsikologProject.WebUi.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("Create")]
         public async Task<IActionResult> Create()
         {
             ViewData["PageTitle"] = "Yeni Randevu";
@@ -115,26 +123,42 @@ namespace YasamPsikologProject.WebUi.Controllers
         }
 
         [HttpPost]
+        [Route("Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(AppointmentDto model)
         {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Lütfen tüm alanları doğru şekilde doldurunuz.";
+                await LoadDropdowns();
+                return View(model);
+            }
+
             try
             {
+                // Tarih kontrolü
+                if (model.AppointmentDate < DateTime.Now)
+                {
+                    TempData["ErrorMessage"] = "Geçmiş tarihli randevu oluşturulamaz.";
+                    await LoadDropdowns();
+                    return View(model);
+                }
+
                 var response = await _appointmentService.CreateAsync(model);
                 if (response.Success)
                 {
                     TempData["SuccessMessage"] = "Randevu başarıyla oluşturuldu.";
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Index", "Appointment");
                 }
 
-                TempData["ErrorMessage"] = response.Message;
+                TempData["ErrorMessage"] = response.Message ?? "Randevu oluşturulamadı.";
                 await LoadDropdowns();
                 return View(model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Randevu oluşturulurken hata");
-                TempData["ErrorMessage"] = "İşlem sırasında hata oluştu.";
+                _logger.LogError(ex, "Randevu oluşturulurken hata: {Error}", ex.Message);
+                TempData["ErrorMessage"] = $"İşlem sırasında hata oluştu: {ex.Message}";
                 await LoadDropdowns();
                 return View(model);
             }

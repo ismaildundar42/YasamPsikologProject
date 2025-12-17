@@ -4,19 +4,23 @@ using YasamPsikologProject.WebUi.Models.DTOs;
 
 namespace YasamPsikologProject.WebUi.Controllers
 {
+    [Route("Admin/[controller]")]
     public class PsychologistController : Controller
     {
-        private readonly IPsychologistService _psychologistService;
+        private readonly IApiPsychologistService _psychologistService;
         private readonly ILogger<PsychologistController> _logger;
 
         public PsychologistController(
-            IPsychologistService psychologistService,
+            IApiPsychologistService psychologistService,
             ILogger<PsychologistController> logger)
         {
             _psychologistService = psychologistService;
             _logger = logger;
         }
 
+        [HttpGet]
+        [Route("")]
+        [Route("Index")]
         public async Task<IActionResult> Index()
         {
             ViewData["PageTitle"] = "Psikolog Yönetimi";
@@ -40,6 +44,8 @@ namespace YasamPsikologProject.WebUi.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("Create")]
         public IActionResult Create()
         {
             ViewData["PageTitle"] = "Yeni Psikolog";
@@ -47,29 +53,52 @@ namespace YasamPsikologProject.WebUi.Controllers
         }
 
         [HttpPost]
+        [Route("Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PsychologistDto model)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                _logger.LogWarning("ModelState invalid: {Errors}", errors);
+                TempData["ErrorMessage"] = $"Lütfen tüm alanları doğru şekilde doldurunuz. {errors}";
+                return View(model);
+            }
+
             try
             {
+                // User bilgilerini kontrol et
+                if (model.User == null)
+                {
+                    _logger.LogWarning("User bilgisi null");
+                    TempData["ErrorMessage"] = "Kullanıcı bilgileri eksik.";
+                    return View(model);
+                }
+
+                _logger.LogInformation("Psikolog oluşturuluyor: {Email}", model.User.Email);
                 var response = await _psychologistService.CreateAsync(model);
+                
                 if (response.Success)
                 {
+                    _logger.LogInformation("Psikolog başarıyla oluşturuldu: {Email}", model.User.Email);
                     TempData["SuccessMessage"] = "Psikolog başarıyla oluşturuldu.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                TempData["ErrorMessage"] = response.Message;
+                _logger.LogWarning("Psikolog oluşturulamadı: {Message}", response.Message);
+                TempData["ErrorMessage"] = response.Message ?? "Psikolog oluşturulamadı.";
                 return View(model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Psikolog oluşturulurken hata");
-                TempData["ErrorMessage"] = "İşlem sırasında hata oluştu.";
+                _logger.LogError(ex, "Psikolog oluşturulurken hata: {Message}", ex.Message);
+                TempData["ErrorMessage"] = $"İşlem sırasında hata oluştu: {ex.Message}";
                 return View(model);
             }
         }
 
+        [HttpGet]
+        [Route("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
             ViewData["PageTitle"] = "Psikolog Düzenle";
@@ -94,29 +123,50 @@ namespace YasamPsikologProject.WebUi.Controllers
         }
 
         [HttpPost]
+        [Route("Edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, PsychologistDto model)
         {
+            if (id != model.Id)
+            {
+                TempData["ErrorMessage"] = "Geçersiz işlem.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                _logger.LogWarning("ModelState invalid: {Errors}", errors);
+                TempData["ErrorMessage"] = $"Lütfen tüm alanları doğru şekilde doldurunuz. {errors}";
+                return View(model);
+            }
+
             try
             {
+                _logger.LogInformation("Psikolog güncelleniyor: ID={Id}", id);
                 var response = await _psychologistService.UpdateAsync(id, model);
+                
                 if (response.Success)
                 {
+                    _logger.LogInformation("Psikolog başarıyla güncellendi: ID={Id}", id);
                     TempData["SuccessMessage"] = "Psikolog başarıyla güncellendi.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                TempData["ErrorMessage"] = response.Message;
+                _logger.LogWarning("Psikolog güncellenemedi: {Message}", response.Message);
+                TempData["ErrorMessage"] = response.Message ?? "Psikolog güncellenemedi.";
                 return View(model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Psikolog güncellenirken hata");
-                TempData["ErrorMessage"] = "İşlem sırasında hata oluştu.";
+                _logger.LogError(ex, "Psikolog güncellenirken hata: {Error}", ex.Message);
+                TempData["ErrorMessage"] = $"İşlem sırasında hata oluştu: {ex.Message}";
                 return View(model);
             }
         }
 
+        [HttpGet]
+        [Route("Details/{id}")]
         public async Task<IActionResult> Details(int id)
         {
             ViewData["PageTitle"] = "Psikolog Detayları";
@@ -141,6 +191,7 @@ namespace YasamPsikologProject.WebUi.Controllers
         }
 
         [HttpPost]
+        [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try

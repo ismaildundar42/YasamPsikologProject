@@ -14,9 +14,31 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
             _context = context;
         }
 
+        public async Task<IEnumerable<Client>> GetAllAsync()
+        {
+            // Soft delete filtresi ile birlikte User ve AssignedPsychologist bilgilerini getir
+            return await _context.Clients
+                .Where(c => !c.IsDeleted)
+                .Include(c => c.User)
+                .Include(c => c.AssignedPsychologist)
+                    .ThenInclude(p => p.User)
+                .ToListAsync();
+        }
+
+        public async Task<Client?> GetByIdAsync(int id)
+        {
+            return await _context.Clients
+                .Where(c => !c.IsDeleted && c.Id == id)
+                .Include(c => c.User)
+                .Include(c => c.AssignedPsychologist)
+                    .ThenInclude(p => p.User)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<Client?> GetByUserIdAsync(int userId)
         {
             return await _context.Clients
+                .Where(c => !c.IsDeleted)
                 .Include(c => c.User)
                 .Include(c => c.AssignedPsychologist)
                     .ThenInclude(p => p.User)
@@ -26,8 +48,8 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
         public async Task<IEnumerable<Client>> GetByPsychologistAsync(int psychologistId)
         {
             return await _context.Clients
+                .Where(c => !c.IsDeleted && c.AssignedPsychologistId == psychologistId)
                 .Include(c => c.User)
-                .Where(c => c.AssignedPsychologistId == psychologistId)
                 .ToListAsync();
         }
     }

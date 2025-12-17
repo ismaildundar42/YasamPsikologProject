@@ -24,18 +24,97 @@ namespace YasamPsikologProject.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var clients = await _clientService.GetAllAsync();
-            return Ok(clients);
+            try
+            {
+                var clients = await _clientService.GetAllAsync();
+                
+                // Entity'leri DTO'ya dönüştür
+                var dtos = clients.Select(c => new
+                {
+                    Id = c.Id,
+                    UserId = c.UserId,
+                    User = c.User == null ? null : new
+                    {
+                        Id = c.User.Id,
+                        FirstName = c.User.FirstName,
+                        LastName = c.User.LastName,
+                        Email = c.User.Email,
+                        PhoneNumber = c.User.PhoneNumber,
+                        Role = c.User.Role.ToString(),
+                        IsActive = c.User.IsActive,
+                        CreatedAt = c.User.CreatedAt
+                    },
+                    AssignedPsychologistId = c.AssignedPsychologistId,
+                    AssignedPsychologist = c.AssignedPsychologist == null ? null : new
+                    {
+                        Id = c.AssignedPsychologist.Id,
+                        UserId = c.AssignedPsychologist.UserId,
+                        LicenseNumber = c.AssignedPsychologist.LicenseNumber,
+                        Specialization = c.AssignedPsychologist.Specialization
+                    },
+                    Address = c.Address,
+                    Notes = c.Notes,
+                    KvkkConsent = c.KvkkConsentGiven,
+                    KvkkConsentDate = c.KvkkConsentDate,
+                    PreferredNotificationMethod = c.PreferredNotificationMethod?.ToString(),
+                    IsActive = c.IsActive
+                }).ToList();
+                
+                return Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Danışanlar listelenirken hata oluştu: {ex.Message}" });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var client = await _clientService.GetByIdAsync(id);
-            if (client == null)
-                return NotFound(new { message = "Danışan bulunamadı." });
+            try
+            {
+                var client = await _clientService.GetByIdAsync(id);
+                if (client == null)
+                    return NotFound(new { message = "Danışan bulunamadı." });
 
-            return Ok(client);
+                // Entity'yi DTO'ya dönüştür
+                var dto = new
+                {
+                    Id = client.Id,
+                    UserId = client.UserId,
+                    User = client.User == null ? null : new
+                    {
+                        Id = client.User.Id,
+                        FirstName = client.User.FirstName,
+                        LastName = client.User.LastName,
+                        Email = client.User.Email,
+                        PhoneNumber = client.User.PhoneNumber,
+                        Role = client.User.Role.ToString(),
+                        IsActive = client.User.IsActive,
+                        CreatedAt = client.User.CreatedAt
+                    },
+                    AssignedPsychologistId = client.AssignedPsychologistId,
+                    AssignedPsychologist = client.AssignedPsychologist == null ? null : new
+                    {
+                        Id = client.AssignedPsychologist.Id,
+                        UserId = client.AssignedPsychologist.UserId,
+                        LicenseNumber = client.AssignedPsychologist.LicenseNumber,
+                        Specialization = client.AssignedPsychologist.Specialization
+                    },
+                    Address = client.Address,
+                    Notes = client.Notes,
+                    KvkkConsent = client.KvkkConsentGiven,
+                    KvkkConsentDate = client.KvkkConsentDate,
+                    PreferredNotificationMethod = client.PreferredNotificationMethod?.ToString(),
+                    IsActive = client.IsActive
+                };
+
+                return Ok(dto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Danışan getirilirken hata oluştu: {ex.Message}" });
+            }
         }
 
         [HttpGet("user/{userId}")]
@@ -58,6 +137,12 @@ namespace YasamPsikologProject.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateClientDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(new { message = "Geçersiz veri.", errors = errors });
+            }
+
             try
             {
                 // Önce User oluştur
@@ -89,10 +174,32 @@ namespace YasamPsikologProject.WebApi.Controllers
 
                 var createdClient = await _clientService.CreateAsync(client);
                 
-                // User bilgisiyle birlikte dön
-                createdClient.User = createdUser;
+                // DTO formatında dön
+                var responseDto = new
+                {
+                    Id = createdClient.Id,
+                    UserId = createdUser.Id,
+                    User = new
+                    {
+                        Id = createdUser.Id,
+                        FirstName = createdUser.FirstName,
+                        LastName = createdUser.LastName,
+                        Email = createdUser.Email,
+                        PhoneNumber = createdUser.PhoneNumber,
+                        Role = createdUser.Role.ToString(),
+                        IsActive = createdUser.IsActive,
+                        CreatedAt = createdUser.CreatedAt
+                    },
+                    AssignedPsychologistId = createdClient.AssignedPsychologistId,
+                    Address = createdClient.Address,
+                    Notes = createdClient.Notes,
+                    KvkkConsent = createdClient.KvkkConsentGiven,
+                    KvkkConsentDate = createdClient.KvkkConsentDate,
+                    PreferredNotificationMethod = createdClient.PreferredNotificationMethod?.ToString(),
+                    IsActive = createdClient.IsActive
+                };
                 
-                return CreatedAtAction(nameof(GetById), new { id = createdClient.Id }, createdClient);
+                return CreatedAtAction(nameof(GetById), new { id = createdClient.Id }, responseDto);
             }
             catch (Exception ex)
             {
@@ -101,15 +208,70 @@ namespace YasamPsikologProject.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Client client)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateClientDto dto)
         {
-            if (id != client.Id)
-                return BadRequest(new { message = "ID uyuşmazlığı." });
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(new { message = "Geçersiz veri.", errors = errors });
+            }
 
             try
             {
-                var updatedClient = await _clientService.UpdateAsync(client);
-                return Ok(updatedClient);
+                // Mevcut client kaydını getir
+                var existing = await _clientService.GetByIdAsync(id);
+                if (existing == null)
+                    return NotFound(new { message = "Danışan bulunamadı." });
+
+                // User bilgilerini güncelle
+                var user = existing.User;
+                if (user != null)
+                {
+                    user.FirstName = dto.FirstName;
+                    user.LastName = dto.LastName;
+                    user.Email = dto.Email;
+                    user.PhoneNumber = dto.PhoneNumber;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    
+                    await _userService.UpdateAsync(user);
+                }
+
+                // Client bilgilerini güncelle
+                existing.AssignedPsychologistId = dto.AssignedPsychologistId;
+                existing.PreferredNotificationMethod = Enum.TryParse<NotificationType>(dto.PreferredNotificationMethod, out var notifType)
+                    ? notifType
+                    : NotificationType.Email;
+                existing.KvkkConsentGiven = dto.KvkkConsent;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                var updatedClient = await _clientService.UpdateAsync(existing);
+                
+                // DTO formatında dön
+                var responseDto = new
+                {
+                    Id = updatedClient.Id,
+                    UserId = updatedClient.UserId,
+                    User = user == null ? null : new
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        Role = user.Role.ToString(),
+                        IsActive = user.IsActive,
+                        CreatedAt = user.CreatedAt
+                    },
+                    AssignedPsychologistId = updatedClient.AssignedPsychologistId,
+                    Address = updatedClient.Address,
+                    Notes = updatedClient.Notes,
+                    KvkkConsent = updatedClient.KvkkConsentGiven,
+                    KvkkConsentDate = updatedClient.KvkkConsentDate,
+                    PreferredNotificationMethod = updatedClient.PreferredNotificationMethod?.ToString(),
+                    IsActive = updatedClient.IsActive
+                };
+                
+                return Ok(responseDto);
             }
             catch (Exception ex)
             {

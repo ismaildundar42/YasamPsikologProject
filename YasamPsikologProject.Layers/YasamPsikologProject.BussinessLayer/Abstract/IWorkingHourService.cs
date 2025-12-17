@@ -5,6 +5,7 @@ namespace YasamPsikologProject.BussinessLayer.Abstract
 {
     public interface IWorkingHourService
     {
+        Task<IEnumerable<WorkingHour>> GetAllAsync();
         Task<WorkingHour?> GetByIdAsync(int id);
         Task<IEnumerable<WorkingHour>> GetByPsychologistAsync(int psychologistId);
         Task<WorkingHour> CreateAsync(WorkingHour workingHour);

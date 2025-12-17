@@ -2,7 +2,10 @@ using YasamPsikologProject.WebUi.Models.DTOs;
 
 namespace YasamPsikologProject.WebUi.Services
 {
-    public interface IPsychologistService
+    /// <summary>
+    /// API üzerinden Psikolog CRUD işlemlerini yöneten HTTP Client Service
+    /// </summary>
+    public interface IApiPsychologistService
     {
         Task<ApiResponse<List<PsychologistDto>>> GetAllAsync();
         Task<ApiResponse<PsychologistDto>> GetByIdAsync(int id);
@@ -11,11 +14,14 @@ namespace YasamPsikologProject.WebUi.Services
         Task<ApiResponse> DeleteAsync(int id);
     }
 
-    public class PsychologistService : BaseApiService, IPsychologistService
+    public class PsychologistService : BaseApiService, IApiPsychologistService
     {
+        private readonly ILogger<PsychologistService> _serviceLogger;
+
         public PsychologistService(HttpClient httpClient, ILogger<PsychologistService> logger)
             : base(httpClient, logger)
         {
+            _serviceLogger = logger;
         }
 
         public async Task<ApiResponse<List<PsychologistDto>>> GetAllAsync()
@@ -30,26 +36,56 @@ namespace YasamPsikologProject.WebUi.Services
 
         public async Task<ApiResponse<PsychologistDto>> CreateAsync(PsychologistDto psychologist)
         {
-            // DTO'yu API'nin beklediği formata dönüştür
-            var createDto = new
+            try
             {
-                FirstName = psychologist.User?.FirstName,
-                LastName = psychologist.User?.LastName,
-                Email = psychologist.User?.Email,
-                PhoneNumber = psychologist.User?.PhoneNumber,
-                LicenseNumber = psychologist.LicenseNumber,
-                Specialization = psychologist.Specialization,
-                CalendarColor = psychologist.CalendarColor,
-                ConsultationFee = psychologist.ConsultationFee,
-                IsActive = psychologist.IsActive
-            };
-            
-            return await PostAsync<object, PsychologistDto>("api/psychologists", createDto);
+                // DTO'yu API'nin beklediği formata dönüştür
+                var createDto = new
+                {
+                    FirstName = psychologist.User?.FirstName ?? throw new ArgumentNullException(nameof(psychologist.User.FirstName), "Ad alanı boş olamaz"),
+                    LastName = psychologist.User?.LastName ?? throw new ArgumentNullException(nameof(psychologist.User.LastName), "Soyad alanı boş olamaz"),
+                    Email = psychologist.User?.Email ?? throw new ArgumentNullException(nameof(psychologist.User.Email), "Email alanı boş olamaz"),
+                    PhoneNumber = psychologist.User?.PhoneNumber ?? throw new ArgumentNullException(nameof(psychologist.User.PhoneNumber), "Telefon alanı boş olamaz"),
+                    LicenseNumber = psychologist.LicenseNumber ?? throw new ArgumentNullException(nameof(psychologist.LicenseNumber), "Lisans numarası boş olamaz"),
+                    Specialization = psychologist.Specialization ?? throw new ArgumentNullException(nameof(psychologist.Specialization), "Uzmanlık alanı boş olamaz"),
+                    CalendarColor = psychologist.CalendarColor ?? "#4CAF50",
+                    ConsultationFee = psychologist.ConsultationFee,
+                    IsActive = psychologist.IsActive
+                };
+                
+                _serviceLogger.LogInformation("API'ye psikolog gönderiliyor: {Email}", createDto.Email);
+                var response = await PostAsync<object, PsychologistDto>("api/psychologists", createDto);
+                _serviceLogger.LogInformation("API yanıtı: Success={Success}, Message={Message}", response.Success, response.Message);
+                
+                return response;
+            }
+            catch (ArgumentNullException ex)
+            {
+                _serviceLogger.LogError(ex, "Psikolog oluşturma hatası: {Message}", ex.Message);
+                return new ApiResponse<PsychologistDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
         }
 
         public async Task<ApiResponse<PsychologistDto>> UpdateAsync(int id, PsychologistDto psychologist)
         {
-            return await PutAsync<PsychologistDto, PsychologistDto>($"api/psychologists/{id}", psychologist);
+            // DTO'yu API'nin beklediği formata dönüştür (UpdatePsychologistDto)
+            var updateDto = new
+            {
+                FirstName = psychologist.User?.FirstName ?? throw new ArgumentNullException(nameof(psychologist.User.FirstName)),
+                LastName = psychologist.User?.LastName ?? throw new ArgumentNullException(nameof(psychologist.User.LastName)),
+                Email = psychologist.User?.Email ?? throw new ArgumentNullException(nameof(psychologist.User.Email)),
+                PhoneNumber = psychologist.User?.PhoneNumber ?? throw new ArgumentNullException(nameof(psychologist.User.PhoneNumber)),
+                LicenseNumber = psychologist.LicenseNumber,
+                Specialization = psychologist.Specialization,
+                CalendarColor = psychologist.CalendarColor ?? "#4CAF50",
+                ConsultationFee = psychologist.ConsultationFee,
+                IsActive = psychologist.IsActive
+            };
+            
+            return await PutAsync<object, PsychologistDto>($"api/psychologists/{id}", updateDto);
         }
 
         public async Task<ApiResponse> DeleteAsync(int id)

@@ -4,17 +4,18 @@ using YasamPsikologProject.WebUi.Models.ViewModels;
 
 namespace YasamPsikologProject.WebUi.Controllers
 {
+    [Route("[controller]")]
     public class DashboardController : Controller
     {
-        private readonly IAppointmentService _appointmentService;
-        private readonly IPsychologistService _psychologistService;
-        private readonly IClientService _clientService;
+        private readonly IApiAppointmentService _appointmentService;
+        private readonly IApiPsychologistService _psychologistService;
+        private readonly IApiClientService _clientService;
         private readonly ILogger<DashboardController> _logger;
 
         public DashboardController(
-            IAppointmentService appointmentService,
-            IPsychologistService psychologistService,
-            IClientService clientService,
+            IApiAppointmentService appointmentService,
+            IApiPsychologistService psychologistService,
+            IApiClientService clientService,
             ILogger<DashboardController> logger)
         {
             _appointmentService = appointmentService;
@@ -23,6 +24,9 @@ namespace YasamPsikologProject.WebUi.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        [Route("")]
+        [Route("Index")]
         public async Task<IActionResult> Index()
         {
             ViewData["PageTitle"] = "Dashboard";

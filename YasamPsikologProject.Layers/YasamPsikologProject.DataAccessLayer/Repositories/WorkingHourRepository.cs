@@ -18,7 +18,9 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
         public async Task<IEnumerable<WorkingHour>> GetByPsychologistAsync(int psychologistId)
         {
             return await _context.WorkingHours
-                .Where(w => w.PsychologistId == psychologistId)
+                .Where(w => !w.IsDeleted && w.PsychologistId == psychologistId)
+                .Include(w => w.Psychologist)
+                    .ThenInclude(p => p.User)
                 .OrderBy(w => w.DayOfWeek)
                 .ToListAsync();
         }
@@ -26,6 +28,8 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
         public async Task<WorkingHour?> GetByPsychologistAndDayAsync(int psychologistId, WeekDay day)
         {
             return await _context.WorkingHours
+                .Where(w => !w.IsDeleted)
+                .Include(w => w.Psychologist)
                 .FirstOrDefaultAsync(w => w.PsychologistId == psychologistId && w.DayOfWeek == day);
         }
     }

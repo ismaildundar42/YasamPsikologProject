@@ -1,0 +1,160 @@
+@model List<YasamPsikologProject.WebUi.Models.DTOs.WorkingHourDto>
+@{
+    ViewData["Title"] = "Çalışma Saatleri Yönetimi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6>Çalışma Saatleri</h6>
+                        <div class="ms-auto">
+                            @if (ViewBag.SelectedPsychologistId != null)
+                            {
+                                <a asp-action="Create" asp-route-psychologistId="@ViewBag.SelectedPsychologistId" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i> Yeni Çalışma Saati Ekle
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-4 pt-4 pb-2">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span class="alert-icon"><i class="fas fa-check-circle"></i></span>
+                            <span class="alert-text">@TempData["SuccessMessage"]</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
+                            <span class="alert-text">@TempData["ErrorMessage"]</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <form asp-action="Index" method="get" class="d-flex gap-2">
+                                <select name="psychologistId" class="form-select" onchange="this.form.submit()">
+                                    <option value="">Psikolog Seçiniz</option>
+                                    @if (ViewBag.Psychologists != null)
+                                    {
+                                        @foreach (var item in ViewBag.Psychologists)
+                                        {
+                                            <option value="@item.Value" selected="@(item.Selected ? "selected" : null)">@item.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center justify-content-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Gün</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Başlangıç</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Bitiş</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Mola</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Durum</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderBy(w => GetDayOrder(w.DayOfWeek)))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <p class="text-sm font-weight-bold mb-0">@item.DayOfWeek</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-sm mb-0">@item.StartTime.ToString(@"hh\:mm")</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-sm mb-0">@item.EndTime.ToString(@"hh\:mm")</p>
+                                            </td>
+                                            <td>
+                                                @if (item.BreakStartTime.HasValue && item.BreakEndTime.HasValue)
+                                                {
+                                                    <p class="text-sm mb-0">@item.BreakStartTime.Value.ToString(@"hh\:mm") - @item.BreakEndTime.Value.ToString(@"hh\:mm")</p>
+                                                }
+                                                else
+                                                {
+                                                    <p class="text-sm text-muted mb-0">-</p>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.IsAvailable)
+                                                {
+                                                    <span class="badge badge-sm bg-gradient-success">Aktif</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-sm bg-gradient-secondary">Pasif</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-link text-info px-3 mb-0">
+                                                    <i class="fas fa-pencil-alt text-dark me-2"></i>Düzenle
+                                                </a>
+                                                <form asp-action="Delete" asp-route-id="@item.Id" asp-route-psychologistId="@item.PsychologistId" method="post" class="d-inline" onsubmit="return confirm('Bu çalışma saatini silmek istediğinize emin misiniz?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-link text-danger px-3 mb-0">
+                                                        <i class="fas fa-trash text-dark me-2"></i>Sil
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-clock fa-3x text-secondary mb-3"></i>
+                            <p class="text-secondary">
+                                @if (ViewBag.SelectedPsychologistId != null)
+                                {
+                                    <span>Bu psikolog için henüz çalışma saati eklenmemiş.</span>
+                                }
+                                else
+                                {
+                                    <span>Lütfen yukarıdan bir psikolog seçiniz.</span>
+                                }
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    int GetDayOrder(string dayName)
+    {
+        return dayName switch
+        {
+            "Pazartesi" => 1,
+            "Salı" => 2,
+            "Çarşamba" => 3,
+            "Perşembe" => 4,
+            "Cuma" => 5,
+            "Cumartesi" => 6,
+            "Pazar" => 7,
+            _ => 8
+        };
+    }
+}

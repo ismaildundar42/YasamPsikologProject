@@ -2,7 +2,10 @@ using YasamPsikologProject.WebUi.Models.DTOs;
 
 namespace YasamPsikologProject.WebUi.Services
 {
-    public interface IClientService
+    /// <summary>
+    /// API üzerinden Danışan CRUD işlemlerini yöneten HTTP Client Service
+    /// </summary>
+    public interface IApiClientService
     {
         Task<ApiResponse<List<ClientDto>>> GetAllAsync();
         Task<ApiResponse<ClientDto>> GetByIdAsync(int id);
@@ -11,7 +14,7 @@ namespace YasamPsikologProject.WebUi.Services
         Task<ApiResponse> DeleteAsync(int id);
     }
 
-    public class ClientService : BaseApiService, IClientService
+    public class ClientService : BaseApiService, IApiClientService
     {
         public ClientService(HttpClient httpClient, ILogger<ClientService> logger)
             : base(httpClient, logger)
@@ -43,9 +46,7 @@ namespace YasamPsikologProject.WebUi.Services
                 Email = client.User?.Email,
                 PhoneNumber = client.User?.PhoneNumber,
                 AssignedPsychologistId = client.AssignedPsychologistId,
-                EmergencyContactName = client.EmergencyContactName,
-                EmergencyContactPhone = client.EmergencyContactPhone,
-                PreferredNotificationMethod = client.PreferredNotificationMethod,
+                PreferredNotificationMethod = client.PreferredNotificationMethod ?? "Email",
                 KvkkConsent = client.KvkkConsent
             };
             
@@ -54,7 +55,19 @@ namespace YasamPsikologProject.WebUi.Services
 
         public async Task<ApiResponse<ClientDto>> UpdateAsync(int id, ClientDto client)
         {
-            return await PutAsync<ClientDto, ClientDto>($"api/clients/{id}", client);
+            // DTO'yu API'nin beklediği formata dönüştür (UpdateClientDto)
+            var updateDto = new
+            {
+                FirstName = client.User?.FirstName,
+                LastName = client.User?.LastName,
+                Email = client.User?.Email,
+                PhoneNumber = client.User?.PhoneNumber,
+                AssignedPsychologistId = client.AssignedPsychologistId,
+                PreferredNotificationMethod = client.PreferredNotificationMethod ?? "Email",
+                KvkkConsent = client.KvkkConsent
+            };
+            
+            return await PutAsync<object, ClientDto>($"api/clients/{id}", updateDto);
         }
 
         public async Task<ApiResponse> DeleteAsync(int id)

@@ -1,18 +1,41 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace YasamPsikologProject.WebApi.DTOs
 {
     public class CreatePsychologistDto
     {
         // User bilgileri
+        [Required(ErrorMessage = "Ad alanı zorunludur")]
+        [StringLength(50)]
         public string FirstName { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Soyad alanı zorunludur")]
+        [StringLength(50)]
         public string LastName { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Email alanı zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
         public string Email { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Telefon alanı zorunludur")]
+        [RegularExpression(@"^0[0-9]{10}$", ErrorMessage = "Telefon numarası 0 ile başlamalı ve 11 haneli olmalıdır")]
         public string PhoneNumber { get; set; } = null!;
 
         // Psychologist bilgileri
+        [Required(ErrorMessage = "Lisans numarası zorunludur")]
+        [StringLength(50)]
         public string LicenseNumber { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Uzmanlık alanı zorunludur")]
+        [StringLength(200)]
         public string Specialization { get; set; } = null!;
+        
+        [RegularExpression(@"^#[0-9A-Fa-f]{6}$", ErrorMessage = "Renk kodu hex formatında olmalıdır")]
         public string? CalendarColor { get; set; }
-        public int ConsultationFee { get; set; }
+        
+        [Range(0, 100000)]
+        public decimal ConsultationFee { get; set; }
+        
         public bool IsActive { get; set; } = true;
     }
 
@@ -25,7 +48,7 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string LicenseNumber { get; set; } = null!;
         public string Specialization { get; set; } = null!;
         public string? CalendarColor { get; set; }
-        public int ConsultationFee { get; set; }
+        public decimal ConsultationFee { get; set; }
         public bool IsActive { get; set; }
     }
 
@@ -56,5 +79,42 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string? EmergencyContactPhone { get; set; }
         public string PreferredNotificationMethod { get; set; } = "Email";
         public bool KvkkConsent { get; set; }
+    }
+
+    public class CreateWorkingHourDto
+    {
+        [Required(ErrorMessage = "Psikolog seçimi zorunludur")]
+        public int PsychologistId { get; set; }
+
+        [Required(ErrorMessage = "Gün seçimi zorunludur")]
+        public string DayOfWeek { get; set; } = null!;
+
+        [Required(ErrorMessage = "Başlangıç saati zorunludur")]
+        public string StartTime { get; set; } = null!;
+
+        [Required(ErrorMessage = "Bitiş saati zorunludur")]
+        public string EndTime { get; set; } = null!;
+
+        public bool IsAvailable { get; set; } = true;
+        public string? BreakStartTime { get; set; }
+        public string? BreakEndTime { get; set; }
+        public string? Notes { get; set; }
+    }
+
+    public class UpdateWorkingHourDto
+    {
+        [Required(ErrorMessage = "Gün seçimi zorunludur")]
+        public string DayOfWeek { get; set; } = null!;
+
+        [Required(ErrorMessage = "Başlangıç saati zorunludur")]
+        public string StartTime { get; set; } = null!;
+
+        [Required(ErrorMessage = "Bitiş saati zorunludur")]
+        public string EndTime { get; set; } = null!;
+
+        public bool IsAvailable { get; set; } = true;
+        public string? BreakStartTime { get; set; }
+        public string? BreakEndTime { get; set; }
+        public string? Notes { get; set; }
     }
 }

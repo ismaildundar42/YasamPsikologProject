@@ -24,6 +24,7 @@ namespace YasamPsikologProject.WebUi.Services
 
                 if (response.IsSuccessStatusCode)
                 {
+                    _logger.LogInformation("API Response for {Endpoint}: {Content}", endpoint, content.Length > 500 ? content.Substring(0, 500) + "..." : content);
                     var data = JsonConvert.DeserializeObject<T>(content);
                     return new ApiResponse<T>
                     {
@@ -72,11 +73,31 @@ namespace YasamPsikologProject.WebUi.Services
                     };
                 }
 
-                _logger.LogWarning($"API POST failed: {endpoint} - Status: {response.StatusCode}");
+                // API'den gelen hata mesajını parse et
+                string errorMessage = $"İşlem başarısız: {response.StatusCode}";
+                try
+                {
+                    var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+                    if (errorResponse?.message != null)
+                    {
+                        errorMessage = errorResponse.message.ToString();
+                    }
+                    else if (errorResponse?.errors != null)
+                    {
+                        errorMessage = JsonConvert.SerializeObject(errorResponse.errors);
+                    }
+                }
+                catch
+                {
+                    // JSON parse edilemezse raw content kullan
+                    errorMessage = responseContent;
+                }
+
+                _logger.LogWarning("API POST failed: {Endpoint} - Status: {StatusCode} - Error: {Error}", endpoint, response.StatusCode, errorMessage);
                 return new ApiResponse<TResponse>
                 {
                     Success = false,
-                    Message = $"İşlem başarısız: {response.StatusCode}",
+                    Message = errorMessage,
                     Errors = new List<string> { responseContent }
                 };
             }

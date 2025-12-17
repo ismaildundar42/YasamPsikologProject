@@ -2,7 +2,10 @@ using YasamPsikologProject.WebUi.Models.DTOs;
 
 namespace YasamPsikologProject.WebUi.Services
 {
-    public interface IAppointmentService
+    /// <summary>
+    /// API üzerinden Randevu CRUD işlemlerini yöneten HTTP Client Service
+    /// </summary>
+    public interface IApiAppointmentService
     {
         Task<ApiResponse<List<AppointmentDto>>> GetAllAsync();
         Task<ApiResponse<AppointmentDto>> GetByIdAsync(int id);
@@ -12,7 +15,7 @@ namespace YasamPsikologProject.WebUi.Services
         Task<ApiResponse> CancelAsync(int id, string reason);
     }
 
-    public class AppointmentService : BaseApiService, IAppointmentService
+    public class AppointmentService : BaseApiService, IApiAppointmentService
     {
         public AppointmentService(HttpClient httpClient, ILogger<AppointmentService> logger)
             : base(httpClient, logger)

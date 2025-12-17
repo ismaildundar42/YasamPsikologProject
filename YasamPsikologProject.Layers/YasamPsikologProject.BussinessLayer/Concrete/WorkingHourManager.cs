@@ -14,6 +14,11 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             _unitOfWork = unitOfWork;
         }
 
+        public async Task<IEnumerable<WorkingHour>> GetAllAsync()
+        {
+            return await _unitOfWork.WorkingHourRepository.GetAllAsync();
+        }
+
         public async Task<WorkingHour?> GetByIdAsync(int id)
         {
             return await _unitOfWork.WorkingHourRepository.GetByIdAsync(id);

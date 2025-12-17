@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YasamPsikologProject.DataAccessLayer.EntityFramework;
 
@@ -11,9 +12,11 @@ using YasamPsikologProject.DataAccessLayer.EntityFramework;
 namespace YasamPsikologProject.DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251217112202_mig_second")]
+    partial class mig_second
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -410,7 +413,6 @@ namespace YasamPsikologProject.DataAccessLayer.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<string>("Specialization")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 

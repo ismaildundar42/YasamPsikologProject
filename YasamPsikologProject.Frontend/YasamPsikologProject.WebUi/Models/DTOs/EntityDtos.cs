@@ -1,13 +1,28 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace YasamPsikologProject.WebUi.Models.DTOs
 {
     public class UserDto
     {
         public int Id { get; set; }
+        
+        [Required(ErrorMessage = "Ad alanı zorunludur")]
+        [StringLength(50, ErrorMessage = "Ad en fazla 50 karakter olabilir")]
         public string FirstName { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Soyad alanı zorunludur")]
+        [StringLength(50, ErrorMessage = "Soyad en fazla 50 karakter olabilir")]
         public string LastName { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Email alanı zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
         public string Email { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Telefon alanı zorunludur")]
+        [RegularExpression(@"^0[0-9]{10}$", ErrorMessage = "Telefon numarası 0 ile başlamalı ve 11 haneli olmalıdır (örn: 05551234567)")]
         public string PhoneNumber { get; set; } = null!;
-        public string Role { get; set; } = null!;
+        
+        public string? Role { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }
@@ -17,12 +32,27 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public int Id { get; set; }
         public int UserId { get; set; }
         public UserDto? User { get; set; }
+        
+        [Required(ErrorMessage = "Lisans numarası zorunludur")]
+        [StringLength(50, ErrorMessage = "Lisans numarası en fazla 50 karakter olabilir")]
         public string LicenseNumber { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Uzmanlık alanı zorunludur")]
+        [StringLength(200, ErrorMessage = "Uzmanlık alanı en fazla 200 karakter olabilir")]
         public string Specialization { get; set; } = null!;
-        public string? Bio { get; set; }
+        
+        [StringLength(1000, ErrorMessage = "Biyografi en fazla 1000 karakter olabilir")]
+        public string? Biography { get; set; }
+        
+        [RegularExpression(@"^#[0-9A-Fa-f]{6}$", ErrorMessage = "Renk kodu hex formatında olmalıdır (örn: #4CAF50)")]
         public string? CalendarColor { get; set; }
-        public int ConsultationFee { get; set; }
-        public int ConsultationDuration { get; set; }
+        
+        [Range(0, 100000, ErrorMessage = "Konsültasyon ücreti 0-100000 arasında olmalıdır")]
+        public decimal ConsultationFee { get; set; }
+        
+        [Range(15, 240, ErrorMessage = "Konsültasyon süresi 15-240 dakika arasında olmalıdır")]
+        public int ConsultationDuration { get; set; } = 50;
+        
         public bool IsActive { get; set; }
     }
 
@@ -33,13 +63,19 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public UserDto? User { get; set; }
         public int? AssignedPsychologistId { get; set; }
         public PsychologistDto? AssignedPsychologist { get; set; }
+        
+        [StringLength(500, ErrorMessage = "Adres en fazla 500 karakter olabilir")]
         public string? Address { get; set; }
-        public string? EmergencyContactName { get; set; }
-        public string? EmergencyContactPhone { get; set; }
+        
+        [StringLength(2000, ErrorMessage = "Notlar en fazla 2000 karakter olabilir")]
         public string? Notes { get; set; }
+        
+        [Required(ErrorMessage = "KVKK onayı zorunludur")]
         public bool KvkkConsent { get; set; }
+        
         public DateTime? KvkkConsentDate { get; set; }
         public string? PreferredNotificationMethod { get; set; }
+        public bool IsActive { get; set; }
     }
 
     public class AppointmentDto

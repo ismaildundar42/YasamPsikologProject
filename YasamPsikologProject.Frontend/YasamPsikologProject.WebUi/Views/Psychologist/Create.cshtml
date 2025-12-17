@@ -70,17 +70,24 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Seans Ücreti (₺) *</label>
                                 <input type="number" step="0.01" class="form-control" asp-for="ConsultationFee" required>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Seans Süresi (Dakika) *</label>
+                                <input type="number" class="form-control" asp-for="ConsultationDuration" value="50" min="15" max="240" required>
+                                <small class="form-text text-muted">15-240 dakika</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Takvim Rengi *</label>
                                 <input type="color" class="form-control" asp-for="CalendarColor" value="@(Model?.CalendarColor ?? "#4CAF50")" required>
-                                <small class="form-text text-muted">Randevu takviminizde görünecek renk</small>
+                                <small class="form-text text-muted">Randevu rengi</small>
                             </div>
                         </div>
                     </div>

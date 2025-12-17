@@ -14,6 +14,15 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
             _context = context;
         }
 
+        // Override GetByIdAsync to include User
+        public new async Task<Psychologist?> GetByIdAsync(int id)
+        {
+            return await _context.Psychologists
+                .Include(p => p.User)
+                .Include(p => p.WorkingHours)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
         public async Task<Psychologist?> GetByUserIdAsync(int userId)
         {
             return await _context.Psychologists
