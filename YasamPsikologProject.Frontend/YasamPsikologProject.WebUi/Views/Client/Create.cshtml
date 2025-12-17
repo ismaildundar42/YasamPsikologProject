@@ -1,0 +1,135 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.ClientDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = Model?.Id > 0 ? "Danışan Düzenle" : "Yeni Danışan";
+    var isEdit = Model?.Id > 0;
+    var psychologists = ViewBag.Psychologists as List<YasamPsikologProject.WebUi.Models.DTOs.PsychologistDto>;
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card card-success">
+            <div class="card-header">
+                <h3 class="card-title">@ViewData["PageTitle"]</h3>
+            </div>
+            <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+                @if (isEdit)
+                {
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="UserId" />
+                }
+                
+                <div class="card-body">
+                    <!-- Kullanıcı Bilgileri -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Ad *</label>
+                                <input type="text" class="form-control" name="User.FirstName" value="@Model?.User?.FirstName" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Soyad *</label>
+                                <input type="text" class="form-control" name="User.LastName" value="@Model?.User?.LastName" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" class="form-control" name="User.Email" value="@Model?.User?.Email" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Telefon *</label>
+                                <input type="tel" class="form-control" name="User.PhoneNumber" value="@Model?.User?.PhoneNumber" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danışan Bilgileri -->
+                    <hr>
+                    <h5 class="mb-3">Danışan Bilgileri</h5>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Atanmış Psikolog</label>
+                                <select class="form-control select2" asp-for="AssignedPsychologistId">
+                                    <option value="">Seçiniz...</option>
+                                    @if (psychologists != null)
+                                    {
+                                        @foreach (var psychologist in psychologists)
+                                        {
+                                            <option value="@psychologist.Id">
+                                                @psychologist.User?.FirstName @psychologist.User?.LastName
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Bildirim Tercihi *</label>
+                                <select class="form-control" asp-for="PreferredNotificationMethod" required>
+                                    <option value="Email">Email</option>
+                                    <option value="SMS">SMS</option>
+                                    <option value="WhatsApp">WhatsApp</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Acil Durum Kişisi</label>
+                        <input type="text" class="form-control" asp-for="EmergencyContactName" placeholder="Ad Soyad">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Acil Durum Telefonu</label>
+                        <input type="tel" class="form-control" asp-for="EmergencyContactPhone" placeholder="+90 5XX XXX XX XX">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" asp-for="KvkkConsent">
+                            <label class="custom-control-label" for="KvkkConsent">
+                                KVKK Onayı Alındı
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Kaydet
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> İptal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                placeholder: 'Seçiniz...'
+            });
+
+            $('form').on('submit', function(e) {
+                var submitBtn = $(this).find('button[type="submit"]');
+                submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Kaydediliyor...');
+            });
+        });
+    </script>
+}

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.17">
       <PrivateAssets>all</PrivateAssets>
@@ -24,6 +25,10 @@
     <ProjectReference Include="..\..\YasamPsikologProject.Layers\YasamPsikologProject.BussinessLayer\YasamPsikologProject.BussinessLayer.csproj" />
     <ProjectReference Include="..\..\YasamPsikologProject.Layers\YasamPsikologProject.DataAccessLayer\YasamPsikologProject.DataAccessLayer.csproj" />
     <ProjectReference Include="..\..\YasamPsikologProject.Layers\YasamPsikologProject.EntityLayer\YasamPsikologProject.EntityLayer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

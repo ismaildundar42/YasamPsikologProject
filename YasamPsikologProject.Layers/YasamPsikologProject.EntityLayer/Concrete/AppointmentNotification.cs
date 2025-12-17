@@ -23,6 +23,12 @@ namespace YasamPsikologProject.EntityLayer.Concrete
         [MaxLength(255)]
         public string RecipientContact { get; set; } = null!;
 
+        [MaxLength(20)]
+        public string RecipientPhoneNumber { get; set; } = null!;
+
+        [MaxLength(255)]
+        public string RecipientEmail { get; set; } = null!;
+
         // Mesaj içeriği
         [Required(ErrorMessage = "Mesaj içeriği zorunludur")]
         [MaxLength(2000)]

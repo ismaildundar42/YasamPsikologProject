@@ -1,0 +1,160 @@
+@model List<YasamPsikologProject.WebUi.Models.DTOs.ClientDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Danışan Yönetimi";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Danışanlar</h3>
+                <div class="card-tools">
+                    <a asp-action="Create" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> Yeni Danışan Ekle
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="clientTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ad Soyad</th>
+                            <th>Email</th>
+                            <th>Telefon</th>
+                            <th>Atanmış Psikolog</th>
+                            <th>KVKK Onayı</th>
+                            <th>Bildirim Tercihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var client in Model)
+                        {
+                            <tr>
+                                <td>@client.Id</td>
+                                <td>@client.User?.FirstName @client.User?.LastName</td>
+                                <td>@client.User?.Email</td>
+                                <td>@client.User?.PhoneNumber</td>
+                                <td>
+                                    @if (client.AssignedPsychologist != null)
+                                    {
+                                        <span class="badge badge-info">
+                                            @client.AssignedPsychologist.User?.FirstName @client.AssignedPsychologist.User?.LastName
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Atanmamış</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (client.KvkkConsent)
+                                    {
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check"></i> Onaylı
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning">
+                                            <i class="fas fa-times"></i> Bekliyor
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (client.PreferredNotificationMethod)
+                                    {
+                                        case "WhatsApp":
+                                            <span class="badge badge-success"><i class="fab fa-whatsapp"></i> WhatsApp</span>
+                                            break;
+                                        case "SMS":
+                                            <span class="badge badge-info"><i class="fas fa-sms"></i> SMS</span>
+                                            break;
+                                        case "Email":
+                                            <span class="badge badge-primary"><i class="fas fa-envelope"></i> Email</span>
+                                            break;
+                                        default:
+                                            <span class="badge badge-secondary">Belirsiz</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@client.Id" class="btn btn-info btn-sm" title="Detaylar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@client.Id" class="btn btn-primary btn-sm" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger btn-sm btn-delete" data-id="@client.Id" title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#clientTable').DataTable({
+                responsive: true,
+                pageLength: 10,
+                order: [[0, 'desc']],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+                }
+            });
+
+            $(document).on('click', '.btn-delete', function() {
+                var id = $(this).data('id');
+                
+                Swal.fire({
+                    title: 'Emin misiniz?',
+                    text: "Bu danışan silinecek!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Evet, Sil!',
+                    cancelButtonText: 'İptal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("Delete")/' + id,
+                            type: 'POST',
+                            success: function(response) {
+                                if (response.success) {
+                                    toastr.success(response.message);
+                                    setTimeout(() => location.reload(), 1000);
+                                } else {
+                                    toastr.error(response.message);
+                                }
+                            },
+                            error: function() {
+                                toastr.error('İşlem sırasında hata oluştu.');
+                            }
+                        });
+                    }
+                });
+            });
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <text>toastr.success('@TempData["SuccessMessage"]');</text>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <text>toastr.error('@TempData["ErrorMessage"]');</text>
+            }
+        });
+    </script>
+}

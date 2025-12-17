@@ -1,0 +1,41 @@
+using Microsoft.EntityFrameworkCore;
+using YasamPsikologProject.DataAccessLayer.Abstract;
+using YasamPsikologProject.DataAccessLayer.EntityFramework;
+using YasamPsikologProject.EntityLayer.Concrete;
+
+namespace YasamPsikologProject.DataAccessLayer.Repositories
+{
+    public class PsychologistRepository : Repository<Psychologist>, IPsychologistRepository
+    {
+        private readonly AppDbContext _context;
+
+        public PsychologistRepository(AppDbContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public async Task<Psychologist?> GetByUserIdAsync(int userId)
+        {
+            return await _context.Psychologists
+                .Include(p => p.User)
+                .Include(p => p.WorkingHours)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+        }
+
+        public async Task<Psychologist?> GetByLicenseNumberAsync(string licenseNumber)
+        {
+            return await _context.Psychologists
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.LicenseNumber == licenseNumber);
+        }
+
+        public async Task<IEnumerable<Psychologist>> GetActiveWithWorkingHoursAsync()
+        {
+            return await _context.Psychologists
+                .Include(p => p.User)
+                .Include(p => p.WorkingHours)
+                .Where(p => p.IsActive)
+                .ToListAsync();
+        }
+    }
+}

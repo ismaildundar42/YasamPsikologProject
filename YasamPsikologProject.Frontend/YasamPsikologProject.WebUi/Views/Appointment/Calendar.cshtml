@@ -1,0 +1,126 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Randevu Takvimi";
+    var psychologists = ViewBag.Psychologists as List<YasamPsikologProject.WebUi.Models.DTOs.PsychologistDto>;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Filtreler</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Psikologlar</label>
+                    @if (psychologists != null)
+                    {
+                        @foreach (var psychologist in psychologists)
+                        {
+                            <div class="custom-control custom-checkbox">
+                                <input class="custom-control-input psychologist-filter" type="checkbox" 
+                                       id="psych_@psychologist.Id" value="@psychologist.Id" checked>
+                                <label class="custom-control-label" for="psych_@psychologist.Id">
+                                    <span class="badge" style="background-color: @psychologist.CalendarColor; color: white;">
+                                        @psychologist.User?.FirstName @psychologist.User?.LastName
+                                    </span>
+                                </label>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" class="btn btn-primary btn-block" id="refreshCalendar">
+                    <i class="fas fa-sync"></i> Yenile
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/locales/tr.global.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: 'tr',
+                initialView: 'timeGridWeek',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                slotMinTime: '08:00:00',
+                slotMaxTime: '20:00:00',
+                allDaySlot: false,
+                editable: false,
+                selectable: true,
+                selectMirror: true,
+                dayMaxEvents: true,
+                weekends: true,
+                businessHours: {
+                    daysOfWeek: [1, 2, 3, 4, 5],
+                    startTime: '09:00',
+                    endTime: '18:00'
+                },
+                events: function(info, successCallback, failureCallback) {
+                    $.ajax({
+                        url: '@Url.Action("GetCalendarEvents")',
+                        type: 'GET',
+                        success: function(data) {
+                            successCallback(data);
+                        },
+                        error: function() {
+                            failureCallback();
+                            toastr.error('Takvim yüklenirken hata oluştu.');
+                        }
+                    });
+                },
+                eventClick: function(info) {
+                    Swal.fire({
+                        title: info.event.title,
+                        html: `
+                            <div style="text-align: left;">
+                                <p><strong>Psikolog:</strong> ${info.event.extendedProps.psychologist}</p>
+                                <p><strong>Danışan:</strong> ${info.event.extendedProps.client}</p>
+                                <p><strong>Tarih:</strong> ${info.event.start.toLocaleDateString('tr-TR')}</p>
+                                <p><strong>Saat:</strong> ${info.event.start.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} - 
+                                   ${info.event.end.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}</p>
+                                <p><strong>Durum:</strong> ${info.event.extendedProps.status}</p>
+                                ${info.event.extendedProps.notes ? `<p><strong>Notlar:</strong> ${info.event.extendedProps.notes}</p>` : ''}
+                            </div>
+                        `,
+                        showCancelButton: false,
+                        confirmButtonText: 'Tamam'
+                    });
+                },
+                select: function(info) {
+                    window.location.href = '@Url.Action("Create")?date=' + info.startStr;
+                }
+            });
+
+            calendar.render();
+
+            $('#refreshCalendar').on('click', function() {
+                calendar.refetchEvents();
+                toastr.success('Takvim yenilendi');
+            });
+
+            $('.psychologist-filter').on('change', function() {
+                calendar.refetchEvents();
+            });
+        });
+    </script>
+}

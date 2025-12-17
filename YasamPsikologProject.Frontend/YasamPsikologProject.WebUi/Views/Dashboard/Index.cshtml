@@ -1,0 +1,287 @@
+@model YasamPsikologProject.WebUi.Models.ViewModels.DashboardViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Dashboard";
+}
+
+<!-- Small boxes (Stat box) -->
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>@Model.TotalAppointments</h3>
+                <p>Toplam Randevu</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <a asp-controller="Appointment" asp-action="Index" class="small-box-footer">
+                Detaylar <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>@Model.TodayAppointments</h3>
+                <p>Bugünkü Randevular</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+            <a href="#todayAppointments" class="small-box-footer">
+                Detaylar <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>@Model.TotalPsychologists</h3>
+                <p>Psikolog</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <a asp-controller="Psychologist" asp-action="Index" class="small-box-footer">
+                Detaylar <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>@Model.TotalClients</h3>
+                <p>Danışan</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <a asp-controller="Client" asp-action="Index" class="small-box-footer">
+                Detaylar <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    <!-- ./col -->
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <!-- Bugünkü Randevular -->
+    <div class="col-md-8">
+        <div class="card" id="todayAppointments">
+            <div class="card-header border-transparent">
+                <h3 class="card-title">Bugünkü Randevular</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+                @if (Model.TodayAppointmentsList.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table m-0">
+                            <thead>
+                                <tr>
+                                    <th>Saat</th>
+                                    <th>Danışan</th>
+                                    <th>Psikolog</th>
+                                    <th>Süre</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var appointment in Model.TodayAppointmentsList)
+                                {
+                                    <tr>
+                                        <td>@appointment.AppointmentDate.ToString("HH:mm")</td>
+                                        <td>@appointment.Client?.User?.FirstName @appointment.Client?.User?.LastName</td>
+                                        <td>@appointment.Psychologist?.User?.FirstName @appointment.Psychologist?.User?.LastName</td>
+                                        <td>@appointment.Duration</td>
+                                        <td>
+                                            @switch (appointment.Status)
+                                            {
+                                                case "Pending":
+                                                    <span class="badge badge-warning">Bekliyor</span>
+                                                    break;
+                                                case "Confirmed":
+                                                    <span class="badge badge-success">Onaylandı</span>
+                                                    break;
+                                                case "Completed":
+                                                    <span class="badge badge-info">Tamamlandı</span>
+                                                    break;
+                                                case "Cancelled":
+                                                    <span class="badge badge-danger">İptal</span>
+                                                    break;
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3 text-center text-muted">
+                        <i class="fas fa-info-circle"></i> Bugün için randevu bulunmuyor.
+                    </div>
+                }
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer clearfix">
+                <a asp-controller="Appointment" asp-action="Create" class="btn btn-sm btn-info float-left">Yeni Randevu Oluştur</a>
+                <a asp-controller="Appointment" asp-action="Calendar" class="btn btn-sm btn-secondary float-right">Takvimi Görüntüle</a>
+            </div>
+            <!-- /.card-footer -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.col -->
+
+    <!-- Hızlı Erişim -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Hızlı Erişim</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-controller="Appointment" asp-action="Create" class="btn btn-primary btn-block mb-2">
+                        <i class="fas fa-plus mr-2"></i> Yeni Randevu
+                    </a>
+                    <a asp-controller="Client" asp-action="Create" class="btn btn-success btn-block mb-2">
+                        <i class="fas fa-user-plus mr-2"></i> Yeni Danışan
+                    </a>
+                    <a asp-controller="Psychologist" asp-action="Create" class="btn btn-info btn-block mb-2">
+                        <i class="fas fa-user-md mr-2"></i> Yeni Psikolog
+                    </a>
+                    <a asp-controller="Appointment" asp-action="Calendar" class="btn btn-warning btn-block">
+                        <i class="fas fa-calendar-alt mr-2"></i> Takvim
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- İstatistikler -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Randevu İstatistikleri</h3>
+            </div>
+            <div class="card-body">
+                <div class="progress-group">
+                    <span class="float-right"><b>@Model.PendingAppointments</b>/@Model.TotalAppointments</span>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar bg-warning" style="width: @(Model.TotalAppointments > 0 ? (Model.PendingAppointments * 100.0 / Model.TotalAppointments) : 0)%"></div>
+                    </div>
+                    <span class="progress-text">Bekleyen</span>
+                </div>
+
+                <div class="progress-group">
+                    <span class="float-right"><b>@Model.CompletedAppointments</b>/@Model.TotalAppointments</span>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar bg-success" style="width: @(Model.TotalAppointments > 0 ? (Model.CompletedAppointments * 100.0 / Model.TotalAppointments) : 0)%"></div>
+                    </div>
+                    <span class="progress-text">Tamamlanan</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.col -->
+</div>
+<!-- /.row -->
+
+<!-- Son Randevular -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Son Randevular</h3>
+                <div class="card-tools">
+                    <a asp-controller="Appointment" asp-action="Index" class="btn btn-sm btn-primary">
+                        Tümünü Gör
+                    </a>
+                </div>
+            </div>
+            <div class="card-body table-responsive p-0">
+                @if (Model.RecentAppointments.Any())
+                {
+                    <table class="table table-hover text-nowrap">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Saat</th>
+                                <th>Danışan</th>
+                                <th>Psikolog</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appointment in Model.RecentAppointments)
+                            {
+                                <tr>
+                                    <td>@appointment.AppointmentDate.ToString("dd.MM.yyyy")</td>
+                                    <td>@appointment.AppointmentDate.ToString("HH:mm")</td>
+                                    <td>@appointment.Client?.User?.FirstName @appointment.Client?.User?.LastName</td>
+                                    <td>@appointment.Psychologist?.User?.FirstName @appointment.Psychologist?.User?.LastName</td>
+                                    <td>
+                                        @switch (appointment.Status)
+                                        {
+                                            case "Pending":
+                                                <span class="badge badge-warning">Bekliyor</span>
+                                                break;
+                                            case "Confirmed":
+                                                <span class="badge badge-success">Onaylandı</span>
+                                                break;
+                                            case "Completed":
+                                                <span class="badge badge-info">Tamamlandı</span>
+                                                break;
+                                            case "Cancelled":
+                                                <span class="badge badge-danger">İptal</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                                        <a href="#" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="p-3 text-center text-muted">
+                        <i class="fas fa-info-circle"></i> Henüz randevu bulunmuyor.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sayfa yüklendiğinde animasyon
+        $(document).ready(function() {
+            $('.small-box').hide().fadeIn(800);
+            
+            // Her 30 saniyede bir sayfa yenileme (opsiyonel)
+            // setInterval(function() {
+            //     location.reload();
+            // }, 30000);
+        });
+    </script>
+}

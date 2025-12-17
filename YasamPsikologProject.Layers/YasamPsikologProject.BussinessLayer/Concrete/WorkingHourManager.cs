@@ -1,0 +1,77 @@
+using YasamPsikologProject.BussinessLayer.Abstract;
+using YasamPsikologProject.DataAccessLayer.Abstract;
+using YasamPsikologProject.EntityLayer.Concrete;
+using YasamPsikologProject.EntityLayer.Enums;
+
+namespace YasamPsikologProject.BussinessLayer.Concrete
+{
+    public class WorkingHourManager : IWorkingHourService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public WorkingHourManager(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<WorkingHour?> GetByIdAsync(int id)
+        {
+            return await _unitOfWork.WorkingHourRepository.GetByIdAsync(id);
+        }
+
+        public async Task<IEnumerable<WorkingHour>> GetByPsychologistAsync(int psychologistId)
+        {
+            return await _unitOfWork.WorkingHourRepository.GetByPsychologistAsync(psychologistId);
+        }
+
+        public async Task<WorkingHour> CreateAsync(WorkingHour workingHour)
+        {
+            var psychologist = await _unitOfWork.PsychologistRepository.GetByIdAsync(workingHour.PsychologistId);
+            if (psychologist == null)
+                throw new Exception("Psikolog bulunamadı.");
+
+            var existing = await _unitOfWork.WorkingHourRepository.GetByPsychologistAndDayAsync(
+                workingHour.PsychologistId, 
+                workingHour.DayOfWeek);
+
+            if (existing != null)
+                throw new Exception("Bu gün için zaten çalışma saati tanımlanmış.");
+
+            if (workingHour.StartTime >= workingHour.EndTime)
+                throw new Exception("Bitiş saati başlangıç saatinden önce olamaz.");
+
+            await _unitOfWork.WorkingHourRepository.AddAsync(workingHour);
+            await _unitOfWork.SaveChangesAsync();
+            return workingHour;
+        }
+
+        public async Task<WorkingHour> UpdateAsync(WorkingHour workingHour)
+        {
+            var existing = await _unitOfWork.WorkingHourRepository.GetByIdAsync(workingHour.Id);
+            if (existing == null)
+                throw new Exception("Çalışma saati bulunamadı.");
+
+            if (workingHour.StartTime >= workingHour.EndTime)
+                throw new Exception("Bitiş saati başlangıç saatinden önce olamaz.");
+
+            _unitOfWork.WorkingHourRepository.Update(workingHour);
+            await _unitOfWork.SaveChangesAsync();
+            return workingHour;
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var workingHour = await _unitOfWork.WorkingHourRepository.GetByIdAsync(id);
+            if (workingHour == null)
+                throw new Exception("Çalışma saati bulunamadı.");
+
+            _unitOfWork.WorkingHourRepository.Delete(workingHour);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<WorkingHour?> GetByPsychologistAndDayAsync(int psychologistId, WeekDay day)
+        {
+            return await _unitOfWork.WorkingHourRepository.GetByPsychologistAndDayAsync(psychologistId, day);
+        }
+    }
+}

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using YasamPsikologProject.EntityLayer.Abstract;
+using YasamPsikologProject.EntityLayer.Enums;
 
 namespace YasamPsikologProject.EntityLayer.Concrete
 {
@@ -13,12 +14,11 @@ namespace YasamPsikologProject.EntityLayer.Concrete
         [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; } = null!;
 
-        // Atanmış psikolog (zorunlu - CRM mantığı)
-        [Required(ErrorMessage = "Psikolog ataması zorunludur")]
-        public int AssignedPsychologistId { get; set; }
+        // Atanmış psikolog (opsiyonel - sonradan atanabilir)
+        public int? AssignedPsychologistId { get; set; }
 
         [ForeignKey(nameof(AssignedPsychologistId))]
-        public virtual Psychologist AssignedPsychologist { get; set; } = null!;
+        public virtual Psychologist? AssignedPsychologist { get; set; }
 
         [MaxLength(500)]
         public string? Address { get; set; }
@@ -31,6 +31,9 @@ namespace YasamPsikologProject.EntityLayer.Concrete
         public bool KvkkConsentGiven { get; set; } = false;
         
         public DateTime? KvkkConsentDate { get; set; }
+
+        // Tercih edilen bildirim yöntemi
+        public NotificationType? PreferredNotificationMethod { get; set; }
 
         // WhatsApp bildirimi onayı
         public bool WhatsAppNotificationEnabled { get; set; } = true;

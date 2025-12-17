@@ -1,0 +1,178 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.AppointmentDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Yeni Randevu";
+    var psychologists = ViewBag.Psychologists as List<YasamPsikologProject.WebUi.Models.DTOs.PsychologistDto>;
+    var clients = ViewBag.Clients as List<YasamPsikologProject.WebUi.Models.DTOs.ClientDto>;
+}
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card card-warning">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-calendar-plus"></i> Yeni Randevu Oluştur
+                </h3>
+            </div>
+            <form asp-action="Create" method="post" id="appointmentForm">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Sol Kolon: Psikolog ve Danışan Seçimi -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Psikolog *</label>
+                                <select class="form-control select2" asp-for="PsychologistId" id="psychologistSelect" required>
+                                    <option value="">Psikolog Seçiniz...</option>
+                                    @if (psychologists != null)
+                                    {
+                                        @foreach (var psychologist in psychologists)
+                                        {
+                                            <option value="@psychologist.Id" data-color="@psychologist.CalendarColor">
+                                                @psychologist.User?.FirstName @psychologist.User?.LastName - @psychologist.Specialization
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Danışan *</label>
+                                <select class="form-control select2" asp-for="ClientId" required>
+                                    <option value="">Danışan Seçiniz...</option>
+                                    @if (clients != null)
+                                    {
+                                        @foreach (var client in clients)
+                                        {
+                                            <option value="@client.Id">
+                                                @client.User?.FirstName @client.User?.LastName - @client.User?.PhoneNumber
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Seans Süresi *</label>
+                                <select class="form-control" asp-for="Duration" id="durationSelect" required>
+                                    <option value="">Seçiniz...</option>
+                                    <option value="Minutes30">30 Dakika</option>
+                                    <option value="Minutes45">45 Dakika</option>
+                                    <option value="Minutes60" selected>60 Dakika (Standart)</option>
+                                    <option value="Minutes90">90 Dakika</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sağ Kolon: Tarih ve Saat Seçimi -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Randevu Tarihi *</label>
+                                <input type="date" class="form-control" id="appointmentDate" required min="@DateTime.Today.ToString("yyyy-MM-dd")">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Müsait Saatler *</label>
+                                <select class="form-control" asp-for="AppointmentDate" id="timeSlotSelect" required disabled>
+                                    <option value="">Önce psikolog, tarih ve süre seçiniz...</option>
+                                </select>
+                                <div id="loadingSlots" class="text-center mt-2" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin"></i> Müsait saatler yükleniyor...
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Bilgi:</strong> Müsait saatleri görmek için psikolog, tarih ve seans süresini seçiniz.
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="form-group">
+                        <label>Notlar</label>
+                        <textarea class="form-control" asp-for="Notes" rows="3" placeholder="Randevu ile ilgili özel notlar..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Durum *</label>
+                        <select class="form-control" asp-for="Status" required>
+                            <option value="Pending" selected>Bekliyor</option>
+                            <option value="Confirmed">Onaylandı</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-calendar-check"></i> Randevu Oluştur
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-times"></i> İptal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                theme: 'bootstrap4'
+            });
+
+            function loadAvailableSlots() {
+                var psychologistId = $('#psychologistSelect').val();
+                var date = $('#appointmentDate').val();
+                var duration = $('#durationSelect').val();
+
+                if (!psychologistId || !date || !duration) {
+                    $('#timeSlotSelect').prop('disabled', true).html('<option value="">Önce psikolog, tarih ve süre seçiniz...</option>');
+                    return;
+                }
+
+                $('#loadingSlots').show();
+                $('#timeSlotSelect').prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("GetAvailableSlots")',
+                    type: 'GET',
+                    data: {
+                        psychologistId: psychologistId,
+                        date: date,
+                        duration: duration
+                    },
+                    success: function(response) {
+                        $('#loadingSlots').hide();
+                        
+                        if (response.success && response.slots && response.slots.length > 0) {
+                            var options = '<option value="">Saat Seçiniz...</option>';
+                            response.slots.forEach(function(slot) {
+                                options += '<option value="' + slot.value + '">' + slot.time + '</option>';
+                            });
+                            $('#timeSlotSelect').html(options).prop('disabled', false);
+                            toastr.success(response.slots.length + ' müsait saat bulundu');
+                        } else {
+                            $('#timeSlotSelect').html('<option value="">Müsait saat bulunmadı</option>').prop('disabled', true);
+                            toastr.warning('Seçilen tarihte müsait saat bulunmadı');
+                        }
+                    },
+                    error: function() {
+                        $('#loadingSlots').hide();
+                        $('#timeSlotSelect').html('<option value="">Hata oluştu</option>').prop('disabled', true);
+                        toastr.error('Müsait saatler yüklenirken hata oluştu');
+                    }
+                });
+            }
+
+            $('#psychologistSelect, #appointmentDate, #durationSelect').on('change', loadAvailableSlots);
+
+            $('#appointmentForm').on('submit', function(e) {
+                var submitBtn = $(this).find('button[type="submit"]');
+                submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Kaydediliyor...');
+            });
+        });
+    </script>
+}
