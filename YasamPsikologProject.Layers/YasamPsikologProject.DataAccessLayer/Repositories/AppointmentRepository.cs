@@ -15,6 +15,27 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
             _context = context;
         }
 
+        public override async Task<IEnumerable<Appointment>> GetAllAsync()
+        {
+            return await _context.Appointments
+                .Include(a => a.Psychologist)
+                    .ThenInclude(p => p.User)
+                .Include(a => a.Client)
+                    .ThenInclude(c => c.User)
+                .OrderByDescending(a => a.AppointmentDate)
+                .ToListAsync();
+        }
+
+        public override async Task<Appointment?> GetByIdAsync(int id)
+        {
+            return await _context.Appointments
+                .Include(a => a.Psychologist)
+                    .ThenInclude(p => p.User)
+                .Include(a => a.Client)
+                    .ThenInclude(c => c.User)
+                .FirstOrDefaultAsync(a => a.Id == id);
+        }
+
         public async Task<bool> HasConflictAsync(int psychologistId, DateTime startDate, DateTime endDate, int? excludeAppointmentId = null)
         {
             var query = _context.Appointments

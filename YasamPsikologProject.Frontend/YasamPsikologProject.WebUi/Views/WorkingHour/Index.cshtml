@@ -2,48 +2,143 @@
 @{
     ViewData["Title"] = "Çalışma Saatleri Yönetimi";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var selectedPsychologistId = ViewBag.SelectedPsychologistId as int?;
+    var showPsychologistColumn = !selectedPsychologistId.HasValue;
 }
+
+<style>
+    .premium-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        border: none;
+        overflow: hidden;
+    }
+    
+    .premium-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+    }
+    
+    .table-hover tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .badge-premium {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    
+    .time-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .break-badge {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+    }
+    
+    .select-premium {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .select-premium:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-premium {
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .empty-state {
+        padding: 4rem 2rem;
+    }
+    
+    .empty-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+</style>
 
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header pb-0">
+            <div class="card premium-card">
+                <div class="premium-header">
                     <div class="d-flex align-items-center justify-content-between">
-                        <h6>Çalışma Saatleri</h6>
-                        <div class="ms-auto">
-                            @if (ViewBag.SelectedPsychologistId != null)
-                            {
-                                <a asp-action="Create" asp-route-psychologistId="@ViewBag.SelectedPsychologistId" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus me-1"></i> Yeni Çalışma Saati Ekle
-                                </a>
-                            }
+                        <div>
+                            <h4 class="text-white mb-1">Çalışma Saatleri Yönetimi</h4>
+                            <p class="text-white-50 mb-0">Psikolog çalışma saatlerini görüntüleyin ve yönetin</p>
                         </div>
+                        @if (ViewBag.SelectedPsychologistId != null)
+                        {
+                            <a asp-action="Create" asp-route-psychologistId="@ViewBag.SelectedPsychologistId" class="btn btn-white btn-premium">
+                                <i class="fas fa-plus me-2"></i>Yeni Ekle
+                            </a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-white btn-premium" onclick="alert('Lütfen önce bir psikolog seçiniz!');">
+                                <i class="fas fa-plus me-2"></i>Yeni Ekle
+                            </button>
+                        }
                     </div>
                 </div>
-                <div class="card-body px-4 pt-4 pb-2">
+                
+                <div class="card-body p-4">
                     @if (TempData["SuccessMessage"] != null)
                     {
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <span class="alert-icon"><i class="fas fa-check-circle"></i></span>
-                            <span class="alert-text">@TempData["SuccessMessage"]</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <i class="fas fa-check-circle me-2"></i><strong>Başarılı!</strong> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     }
                     @if (TempData["ErrorMessage"] != null)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
-                            <span class="alert-text">@TempData["ErrorMessage"]</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <i class="fas fa-exclamation-circle me-2"></i><strong>Hata!</strong> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     }
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <form asp-action="Index" method="get" class="d-flex gap-2">
-                                <select name="psychologistId" class="form-select" onchange="this.form.submit()">
-                                    <option value="">Psikolog Seçiniz</option>
+                            <form asp-action="Index" method="get">
+                                <label class="form-label fw-bold">Psikolog Seçiniz</label>
+                                <select name="psychologistId" class="form-select select-premium" onchange="this.form.submit()">
+                                    <option value="">Tüm Psikologlar</option>
                                     @if (ViewBag.Psychologists != null)
                                     {
                                         @foreach (var item in ViewBag.Psychologists)
@@ -54,63 +149,94 @@
                                 </select>
                             </form>
                         </div>
+                        @if (Model != null && Model.Any())
+                        {
+                            <div class="col-md-6 d-flex align-items-end justify-content-end">
+                                <div class="badge-premium bg-gradient-info text-white">
+                                    <i class="fas fa-calendar-check me-2"></i>
+                                    Toplam @Model.Count çalışma saati
+                                </div>
+                            </div>
+                        }
                     </div>
 
                     @if (Model != null && Model.Any())
                     {
-                        <div class="table-responsive p-0">
-                            <table class="table align-items-center justify-content-center mb-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-items-center mb-0">
                                 <thead>
                                     <tr>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Gün</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Başlangıç</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Bitiş</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Mola</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Durum</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">İşlemler</th>
+                                        @if (showPsychologistColumn)
+                                        {
+                                            <th class="text-uppercase text-secondary text-xs font-weight-bolder">Psikolog</th>
+                                        }
+                                        <th class="text-uppercase text-secondary text-xs font-weight-bolder">Gün</th>
+                                        <th class="text-uppercase text-secondary text-xs font-weight-bolder">Başlangıç</th>
+                                        <th class="text-uppercase text-secondary text-xs font-weight-bolder">Bitiş</th>
+                                        <th class="text-uppercase text-secondary text-xs font-weight-bolder">Mola</th>
+                                        <th class="text-uppercase text-secondary text-xs font-weight-bolder">Durum</th>
+                                        <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">İşlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var item in Model.OrderBy(w => GetDayOrder(w.DayOfWeek)))
+                                    @foreach (var item in Model.OrderBy(w => w.PsychologistId).ThenBy(w => GetDayOrder(w.DayOfWeek)))
                                     {
                                         <tr>
+                                            @if (showPsychologistColumn)
+                                            {
+                                                <td>
+                                                    <p class="text-sm font-weight-bold mb-0">
+                                                        @{
+                                                            var psychologistNames = ViewBag.PsychologistNames as Dictionary<int, string>;
+                                                            var psychologistName = "Bilinmiyor";
+                                                            if (psychologistNames != null && psychologistNames.ContainsKey(item.PsychologistId))
+                                                            {
+                                                                psychologistName = psychologistNames[item.PsychologistId];
+                                                            }
+                                                        }
+                                                        @psychologistName
+                                                    </p>
+                                                </td>
+                                            }
                                             <td>
-                                                <p class="text-sm font-weight-bold mb-0">@item.DayOfWeek</p>
+                                                <p class="text-sm font-weight-bold mb-0">@GetDayNameInTurkish(item.DayOfWeek)</p>
                                             </td>
                                             <td>
-                                                <p class="text-sm mb-0">@item.StartTime.ToString(@"hh\:mm")</p>
+                                                <span class="time-badge">@item.StartTime.ToString(@"hh\:mm")</span>
                                             </td>
                                             <td>
-                                                <p class="text-sm mb-0">@item.EndTime.ToString(@"hh\:mm")</p>
+                                                <span class="time-badge">@item.EndTime.ToString(@"hh\:mm")</span>
                                             </td>
                                             <td>
                                                 @if (item.BreakStartTime.HasValue && item.BreakEndTime.HasValue)
                                                 {
-                                                    <p class="text-sm mb-0">@item.BreakStartTime.Value.ToString(@"hh\:mm") - @item.BreakEndTime.Value.ToString(@"hh\:mm")</p>
+                                                    <span class="break-badge">
+                                                        @item.BreakStartTime.Value.ToString(@"hh\:mm") - @item.BreakEndTime.Value.ToString(@"hh\:mm")
+                                                    </span>
                                                 }
                                                 else
                                                 {
-                                                    <p class="text-sm text-muted mb-0">-</p>
+                                                    <span class="text-muted">-</span>
                                                 }
                                             </td>
                                             <td>
                                                 @if (item.IsAvailable)
                                                 {
-                                                    <span class="badge badge-sm bg-gradient-success">Aktif</span>
+                                                    <span class="badge bg-gradient-success">Aktif</span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge badge-sm bg-gradient-secondary">Pasif</span>
+                                                    <span class="badge bg-gradient-secondary">Pasif</span>
                                                 }
                                             </td>
                                             <td class="text-center">
-                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-link text-info px-3 mb-0">
-                                                    <i class="fas fa-pencil-alt text-dark me-2"></i>Düzenle
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-link text-info px-2 mb-0">
+                                                    <i class="fas fa-pencil-alt"></i>
                                                 </a>
-                                                <form asp-action="Delete" asp-route-id="@item.Id" asp-route-psychologistId="@item.PsychologistId" method="post" class="d-inline" onsubmit="return confirm('Bu çalışma saatini silmek istediğinize emin misiniz?');">
+                                                <form asp-action="Delete" asp-route-id="@item.Id" asp-route-psychologistId="@item.PsychologistId" method="post" class="d-inline" onsubmit="return confirm('Silmek istediğinize emin misiniz?');">
                                                     @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-link text-danger px-3 mb-0">
-                                                        <i class="fas fa-trash text-dark me-2"></i>Sil
+                                                    <button type="submit" class="btn btn-link text-danger px-2 mb-0">
+                                                        <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
                                             </td>
@@ -122,18 +248,36 @@
                     }
                     else
                     {
-                        <div class="text-center py-5">
-                            <i class="fas fa-clock fa-3x text-secondary mb-3"></i>
-                            <p class="text-secondary">
+                        <div class="empty-state text-center">
+                            <div class="empty-icon">
+                                <i class="fas fa-clock fa-3x text-white"></i>
+                            </div>
+                            <h5 class="mb-2">
                                 @if (ViewBag.SelectedPsychologistId != null)
                                 {
-                                    <span>Bu psikolog için henüz çalışma saati eklenmemiş.</span>
+                                    <span>Henüz Çalışma Saati Eklenmemiş</span>
                                 }
                                 else
                                 {
-                                    <span>Lütfen yukarıdan bir psikolog seçiniz.</span>
+                                    <span>Çalışma Saati Bulunamadı</span>
+                                }
+                            </h5>
+                            <p class="text-muted mb-4">
+                                @if (ViewBag.SelectedPsychologistId != null)
+                                {
+                                    <span>Bu psikolog için henüz çalışma saati tanımlanmamış.</span>
+                                }
+                                else
+                                {
+                                    <span>Sistemde henüz hiç çalışma saati tanımlanmamış.</span>
                                 }
                             </p>
+                            @if (ViewBag.SelectedPsychologistId != null)
+                            {
+                                <a asp-action="Create" asp-route-psychologistId="@ViewBag.SelectedPsychologistId" class="btn btn-primary btn-premium">
+                                    <i class="fas fa-plus me-2"></i>İlk Çalışma Saatini Ekle
+                                </a>
+                            }
                         </div>
                     }
                 </div>
@@ -147,6 +291,13 @@
     {
         return dayName switch
         {
+            "Monday" => 1,
+            "Tuesday" => 2,
+            "Wednesday" => 3,
+            "Thursday" => 4,
+            "Friday" => 5,
+            "Saturday" => 6,
+            "Sunday" => 7,
             "Pazartesi" => 1,
             "Salı" => 2,
             "Çarşamba" => 3,
@@ -155,6 +306,21 @@
             "Cumartesi" => 6,
             "Pazar" => 7,
             _ => 8
+        };
+    }
+
+    string GetDayNameInTurkish(string dayName)
+    {
+        return dayName switch
+        {
+            "Monday" => "Pazartesi",
+            "Tuesday" => "Salı",
+            "Wednesday" => "Çarşamba",
+            "Thursday" => "Perşembe",
+            "Friday" => "Cuma",
+            "Saturday" => "Cumartesi",
+            "Sunday" => "Pazar",
+            _ => dayName
         };
     }
 }

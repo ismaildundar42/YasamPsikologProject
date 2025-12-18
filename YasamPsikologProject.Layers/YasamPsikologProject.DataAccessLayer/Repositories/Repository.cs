@@ -17,7 +17,7 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public virtual async Task<T?> GetByIdAsync(int id)
         {
             var entity = await _dbSet.FindAsync(id);
             // Soft delete kontrolü
@@ -31,7 +31,7 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
             return await _dbSet.FirstOrDefaultAsync(filter);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
             // Soft delete filtresi - silinmiş kayıtları getirme
             return await _dbSet.Where(x => !x.IsDeleted).ToListAsync();

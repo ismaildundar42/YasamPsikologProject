@@ -117,4 +117,48 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string? BreakEndTime { get; set; }
         public string? Notes { get; set; }
     }
+
+    public class CreateAppointmentDto
+    {
+        [Required]
+        public int PsychologistId { get; set; }
+        
+        [Required]
+        public int ClientId { get; set; }
+        
+        [Required]
+        public DateTime AppointmentDate { get; set; }
+        
+        [Required]
+        [Range(15, 240)]
+        public int Duration { get; set; }
+        
+        [Required]
+        public string Status { get; set; } = "Pending";
+        
+        public string? Notes { get; set; }
+    }
+
+    public class UpdateAppointmentDto
+    {
+        [Required]
+        public int PsychologistId { get; set; }
+        
+        [Required]
+        public int ClientId { get; set; }
+        
+        [Required]
+        public DateTime AppointmentDate { get; set; }
+        
+        [Required]
+        [Range(15, 240)]
+        public int Duration { get; set; }
+
+        public int BreakDuration { get; set; } = 10;
+        
+        [Required]
+        public string Status { get; set; } = "Pending";
+        
+        public string? Notes { get; set; }
+    }
 }

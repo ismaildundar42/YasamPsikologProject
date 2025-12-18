@@ -1,0 +1,114 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.AppointmentDto
+@{
+    ViewData["Title"] = "Randevu Detayları";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info">
+                <h3 class="card-title text-white">
+                    <i class="fas fa-calendar-check mr-2"></i>Randevu Detayları
+                </h3>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Randevu Tarihi:</dt>
+                    <dd class="col-sm-8">@Model.AppointmentDate.ToString("dd.MM.yyyy HH:mm")</dd>
+
+                    <dt class="col-sm-4">Bitiş Tarihi:</dt>
+                    <dd class="col-sm-8">@Model.AppointmentEndDate.ToString("dd.MM.yyyy HH:mm")</dd>
+
+                    <dt class="col-sm-4">Danışan:</dt>
+                    <dd class="col-sm-8">@Model.Client?.User?.FirstName @Model.Client?.User?.LastName</dd>
+
+                    <dt class="col-sm-4">Psikolog:</dt>
+                    <dd class="col-sm-8">@Model.Psychologist?.User?.FirstName @Model.Psychologist?.User?.LastName</dd>
+
+                    <dt class="col-sm-4">Süre:</dt>
+                    <dd class="col-sm-8">@Model.Duration dakika</dd>
+
+                    <dt class="col-sm-4">Ara Süresi:</dt>
+                    <dd class="col-sm-8">@Model.BreakDuration dakika</dd>
+
+                    <dt class="col-sm-4">Durum:</dt>
+                    <dd class="col-sm-8">
+                        @switch (Model.Status)
+                        {
+                            case "Pending":
+                                <span class="badge badge-warning">Bekliyor</span>
+                                break;
+                            case "Confirmed":
+                                <span class="badge badge-success">Onaylandı</span>
+                                break;
+                            case "Completed":
+                                <span class="badge badge-info">Tamamlandı</span>
+                                break;
+                            case "Cancelled":
+                                <span class="badge badge-danger">İptal</span>
+                                break;
+                        }
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <dt class="col-sm-4">Notlar:</dt>
+                        <dd class="col-sm-8">@Model.Notes</dd>
+                    }
+
+                    @if (Model.Status == "Cancelled" && !string.IsNullOrEmpty(Model.CancellationReason))
+                    {
+                        <dt class="col-sm-4">İptal Nedeni:</dt>
+                        <dd class="col-sm-8">@Model.CancellationReason</dd>
+                    }
+
+                    <dt class="col-sm-4">Oluşturulma Tarihi:</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <dt class="col-sm-4">Son Güncelleme:</dt>
+                        <dd class="col-sm-8">@Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+            <div class="card-footer">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit mr-2"></i>Düzenle
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Geri Dön
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-secondary">
+                <h3 class="card-title text-white">
+                    <i class="fas fa-info-circle mr-2"></i>Ek Bilgiler
+                </h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Randevu ID:</strong> #@Model.Id</p>
+                <p><strong>Toplam Süre:</strong> @(Model.Duration + Model.BreakDuration) dakika</p>
+                
+                @if (Model.Client != null)
+                {
+                    <hr>
+                    <h6>Danışan İletişim</h6>
+                    @if (!string.IsNullOrEmpty(Model.Client.User?.Email))
+                    {
+                        <p><i class="fas fa-envelope mr-2"></i>@Model.Client.User.Email</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Client.User?.PhoneNumber))
+                    {
+                        <p><i class="fas fa-phone mr-2"></i>@Model.Client.User.PhoneNumber</p>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

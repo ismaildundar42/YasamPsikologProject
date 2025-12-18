@@ -1,0 +1,183 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.AppointmentDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Randevu Düzenle";
+    var psychologists = ViewBag.Psychologists as List<YasamPsikologProject.WebUi.Models.DTOs.PsychologistDto>;
+    var clients = ViewBag.Clients as List<YasamPsikologProject.WebUi.Models.DTOs.ClientDto>;
+}
+
+<style>
+    .premium-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        border: none;
+    }
+    
+    .premium-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-premium {
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #344767;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-10 col-md-11 mx-auto">
+            <div class="card premium-card">
+                <div class="premium-header">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="text-white mb-0"><i class="fas fa-edit me-2"></i>Randevu Düzenle</h5>
+                            <p class="text-white-50 mb-0 text-sm">Randevu bilgilerini güncelleyin</p>
+                        </div>
+                        <a asp-action="Index" class="btn btn-white btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Geri
+                        </a>
+                    </div>
+                </div>
+                
+                <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="CreatedAt" />
+                    
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <!-- Sol Kolon -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Psikolog <span class="text-danger">*</span></label>
+                                    <select class="form-select select2" asp-for="PsychologistId" required>
+                                        <option value="">Psikolog Seçiniz...</option>
+                                        @if (psychologists != null)
+                                        {
+                                            @foreach (var psychologist in psychologists)
+                                            {
+                                                <option value="@psychologist.Id" selected="@(psychologist.Id == Model.PsychologistId)">
+                                                    @psychologist.User?.FirstName @psychologist.User?.LastName - @psychologist.Specialization
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Danışan <span class="text-danger">*</span></label>
+                                    <select class="form-select select2" asp-for="ClientId" required>
+                                        <option value="">Danışan Seçiniz...</option>
+                                        @if (clients != null)
+                                        {
+                                            @foreach (var client in clients)
+                                            {
+                                                <option value="@client.Id" selected="@(client.Id == Model.ClientId)">
+                                                    @client.User?.FirstName @client.User?.LastName - @client.User?.PhoneNumber
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Seans Süresi <span class="text-danger">*</span></label>
+                                    <select class="form-select" asp-for="Duration" required>
+                                        <option value="">Seçiniz...</option>
+                                        <option value="50">50 Dakika</option>
+                                        <option value="90">90 Dakika</option>
+                                        <option value="120">120 Dakika</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Sağ Kolon -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Randevu Tarihi <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control" asp-for="AppointmentDate" required />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Ara Süresi (dakika)</label>
+                                    <input type="number" class="form-control" asp-for="BreakDuration" value="10" min="0" max="60" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Durum <span class="text-danger">*</span></label>
+                                    <select class="form-select" asp-for="Status" required>
+                                        <option value="Pending">Bekliyor</option>
+                                        <option value="Confirmed">Onaylandı</option>
+                                        <option value="Completed">Tamamlandı</option>
+                                        <option value="Cancelled">İptal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Notlar</label>
+                                <textarea class="form-control" asp-for="Notes" rows="3" 
+                                          placeholder="Randevu ile ilgili özel notlar..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-light p-4">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-premium">
+                                <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info btn-premium">
+                                <i class="fas fa-eye me-2"></i>Detaylar
+                            </a>
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-premium">
+                                <i class="fas fa-times me-2"></i>İptal
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                theme: 'bootstrap4'
+            });
+        });
+    </script>
+}

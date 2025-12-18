@@ -35,11 +35,20 @@ namespace YasamPsikologProject.WebUi.Controllers
                 var psychologistsResponse = await _psychologistService.GetAllAsync();
                 if (psychologistsResponse.Success && psychologistsResponse.Data != null)
                 {
+                    var psychologistList = psychologistsResponse.Data.Select(p => new
+                    {
+                        Id = p.Id,
+                        FullName = $"{p.User?.FirstName} {p.User?.LastName}"
+                    }).ToList();
+
                     ViewBag.Psychologists = new SelectList(
-                        psychologistsResponse.Data,
+                        psychologistList,
                         "Id",
-                        "User.FirstName",
+                        "FullName",
                         psychologistId);
+
+                    // Psikolog isimlerini ID ile eşleştirmek için dictionary oluştur
+                    ViewBag.PsychologistNames = psychologistList.ToDictionary(p => p.Id, p => p.FullName);
                 }
 
                 if (psychologistId.HasValue)
@@ -51,9 +60,25 @@ namespace YasamPsikologProject.WebUi.Controllers
                         return View(response.Data);
                     }
                     TempData["ErrorMessage"] = response.Message;
+                    return View(new List<WorkingHourDto>());
                 }
-
-                return View(new List<WorkingHourDto>());
+                else
+                {
+                    // Tüm psikologların çalışma saatlerini getir
+                    var allWorkingHours = new List<WorkingHourDto>();
+                    if (psychologistsResponse.Success && psychologistsResponse.Data != null)
+                    {
+                        foreach (var psychologist in psychologistsResponse.Data)
+                        {
+                            var response = await _workingHourService.GetAllByPsychologistAsync(psychologist.Id);
+                            if (response.Success && response.Data != null)
+                            {
+                                allWorkingHours.AddRange(response.Data);
+                            }
+                        }
+                    }
+                    return View(allWorkingHours);
+                }
             }
             catch (Exception ex)
             {
@@ -87,13 +112,13 @@ namespace YasamPsikologProject.WebUi.Controllers
             // Haftanın günleri
             ViewBag.DaysOfWeek = new SelectList(new[]
             {
-                new { Value = "Pazartesi", Text = "Pazartesi" },
-                new { Value = "Salı", Text = "Salı" },
-                new { Value = "Çarşamba", Text = "Çarşamba" },
-                new { Value = "Perşembe", Text = "Perşembe" },
-                new { Value = "Cuma", Text = "Cuma" },
-                new { Value = "Cumartesi", Text = "Cumartesi" },
-                new { Value = "Pazar", Text = "Pazar" }
+                new { Value = "Monday", Text = "Pazartesi" },
+                new { Value = "Tuesday", Text = "Salı" },
+                new { Value = "Wednesday", Text = "Çarşamba" },
+                new { Value = "Thursday", Text = "Perşembe" },
+                new { Value = "Friday", Text = "Cuma" },
+                new { Value = "Saturday", Text = "Cumartesi" },
+                new { Value = "Sunday", Text = "Pazar" }
             }, "Value", "Text");
 
             var model = new WorkingHourDto
@@ -135,13 +160,13 @@ namespace YasamPsikologProject.WebUi.Controllers
 
                 ViewBag.DaysOfWeek = new SelectList(new[]
                 {
-                    new { Value = "Pazartesi", Text = "Pazartesi" },
-                    new { Value = "Salı", Text = "Salı" },
-                    new { Value = "Çarşamba", Text = "Çarşamba" },
-                    new { Value = "Perşembe", Text = "Perşembe" },
-                    new { Value = "Cuma", Text = "Cuma" },
-                    new { Value = "Cumartesi", Text = "Cumartesi" },
-                    new { Value = "Pazar", Text = "Pazar" }
+                    new { Value = "Monday", Text = "Pazartesi" },
+                    new { Value = "Tuesday", Text = "Salı" },
+                    new { Value = "Wednesday", Text = "Çarşamba" },
+                    new { Value = "Thursday", Text = "Perşembe" },
+                    new { Value = "Friday", Text = "Cuma" },
+                    new { Value = "Saturday", Text = "Cumartesi" },
+                    new { Value = "Sunday", Text = "Pazar" }
                 }, "Value", "Text", model.DayOfWeek);
 
                 return View(model);
@@ -201,13 +226,13 @@ namespace YasamPsikologProject.WebUi.Controllers
 
                 ViewBag.DaysOfWeek = new SelectList(new[]
                 {
-                    new { Value = "Pazartesi", Text = "Pazartesi" },
-                    new { Value = "Salı", Text = "Salı" },
-                    new { Value = "Çarşamba", Text = "Çarşamba" },
-                    new { Value = "Perşembe", Text = "Perşembe" },
-                    new { Value = "Cuma", Text = "Cuma" },
-                    new { Value = "Cumartesi", Text = "Cumartesi" },
-                    new { Value = "Pazar", Text = "Pazar" }
+                    new { Value = "Monday", Text = "Pazartesi" },
+                    new { Value = "Tuesday", Text = "Salı" },
+                    new { Value = "Wednesday", Text = "Çarşamba" },
+                    new { Value = "Thursday", Text = "Perşembe" },
+                    new { Value = "Friday", Text = "Cuma" },
+                    new { Value = "Saturday", Text = "Cumartesi" },
+                    new { Value = "Sunday", Text = "Pazar" }
                 }, "Value", "Text", response.Data.DayOfWeek);
 
                 return View(response.Data);
@@ -253,13 +278,13 @@ namespace YasamPsikologProject.WebUi.Controllers
 
                 ViewBag.DaysOfWeek = new SelectList(new[]
                 {
-                    new { Value = "Pazartesi", Text = "Pazartesi" },
-                    new { Value = "Salı", Text = "Salı" },
-                    new { Value = "Çarşamba", Text = "Çarşamba" },
-                    new { Value = "Perşembe", Text = "Perşembe" },
-                    new { Value = "Cuma", Text = "Cuma" },
-                    new { Value = "Cumartesi", Text = "Cumartesi" },
-                    new { Value = "Pazar", Text = "Pazar" }
+                    new { Value = "Monday", Text = "Pazartesi" },
+                    new { Value = "Tuesday", Text = "Salı" },
+                    new { Value = "Wednesday", Text = "Çarşamba" },
+                    new { Value = "Thursday", Text = "Perşembe" },
+                    new { Value = "Friday", Text = "Cuma" },
+                    new { Value = "Saturday", Text = "Cumartesi" },
+                    new { Value = "Sunday", Text = "Pazar" }
                 }, "Value", "Text", model.DayOfWeek);
 
                 return View(model);

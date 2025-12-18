@@ -253,8 +253,8 @@
                                         }
                                     </td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
-                                        <a href="#" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
+                                        <a asp-controller="Appointment" asp-action="Details" asp-route-id="@appointment.Id" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                                        <a asp-controller="Appointment" asp-action="Edit" asp-route-id="@appointment.Id" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
                                     </td>
                                 </tr>
                             }

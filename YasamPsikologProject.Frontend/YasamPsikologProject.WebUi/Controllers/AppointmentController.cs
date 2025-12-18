@@ -76,6 +76,7 @@ namespace YasamPsikologProject.WebUi.Controllers
         }
 
         [HttpGet]
+        [Route("GetCalendarEvents")]
         public async Task<IActionResult> GetCalendarEvents()
         {
             try
@@ -164,6 +165,91 @@ namespace YasamPsikologProject.WebUi.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            ViewData["PageTitle"] = "Randevu Detayları";
+            
+            try
+            {
+                var response = await _appointmentService.GetByIdAsync(id);
+                if (response.Success && response.Data != null)
+                {
+                    return View(response.Data);
+                }
+                
+                TempData["ErrorMessage"] = response.Message ?? "Randevu bulunamadı.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Randevu detayları yüklenirken hata");
+                TempData["ErrorMessage"] = "Randevu detayları yüklenirken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpGet]
+        [Route("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            ViewData["PageTitle"] = "Randevu Düzenle";
+            
+            try
+            {
+                var response = await _appointmentService.GetByIdAsync(id);
+                if (response.Success && response.Data != null)
+                {
+                    await LoadDropdowns();
+                    return View(response.Data);
+                }
+                
+                TempData["ErrorMessage"] = response.Message ?? "Randevu bulunamadı.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Randevu yüklenirken hata");
+                TempData["ErrorMessage"] = "Randevu yüklenirken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpPost]
+        [Route("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, AppointmentDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Lütfen tüm alanları doğru şekilde doldurunuz.";
+                await LoadDropdowns();
+                return View(model);
+            }
+
+            try
+            {
+                var response = await _appointmentService.UpdateAsync(id, model);
+                if (response.Success)
+                {
+                    TempData["SuccessMessage"] = "Randevu başarıyla güncellendi.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["ErrorMessage"] = response.Message ?? "Randevu güncellenemedi.";
+                await LoadDropdowns();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Randevu güncellenirken hata");
+                TempData["ErrorMessage"] = "İşlem sırasında hata oluştu.";
+                await LoadDropdowns();
+                return View(model);
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Cancel(int id, string reason)
         {
@@ -185,7 +271,8 @@ namespace YasamPsikologProject.WebUi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAvailableSlots(int psychologistId, string date, string duration)
+        [Route("GetAvailableSlots")]
+        public async Task<IActionResult> GetAvailableSlots(int psychologistId, string date, int duration)
         {
             try
             {
@@ -203,12 +290,12 @@ namespace YasamPsikologProject.WebUi.Controllers
                     return Json(new { success = true, slots });
                 }
 
-                return Json(new { success = false, message = response.Message });
+                return Json(new { success = false, message = response.Message ?? "Müsait saat bulunamadı" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Müsait saatler yüklenirken hata");
-                return Json(new { success = false, message = "Müsait saatler yüklenirken hata oluştu." });
+                return Json(new { success = false, message = "Müsait saatler yüklenirken hata oluştu: " + ex.Message });
             }
         }
 

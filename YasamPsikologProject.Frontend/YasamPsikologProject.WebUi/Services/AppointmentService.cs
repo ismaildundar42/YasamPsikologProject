@@ -10,8 +10,9 @@ namespace YasamPsikologProject.WebUi.Services
         Task<ApiResponse<List<AppointmentDto>>> GetAllAsync();
         Task<ApiResponse<AppointmentDto>> GetByIdAsync(int id);
         Task<ApiResponse<List<AppointmentDto>>> GetByPsychologistAsync(int psychologistId);
-        Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, string duration);
+        Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, int duration);
         Task<ApiResponse<AppointmentDto>> CreateAsync(AppointmentDto appointment);
+        Task<ApiResponse<AppointmentDto>> UpdateAsync(int id, AppointmentDto appointment);
         Task<ApiResponse> CancelAsync(int id, string reason);
     }
 
@@ -37,7 +38,7 @@ namespace YasamPsikologProject.WebUi.Services
             return await GetAsync<List<AppointmentDto>>($"api/appointments/psychologist/{psychologistId}");
         }
 
-        public async Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, string duration)
+        public async Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, int duration)
         {
             return await GetAsync<List<DateTime>>($"api/appointments/available-slots?psychologistId={psychologistId}&date={date:yyyy-MM-dd}&duration={duration}");
         }
@@ -45,6 +46,11 @@ namespace YasamPsikologProject.WebUi.Services
         public async Task<ApiResponse<AppointmentDto>> CreateAsync(AppointmentDto appointment)
         {
             return await PostAsync<AppointmentDto, AppointmentDto>("api/appointments", appointment);
+        }
+
+        public async Task<ApiResponse<AppointmentDto>> UpdateAsync(int id, AppointmentDto appointment)
+        {
+            return await PutAsync<AppointmentDto, AppointmentDto>($"api/appointments/{id}", appointment);
         }
 
         public async Task<ApiResponse> CancelAsync(int id, string reason)

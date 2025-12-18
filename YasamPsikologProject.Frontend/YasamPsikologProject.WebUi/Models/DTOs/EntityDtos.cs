@@ -87,13 +87,16 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public ClientDto? Client { get; set; }
         public DateTime AppointmentDate { get; set; }
         public DateTime AppointmentEndDate { get; set; }
-        public string Duration { get; set; } = null!;
+        public int Duration { get; set; }
+        public int BreakDuration { get; set; } = 10;
         public string Status { get; set; } = null!;
         public string? Notes { get; set; }
         public string? CancellationReason { get; set; }
         public DateTime? CancelledAt { get; set; }
         public bool ReminderSent { get; set; }
         public string? MeetingLink { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     public class WorkingHourDto

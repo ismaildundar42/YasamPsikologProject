@@ -4,25 +4,71 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+<style>
+    .premium-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        border: none;
+    }
+    
+    .premium-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #f093fb;
+        box-shadow: 0 0 0 0.2rem rgba(240, 147, 251, 0.25);
+    }
+    
+    .btn-premium {
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #344767;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
 <div class="container-fluid py-4">
     <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header pb-0">
-                    <div class="d-flex align-items-center">
-                        <h6 class="mb-0">Çalışma Saati Düzenle</h6>
-                        <a asp-action="Index" asp-route-psychologistId="@Model.PsychologistId" class="btn btn-outline-secondary btn-sm ms-auto">
-                            <i class="fas fa-arrow-left me-1"></i> Geri Dön
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="card premium-card">
+                <div class="premium-header">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="text-white mb-0">Çalışma Saati Düzenle</h5>
+                            <p class="text-white-50 mb-0 text-sm">Mevcut çalışma saatini güncelleyin</p>
+                        </div>
+                        <a asp-action="Index" asp-route-psychologistId="@Model.PsychologistId" class="btn btn-white btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Geri
                         </a>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     @if (TempData["ErrorMessage"] != null)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
-                            <span class="alert-text">@TempData["ErrorMessage"]</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <i class="fas fa-exclamation-circle me-2"></i><strong>Hata!</strong> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     }
 
@@ -31,76 +77,62 @@
                         @Html.HiddenFor(m => m.Id)
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label asp-for="PsychologistId" class="form-control-label">Psikolog <span class="text-danger">*</span></label>
-                                    <select asp-for="PsychologistId" asp-items="ViewBag.Psychologists" class="form-select" required disabled>
-                                        <option value="">Psikolog Seçiniz</option>
-                                    </select>
-                                    <input type="hidden" asp-for="PsychologistId" />
-                                    <span asp-validation-for="PsychologistId" class="text-danger text-xs"></span>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Psikolog <span class="text-danger">*</span></label>
+                                <select asp-for="PsychologistId" asp-items="ViewBag.Psychologists" class="form-select" required disabled>
+                                    <option value="">Psikolog Seçiniz</option>
+                                </select>
+                                <input type="hidden" asp-for="PsychologistId" />
+                                <span asp-validation-for="PsychologistId" class="text-danger text-xs"></span>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label asp-for="DayOfWeek" class="form-control-label">Gün <span class="text-danger">*</span></label>
-                                    <select asp-for="DayOfWeek" asp-items="ViewBag.DaysOfWeek" class="form-select" required>
-                                        <option value="">Gün Seçiniz</option>
-                                    </select>
-                                    <span asp-validation-for="DayOfWeek" class="text-danger text-xs"></span>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gün <span class="text-danger">*</span></label>
+                                <select asp-for="DayOfWeek" asp-items="ViewBag.DaysOfWeek" class="form-select" required>
+                                    <option value="">Gün Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="DayOfWeek" class="text-danger text-xs"></span>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label asp-for="StartTime" class="form-control-label">Başlangıç Saati <span class="text-danger">*</span></label>
-                                    <input asp-for="StartTime" type="time" class="form-control" required />
-                                    <span asp-validation-for="StartTime" class="text-danger text-xs"></span>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Başlangıç Saati <span class="text-danger">*</span></label>
+                                <input asp-for="StartTime" type="time" class="form-control" required />
+                                <span asp-validation-for="StartTime" class="text-danger text-xs"></span>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label asp-for="EndTime" class="form-control-label">Bitiş Saati <span class="text-danger">*</span></label>
-                                    <input asp-for="EndTime" type="time" class="form-control" required />
-                                    <span asp-validation-for="EndTime" class="text-danger text-xs"></span>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Bitiş Saati <span class="text-danger">*</span></label>
+                                <input asp-for="EndTime" type="time" class="form-control" required />
+                                <span asp-validation-for="EndTime" class="text-danger text-xs"></span>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label asp-for="BreakStartTime" class="form-control-label">Mola Başlangıç</label>
-                                    <input asp-for="BreakStartTime" type="time" class="form-control" />
-                                    <span asp-validation-for="BreakStartTime" class="text-danger text-xs"></span>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mola Başlangıç</label>
+                                <input asp-for="BreakStartTime" type="time" class="form-control" />
+                                <span asp-validation-for="BreakStartTime" class="text-danger text-xs"></span>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label asp-for="BreakEndTime" class="form-control-label">Mola Bitiş</label>
-                                    <input asp-for="BreakEndTime" type="time" class="form-control" />
-                                    <span asp-validation-for="BreakEndTime" class="text-danger text-xs"></span>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mola Bitiş</label>
+                                <input asp-for="BreakEndTime" type="time" class="form-control" />
+                                <span asp-validation-for="BreakEndTime" class="text-danger text-xs"></span>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label asp-for="Notes" class="form-control-label">Notlar</label>
-                                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="İsteğe bağlı notlar..."></textarea>
-                                    <span asp-validation-for="Notes" class="text-danger text-xs"></span>
-                                </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Notlar</label>
+                                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="İsteğe bağlı notlar..."></textarea>
+                                <span asp-validation-for="Notes" class="text-danger text-xs"></span>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-12">
+                            <div class="col-12 mb-4">
                                 <div class="form-check form-switch">
                                     <input asp-for="IsAvailable" class="form-check-input" type="checkbox" />
                                     <label asp-for="IsAvailable" class="form-check-label">Aktif</label>
@@ -108,13 +140,13 @@
                             </div>
                         </div>
 
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i> Güncelle
+                        <div class="row">
+                            <div class="col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-premium">
+                                    <i class="fas fa-save me-2"></i>Güncelle
                                 </button>
-                                <a asp-action="Index" asp-route-psychologistId="@Model.PsychologistId" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-1"></i> İptal
+                                <a asp-action="Index" asp-route-psychologistId="@Model.PsychologistId" class="btn btn-outline-secondary btn-premium">
+                                    <i class="fas fa-times me-2"></i>İptal
                                 </a>
                             </div>
                         </div>

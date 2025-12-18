@@ -4,85 +4,135 @@
     ViewData["PageTitle"] = "Randevu Yönetimi";
 }
 
-<div class="row mb-3">
-    <div class="col-12">
-        <a asp-action="Create" class="btn btn-success">
-            <i class="fas fa-plus"></i> Yeni Randevu
-        </a>
-        <a asp-action="Calendar" class="btn btn-primary">
-            <i class="fas fa-calendar-alt"></i> Takvim Görünümü
-        </a>
-    </div>
-</div>
+<style>
+    .premium-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        border: none;
+    }
+    
+    .premium-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .table-hover tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .btn-premium {
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+</style>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Randevu Listesi</h3>
-            </div>
-            <div class="card-body">
-                <table id="appointmentTable" class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tarih</th>
-                            <th>Saat</th>
-                            <th>Danışan</th>
-                            <th>Psikolog</th>
-                            <th>Süre</th>
-                            <th>Durum</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var appointment in Model)
-                        {
-                            <tr>
-                                <td>@appointment.Id</td>
-                                <td>@appointment.AppointmentDate.ToString("dd.MM.yyyy")</td>
-                                <td>@appointment.AppointmentDate.ToString("HH:mm")</td>
-                                <td>@appointment.Client?.User?.FirstName @appointment.Client?.User?.LastName</td>
-                                <td>
-                                    <span class="badge" style="background-color: @appointment.Psychologist?.CalendarColor; color: white;">
-                                        @appointment.Psychologist?.User?.FirstName @appointment.Psychologist?.User?.LastName
-                                    </span>
-                                </td>
-                                <td>@appointment.Duration</td>
-                                <td>
-                                    @switch (appointment.Status)
-                                    {
-                                        case "Pending":
-                                            <span class="badge badge-warning">Bekliyor</span>
-                                            break;
-                                        case "Confirmed":
-                                            <span class="badge badge-success">Onaylandı</span>
-                                            break;
-                                        case "Completed":
-                                            <span class="badge badge-info">Tamamlandı</span>
-                                            break;
-                                        case "Cancelled":
-                                            <span class="badge badge-danger">İptal</span>
-                                            break;
-                                    }
-                                </td>
-                                <td>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-info btn-sm" title="Detaylar">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        @if (appointment.Status != "Cancelled" && appointment.Status != "Completed")
-                                        {
-                                            <button type="button" class="btn btn-danger btn-sm btn-cancel" data-id="@appointment.Id" title="İptal Et">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card premium-card">
+                <div class="premium-header">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h4 class="text-white mb-1">Randevu Yönetimi</h4>
+                            <p class="text-white-50 mb-0">Tüm randevuları görüntüleyin ve yönetin</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Create" class="btn btn-white btn-premium">
+                                <i class="fas fa-plus me-2"></i>Yeni Randevu
+                            </a>
+                            <a asp-action="Calendar" class="btn btn-outline-light btn-premium">
+                                <i class="fas fa-calendar-alt me-2"></i>Takvim
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table id="appointmentTable" class="table table-hover align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder">Tarih & Saat</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder">Danışan</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder">Psikolog</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder">Süre</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder">Durum</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var appointment in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">@appointment.AppointmentDate.ToString("dd.MM.yyyy")</p>
+                                            <p class="text-xs text-secondary mb-0">@appointment.AppointmentDate.ToString("HH:mm")</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm mb-0">@appointment.Client?.User?.FirstName @appointment.Client?.User?.LastName</p>
+                                        </td>
+                                        <td>
+                                            <span class="badge" style="background-color: @appointment.Psychologist?.CalendarColor; color: white; padding: 0.5rem 1rem; border-radius: 8px;">
+                                                @appointment.Psychologist?.User?.FirstName @appointment.Psychologist?.User?.LastName
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @{
+                                                var durationMinutes = appointment.Duration;
+                                            }
+                                            <span class="text-sm">@durationMinutes dk</span>
+                                        </td>
+                                        <td>
+                                            @switch (appointment.Status)
+                                            {
+                                                case "Pending":
+                                                    <span class="badge bg-gradient-warning">Bekliyor</span>
+                                                    break;
+                                                case "Confirmed":
+                                                    <span class="badge bg-gradient-success">Onaylandı</span>
+                                                    break;
+                                                case "Completed":
+                                                    <span class="badge bg-gradient-info">Tamamlandı</span>
+                                                    break;
+                                                case "Cancelled":
+                                                    <span class="badge bg-gradient-danger">İptal</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <a asp-action="Details" asp-route-id="@appointment.Id" class="btn btn-link text-info px-2 mb-0" title="Detaylar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (appointment.Status != "Cancelled" && appointment.Status != "Completed")
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@appointment.Id" class="btn btn-link text-primary px-2 mb-0" title="Düzenle">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-link text-danger px-2 mb-0 btn-cancel" data-id="@appointment.Id" title="İptal Et">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -94,7 +144,7 @@
             $('#appointmentTable').DataTable({
                 responsive: true,
                 pageLength: 10,
-                order: [[1, 'desc'], [2, 'desc']],
+                order: [[0, 'desc']],
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
                 }
