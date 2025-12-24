@@ -1,5 +1,6 @@
 using Serilog;
 using YasamPsikologProject.WebUi.Services;
+using YasamPsikologProject.WebUi.Filters;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -24,6 +25,10 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Filters
+builder.Services.AddScoped<PsychologistAuthorizationFilter>();
+
 
 // HttpClient with Polly
 var retryPolicy = HttpPolicyExtensions
@@ -114,3 +119,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+

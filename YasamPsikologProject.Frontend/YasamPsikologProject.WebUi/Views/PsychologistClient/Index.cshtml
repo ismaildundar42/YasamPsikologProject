@@ -1,0 +1,61 @@
+@model List<YasamPsikologProject.WebUi.Models.DTOs.ClientDto>
+@{
+    ViewData["Title"] = "Danışanlarım";
+    Layout = "~/Views/Shared/_PsychologistLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-users mr-2"></i>
+                    Danışanlarım
+                </h3>
+            </div>
+            <div class="card-body">
+                <table id="clientsTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Ad Soyad</th>
+                            <th>E-posta</th>
+                            <th>Telefon</th>
+                            <th>Kayıt Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var client in Model)
+                        {
+                            <tr>
+                                <td>@client.User?.FirstName @client.User?.LastName</td>
+                                <td>@client.User?.Email</td>
+                                <td>@client.User?.PhoneNumber</td>
+                                <td>@client.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@client.Id" class="btn btn-sm btn-info" title="Detaylar">
+                                        <i class="fas fa-eye"></i> Detaylar
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#clientsTable').DataTable({
+                "responsive": true,
+                "lengthChange": true,
+                "autoWidth": false,
+                "order": [[0, "asc"]],
+                "pageLength": 25
+            });
+        });
+    </script>
+}

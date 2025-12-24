@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "Takvim Görünümü";
+    Layout = "~/Views/Shared/_PsychologistLayout.cshtml";
+}
+
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-calendar mr-2"></i>
+                    Randevu Takvimi
+                </h3>
+                <div class="card-tools">
+                    <a asp-action="Index" class="btn btn-sm btn-light">
+                        <i class="fas fa-list"></i> Liste Görünümü
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/tr.global.min.js'></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: 'tr',
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Bugün',
+                    month: 'Ay',
+                    week: 'Hafta',
+                    day: 'Gün'
+                },
+                events: '@Url.Action("GetCalendarEvents")',
+                eventClick: function (info) {
+                    var eventId = info.event.id;
+                    window.location.href = '@Url.Action("Details")/' + eventId;
+                },
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                },
+                slotMinTime: '08:00:00',
+                slotMaxTime: '20:00:00',
+                height: 'auto',
+                contentHeight: 650
+            });
+            calendar.render();
+        });
+    </script>
+}

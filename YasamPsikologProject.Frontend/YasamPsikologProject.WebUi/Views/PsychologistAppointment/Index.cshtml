@@ -1,0 +1,100 @@
+@model List<YasamPsikologProject.WebUi.Models.DTOs.AppointmentDto>
+@{
+    ViewData["Title"] = "Randevularım";
+    Layout = "~/Views/Shared/_PsychologistLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    Tüm Randevularım
+                </h3>
+                <div class="card-tools">
+                    <a asp-action="Calendar" class="btn btn-sm btn-primary">
+                        <i class="fas fa-calendar"></i> Takvim Görünümü
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="appointmentsTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Saat</th>
+                            <th>Danışan</th>
+                            <th>Süre</th>
+                            <th>Tür</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appointment in Model)
+                        {
+                            <tr>
+                                <td>@appointment.AppointmentDate.ToString("dd.MM.yyyy")</td>
+                                <td>@appointment.AppointmentDate.ToString("HH:mm")</td>
+                                <td>@appointment.ClientName</td>
+                                <td>@appointment.Duration dk</td>
+                                <td>
+                                    @if (appointment.IsOnline)
+                                    {
+                                        <span class="badge badge-info">
+                                            <i class="fas fa-video"></i> Online
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">
+                                            <i class="fas fa-user"></i> Yüz Yüze
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (appointment.Status == "Pending")
+                                    {
+                                        <span class="badge badge-warning">Bekliyor</span>
+                                    }
+                                    else if (appointment.Status == "Confirmed")
+                                    {
+                                        <span class="badge badge-success">Onaylandı</span>
+                                    }
+                                    else if (appointment.Status == "Completed")
+                                    {
+                                        <span class="badge badge-info">Tamamlandı</span>
+                                    }
+                                    else if (appointment.Status == "Cancelled")
+                                    {
+                                        <span class="badge badge-danger">İptal</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@appointment.Id" class="btn btn-sm btn-info" title="Detaylar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#appointmentsTable').DataTable({
+                "responsive": true,
+                "lengthChange": true,
+                "autoWidth": false,
+                "order": [[0, "desc"], [1, "desc"]],
+                "pageLength": 25
+            });
+        });
+    </script>
+}

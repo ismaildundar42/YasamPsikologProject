@@ -1,0 +1,165 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.PsychologistDto
+@{
+    ViewData["Title"] = "Profilim";
+    Layout = "~/Views/Shared/_PsychologistLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <!-- Profil Kartı -->
+        <div class="card card-primary card-outline">
+            <div class="card-body box-profile">
+                <div class="text-center">
+                    <img class="profile-user-img img-fluid img-circle" src="~/img/default-avatar.png" alt="User profile picture">
+                </div>
+
+                <h3 class="profile-username text-center">@Model.User?.FirstName @Model.User?.LastName</h3>
+
+                <p class="text-muted text-center">Psikolog</p>
+
+                <ul class="list-group list-group-unbordered mb-3">
+                    <li class="list-group-item">
+                        <b>Uzmanlık</b> <a class="float-right">@Model.Specialization</a>
+                    </li>
+                    <li class="list-group-item">
+                        <b>Deneyim</b> <a class="float-right">@Model.ExperienceYears yıl</a>
+                    </li>
+                    <li class="list-group-item">
+                        <b>Lisans No</b> <a class="float-right">@Model.LicenseNumber</a>
+                    </li>
+                </ul>
+
+                <a asp-action="Edit" class="btn btn-primary btn-block"><i class="fas fa-edit"></i> Profili Düzenle</a>
+                <a asp-action="ChangePassword" class="btn btn-warning btn-block"><i class="fas fa-key"></i> Şifre Değiştir</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <!-- Kişisel Bilgiler -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-user mr-2"></i>
+                    Kişisel Bilgiler
+                </h3>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Ad Soyad:</dt>
+                    <dd class="col-sm-8">@Model.User?.FirstName @Model.User?.LastName</dd>
+
+                    <dt class="col-sm-4">E-posta:</dt>
+                    <dd class="col-sm-8">@Model.User?.Email</dd>
+
+                    <dt class="col-sm-4">Telefon:</dt>
+                    <dd class="col-sm-8">@Model.User?.PhoneNumber</dd>
+
+                    @if (Model.User?.DateOfBirth.HasValue == true)
+                    {
+                        <dt class="col-sm-4">Doğum Tarihi:</dt>
+                        <dd class="col-sm-8">@Model.User.DateOfBirth.Value.ToString("dd.MM.yyyy")</dd>
+                    }
+
+                    <dt class="col-sm-4">Kayıt Tarihi:</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Mesleki Bilgiler -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-briefcase mr-2"></i>
+                    Mesleki Bilgiler
+                </h3>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Uzmanlık Alanı:</dt>
+                    <dd class="col-sm-8">@Model.Specialization</dd>
+
+                    <dt class="col-sm-4">Lisans Numarası:</dt>
+                    <dd class="col-sm-8">@Model.LicenseNumber</dd>
+
+                    <dt class="col-sm-4">Deneyim:</dt>
+                    <dd class="col-sm-8">@Model.ExperienceYears yıl</dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Education))
+                    {
+                        <dt class="col-sm-4">Eğitim:</dt>
+                        <dd class="col-sm-8">@Model.Education</dd>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Certifications))
+                    {
+                        <dt class="col-sm-4">Sertifikalar:</dt>
+                        <dd class="col-sm-8">@Model.Certifications</dd>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Biography))
+                    {
+                        <dt class="col-sm-4">Biyografi:</dt>
+                        <dd class="col-sm-8">@Model.Biography</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <!-- Seans Bilgileri -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-calendar-check mr-2"></i>
+                    Seans Bilgileri
+                </h3>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Seans Ücreti:</dt>
+                    <dd class="col-sm-8">@Model.ConsultationFee TL</dd>
+
+                    <dt class="col-sm-4">Seans Süresi:</dt>
+                    <dd class="col-sm-8">@Model.ConsultationDuration dakika</dd>
+
+                    <dt class="col-sm-4">Online Görüşme:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsOnlineConsultationAvailable)
+                        {
+                            <span class="badge badge-success">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">Pasif</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Yüz Yüze Görüşme:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsInPersonConsultationAvailable)
+                        {
+                            <span class="badge badge-success">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">Pasif</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Otomatik Onay:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.AutoApproveAppointments)
+                        {
+                            <span class="badge badge-success">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-warning">Pasif</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

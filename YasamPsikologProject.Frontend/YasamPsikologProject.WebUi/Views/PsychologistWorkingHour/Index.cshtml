@@ -1,0 +1,147 @@
+@model List<YasamPsikologProject.WebUi.Models.DTOs.WorkingHourDto>
+@{
+    ViewData["Title"] = "Çalışma Saatlerim";
+    Layout = "~/Views/Shared/_PsychologistLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clock mr-2"></i>
+                    Çalışma Saatlerim
+                </h3>
+                <div class="card-tools">
+                    <a asp-action="Create" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Yeni Ekle
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (Model.Any())
+                {
+                    <table id="workingHoursTable" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Gün</th>
+                                <th>Başlangıç</th>
+                                <th>Bitiş</th>
+                                <th>Mola</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var wh in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @switch (wh.DayOfWeek)
+                                        {
+                                            case 1: <text>Pazartesi</text> break;
+                                            case 2: <text>Salı</text> break;
+                                            case 3: <text>Çarşamba</text> break;
+                                            case 4: <text>Perşembe</text> break;
+                                            case 5: <text>Cuma</text> break;
+                                            case 6: <text>Cumartesi</text> break;
+                                            case 7: <text>Pazar</text> break;
+                                        }
+                                    </td>
+                                    <td>@wh.StartTime.ToString(@"hh\:mm")</td>
+                                    <td>@wh.EndTime.ToString(@"hh\:mm")</td>
+                                    <td>
+                                        @if (wh.BreakStartTime.HasValue && wh.BreakEndTime.HasValue)
+                                        {
+                                            @wh.BreakStartTime.Value.ToString(@"hh\:mm") <text> - </text> @wh.BreakEndTime.Value.ToString(@"hh\:mm")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (wh.IsAvailable)
+                                        {
+                                            <span class="badge badge-success">Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">Pasif</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@wh.Id" class="btn btn-sm btn-warning" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteWorkingHour(@wh.Id)" title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center text-muted p-4">
+                        <i class="fas fa-clock fa-3x mb-3"></i>
+                        <p>Henüz çalışma saati tanımlanmamış.</p>
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> İlk Çalışma Saatini Ekle
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#workingHoursTable').DataTable({
+                "responsive": true,
+                "lengthChange": false,
+                "autoWidth": false,
+                "paging": false,
+                "searching": false,
+                "info": false
+            });
+        });
+
+        function deleteWorkingHour(id) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: 'Bu çalışma saatini silmek istediğinize emin misiniz?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, sil',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("Delete")/' + id,
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.success) {
+                                toastr.success(response.message);
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 1500);
+                            } else {
+                                toastr.error(response.message);
+                            }
+                        },
+                        error: function () {
+                            toastr.error('İşlem sırasında hata oluştu');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

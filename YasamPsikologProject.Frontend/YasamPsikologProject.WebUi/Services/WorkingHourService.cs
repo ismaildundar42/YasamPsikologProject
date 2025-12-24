@@ -4,6 +4,7 @@ namespace YasamPsikologProject.WebUi.Services
 {
     public interface IApiWorkingHourService
     {
+        Task<ApiResponse<List<WorkingHourDto>>> GetAllAsync();
         Task<ApiResponse<List<WorkingHourDto>>> GetAllByPsychologistAsync(int psychologistId);
         Task<ApiResponse<WorkingHourDto>> GetByIdAsync(int id);
         Task<ApiResponse<WorkingHourDto>> CreateAsync(WorkingHourDto workingHour);
@@ -19,6 +20,11 @@ namespace YasamPsikologProject.WebUi.Services
             : base(httpClient, logger)
         {
             _serviceLogger = logger;
+        }
+
+        public async Task<ApiResponse<List<WorkingHourDto>>> GetAllAsync()
+        {
+            return await GetAsync<List<WorkingHourDto>>("api/workinghours");
         }
 
         public async Task<ApiResponse<List<WorkingHourDto>>> GetAllByPsychologistAsync(int psychologistId)

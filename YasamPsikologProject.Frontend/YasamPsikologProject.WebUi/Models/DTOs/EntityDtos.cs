@@ -23,6 +23,7 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public string PhoneNumber { get; set; } = null!;
         
         public string? Role { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }
@@ -44,6 +45,15 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         [StringLength(1000, ErrorMessage = "Biyografi en fazla 1000 karakter olabilir")]
         public string? Biography { get; set; }
         
+        [Range(0, 50, ErrorMessage = "Deneyim yılı 0-50 arasında olmalıdır")]
+        public int ExperienceYears { get; set; } = 0;
+        
+        [StringLength(500, ErrorMessage = "Eğitim en fazla 500 karakter olabilir")]
+        public string? Education { get; set; }
+        
+        [StringLength(500, ErrorMessage = "Sertifikalar en fazla 500 karakter olabilir")]
+        public string? Certifications { get; set; }
+        
         [RegularExpression(@"^#[0-9A-Fa-f]{6}$", ErrorMessage = "Renk kodu hex formatında olmalıdır (örn: #4CAF50)")]
         public string? CalendarColor { get; set; }
         
@@ -53,7 +63,12 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         [Range(15, 240, ErrorMessage = "Konsültasyon süresi 15-240 dakika arasında olmalıdır")]
         public int ConsultationDuration { get; set; } = 50;
         
+        public bool IsOnlineConsultationAvailable { get; set; } = true;
+        public bool IsInPersonConsultationAvailable { get; set; } = true;
+        public bool AutoApproveAppointments { get; set; } = false;
+        
         public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class ClientDto
@@ -76,6 +91,7 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public DateTime? KvkkConsentDate { get; set; }
         public string? PreferredNotificationMethod { get; set; }
         public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class AppointmentDto
@@ -90,6 +106,9 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public int Duration { get; set; }
         public int BreakDuration { get; set; } = 10;
         public string Status { get; set; } = null!;
+        public bool IsOnline { get; set; } = true;
+        public string? ClientNotes { get; set; }
+        public string? PsychologistNotes { get; set; }
         public string? Notes { get; set; }
         public string? CancellationReason { get; set; }
         public DateTime? CancelledAt { get; set; }
@@ -97,13 +116,17 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public string? MeetingLink { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        
+        // Computed properties for display
+        public string ClientName => Client != null ? $"{Client.User?.FirstName} {Client.User?.LastName}" : "N/A";
+        public string PsychologistName => Psychologist != null ? $"{Psychologist.User?.FirstName} {Psychologist.User?.LastName}" : "N/A";
     }
 
     public class WorkingHourDto
     {
         public int Id { get; set; }
         public int PsychologistId { get; set; }
-        public string DayOfWeek { get; set; } = null!;
+        public int DayOfWeek { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public bool IsAvailable { get; set; }

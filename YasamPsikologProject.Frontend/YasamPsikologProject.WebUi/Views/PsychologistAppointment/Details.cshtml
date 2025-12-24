@@ -1,0 +1,213 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.AppointmentDto
+@{
+    ViewData["Title"] = "Randevu Detayları";
+    Layout = "~/Views/Shared/_PsychologistLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Randevu Bilgileri -->
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Randevu Bilgileri
+                </h3>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Danışan:</dt>
+                    <dd class="col-sm-8">@Model.ClientName</dd>
+
+                    <dt class="col-sm-4">Tarih:</dt>
+                    <dd class="col-sm-8">@Model.AppointmentDate.ToString("dd MMMM yyyy, dddd")</dd>
+
+                    <dt class="col-sm-4">Saat:</dt>
+                    <dd class="col-sm-8">@Model.AppointmentDate.ToString("HH:mm") - @Model.AppointmentEndDate.ToString("HH:mm")</dd>
+
+                    <dt class="col-sm-4">Süre:</dt>
+                    <dd class="col-sm-8">@Model.Duration dakika</dd>
+
+                    <dt class="col-sm-4">Tür:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsOnline)
+                        {
+                            <span class="badge badge-info"><i class="fas fa-video"></i> Online</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary"><i class="fas fa-user"></i> Yüz Yüze</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Durum:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Status == "Pending")
+                        {
+                            <span class="badge badge-warning">Bekliyor</span>
+                        }
+                        else if (Model.Status == "Confirmed")
+                        {
+                            <span class="badge badge-success">Onaylandı</span>
+                        }
+                        else if (Model.Status == "Completed")
+                        {
+                            <span class="badge badge-info">Tamamlandı</span>
+                        }
+                        else if (Model.Status == "Cancelled")
+                        {
+                            <span class="badge badge-danger">İptal</span>
+                        }
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.ClientNotes))
+                    {
+                        <dt class="col-sm-4">Danışan Notu:</dt>
+                        <dd class="col-sm-8">@Model.ClientNotes</dd>
+                    }
+
+                    @if (Model.IsOnline && !string.IsNullOrEmpty(Model.MeetingLink))
+                    {
+                        <dt class="col-sm-4">Görüşme Linki:</dt>
+                        <dd class="col-sm-8">
+                            <a href="@Model.MeetingLink" target="_blank" class="btn btn-sm btn-info">
+                                <i class="fas fa-video"></i> Görüşmeye Katıl
+                            </a>
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <!-- Psikolog Notları -->
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-notes-medical mr-2"></i>
+                    Psikolog Notları
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <textarea id="psychologistNotes" class="form-control" rows="6" placeholder="Randevu notlarınızı buraya yazabilirsiniz...">@Model.PsychologistNotes</textarea>
+                </div>
+                <button type="button" id="saveNotesBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Notları Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Durum Güncelleme -->
+        <div class="card card-warning">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-tasks mr-2"></i>
+                    Randevu Durumu
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Durum Değiştir:</label>
+                    <select id="statusSelect" class="form-control">
+                        <option value="Pending" selected="@(Model.Status == "Pending")">Bekliyor</option>
+                        <option value="Confirmed" selected="@(Model.Status == "Confirmed")">Onaylandı</option>
+                        <option value="Completed" selected="@(Model.Status == "Completed")">Tamamlandı</option>
+                        <option value="Cancelled" selected="@(Model.Status == "Cancelled")">İptal</option>
+                    </select>
+                </div>
+                <button type="button" id="updateStatusBtn" class="btn btn-warning btn-block">
+                    <i class="fas fa-sync-alt"></i> Durumu Güncelle
+                </button>
+            </div>
+        </div>
+
+        <!-- Hızlı İşlemler -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-bolt mr-2"></i>
+                    Hızlı İşlemler
+                </h3>
+            </div>
+            <div class="card-body">
+                <a asp-controller="PsychologistClient" asp-action="Details" asp-route-id="@Model.ClientId" class="btn btn-info btn-block">
+                    <i class="fas fa-user"></i> Danışan Detayları
+                </a>
+                <a asp-action="Index" class="btn btn-secondary btn-block">
+                    <i class="fas fa-arrow-left"></i> Randevu Listesi
+                </a>
+                <a asp-action="Calendar" class="btn btn-primary btn-block">
+                    <i class="fas fa-calendar"></i> Takvim
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Notları kaydet
+            $('#saveNotesBtn').click(function () {
+                var notes = $('#psychologistNotes').val();
+                
+                $.ajax({
+                    url: '@Url.Action("UpdateNotes", new { id = Model.Id })',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(notes),
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('İşlem sırasında hata oluştu');
+                    }
+                });
+            });
+
+            // Durumu güncelle
+            $('#updateStatusBtn').click(function () {
+                var status = $('#statusSelect').val();
+                
+                Swal.fire({
+                    title: 'Emin misiniz?',
+                    text: 'Randevu durumunu değiştirmek istediğinize emin misiniz?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Evet, güncelle',
+                    cancelButtonText: 'İptal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("UpdateStatus", new { id = Model.Id })',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(status),
+                            success: function (response) {
+                                if (response.success) {
+                                    toastr.success(response.message);
+                                    setTimeout(function () {
+                                        location.reload();
+                                    }, 1500);
+                                } else {
+                                    toastr.error(response.message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error('İşlem sırasında hata oluştu');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
