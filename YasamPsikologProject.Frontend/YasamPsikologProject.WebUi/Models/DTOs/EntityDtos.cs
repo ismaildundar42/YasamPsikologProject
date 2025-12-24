@@ -144,4 +144,15 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public string Reason { get; set; } = null!;
         public bool IsAllDay { get; set; }
     }
+
+    public class LoginResponseDto
+    {
+        public int UserId { get; set; }
+        public string Email { get; set; } = null!;
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
+        public int Role { get; set; }
+        public int? PsychologistId { get; set; }
+        public int? ClientId { get; set; }
+    }
 }

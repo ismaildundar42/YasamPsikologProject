@@ -48,6 +48,15 @@ var httpClientHandler = new HttpClientHandler
 };
 
 // HTTP Client Services - API Consume
+builder.Services.AddHttpClient<IApiAuthService, AuthService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+})
+.ConfigurePrimaryHttpMessageHandler(() => httpClientHandler)
+.AddPolicyHandler(retryPolicy)
+.AddPolicyHandler(circuitBreakerPolicy);
+
 builder.Services.AddHttpClient<IApiPsychologistService, PsychologistService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl!);
@@ -116,7 +125,7 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
 
