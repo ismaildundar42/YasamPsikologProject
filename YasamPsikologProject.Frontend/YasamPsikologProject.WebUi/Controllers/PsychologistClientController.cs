@@ -33,18 +33,15 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
                 var response = await _clientService.GetAllAsync();
                 if (response.Success && response.Data != null)
                 {
                     // Sadece kendisine atanmış danışanları filtrele
                     var clients = response.Data
-                        .Where(c => c.AssignedPsychologistId == psychologistId.Value)
+                        .Where(c => c.AssignedPsychologistId == psychologistId)
                         .OrderBy(c => c.User!.FirstName)
                         .ToList();
 
@@ -70,17 +67,14 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
                 var response = await _clientService.GetByIdAsync(id);
                 if (response.Success && response.Data != null)
                 {
                     // Sadece kendi danışanını görebilir
-                    if (response.Data.AssignedPsychologistId != psychologistId.Value)
+                    if (response.Data.AssignedPsychologistId != psychologistId)
                     {
                         TempData["ErrorMessage"] = "Bu danışana erişim yetkiniz yok.";
                         return RedirectToAction(nameof(Index));
@@ -91,7 +85,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                     if (appointmentsResponse.Success && appointmentsResponse.Data != null)
                     {
                         ViewBag.ClientAppointments = appointmentsResponse.Data
-                            .Where(a => a.ClientId == id && a.PsychologistId == psychologistId.Value)
+                            .Where(a => a.ClientId == id && a.PsychologistId == psychologistId)
                             .OrderByDescending(a => a.AppointmentDate)
                             .ToList();
                     }

@@ -27,7 +27,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 {
                     w.Id,
                     w.PsychologistId,
-                    DayOfWeek = w.DayOfWeek.ToString(),
+                    DayOfWeek = (int)w.DayOfWeek,
                     StartTime = w.StartTime.ToString(@"hh\:mm"),
                     EndTime = w.EndTime.ToString(@"hh\:mm"),
                     w.IsAvailable,
@@ -56,7 +56,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 {
                     workingHour.Id,
                     workingHour.PsychologistId,
-                    DayOfWeek = workingHour.DayOfWeek.ToString(),
+                    DayOfWeek = (int)workingHour.DayOfWeek,
                     StartTime = workingHour.StartTime.ToString(@"hh\:mm"),
                     EndTime = workingHour.EndTime.ToString(@"hh\:mm"),
                     workingHour.IsAvailable,
@@ -83,7 +83,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 {
                     w.Id,
                     w.PsychologistId,
-                    DayOfWeek = w.DayOfWeek.ToString(),
+                    DayOfWeek = (int)w.DayOfWeek,
                     StartTime = w.StartTime.ToString(@"hh\:mm"),
                     EndTime = w.EndTime.ToString(@"hh\:mm"),
                     w.IsAvailable,
@@ -138,7 +138,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 {
                     created.Id,
                     created.PsychologistId,
-                    DayOfWeek = created.DayOfWeek.ToString(),
+                    DayOfWeek = (int)created.DayOfWeek,
                     StartTime = created.StartTime.ToString(@"hh\:mm"),
                     EndTime = created.EndTime.ToString(@"hh\:mm"),
                     created.IsAvailable,
@@ -184,7 +184,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 {
                     updated.Id,
                     updated.PsychologistId,
-                    DayOfWeek = updated.DayOfWeek.ToString(),
+                    DayOfWeek = (int)updated.DayOfWeek,
                     StartTime = updated.StartTime.ToString(@"hh\:mm"),
                     EndTime = updated.EndTime.ToString(@"hh\:mm"),
                     updated.IsAvailable,

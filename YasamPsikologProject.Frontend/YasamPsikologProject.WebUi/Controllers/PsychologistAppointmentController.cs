@@ -30,18 +30,15 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
                 var response = await _appointmentService.GetAllAsync();
                 if (response.Success && response.Data != null)
                 {
                     // Sadece kendi randevularını filtrele
                     var appointments = response.Data
-                        .Where(a => a.PsychologistId == psychologistId.Value)
+                        .Where(a => a.PsychologistId == psychologistId)
                         .OrderByDescending(a => a.AppointmentDate)
                         .ToList();
 
@@ -125,17 +122,14 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
                 var response = await _appointmentService.GetByIdAsync(id);
                 if (response.Success && response.Data != null)
                 {
                     // Sadece kendi randevusunu görebilir
-                    if (response.Data.PsychologistId != psychologistId.Value)
+                    if (response.Data.PsychologistId != psychologistId)
                     {
                         TempData["ErrorMessage"] = "Bu randevuya erişim yetkiniz yok.";
                         return RedirectToAction(nameof(Index));

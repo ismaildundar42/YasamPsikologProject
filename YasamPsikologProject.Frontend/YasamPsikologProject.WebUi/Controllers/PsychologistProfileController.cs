@@ -30,13 +30,15 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
+                //if (!psychologistId.HasValue)
+                //{
+                //    return RedirectToAction("Login", "Account");
+                //}
 
-                var response = await _psychologistService.GetByIdAsync(psychologistId.Value);
+                // Psikolog bilgilerini çek
+                var response = await _psychologistService.GetByIdAsync(psychologistId);
                 if (response.Success && response.Data != null)
                 {
                     return View(response.Data);
@@ -61,13 +63,14 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
+                //if (!psychologistId.HasValue)
+                //{
+                //    return RedirectToAction("Login", "Account");
+                //}
 
-                var response = await _psychologistService.GetByIdAsync(psychologistId.Value);
+                var response = await _psychologistService.GetByIdAsync(psychologistId);
                 if (response.Success && response.Data != null)
                 {
                     return View(response.Data);
@@ -97,12 +100,13 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue || model.Id != psychologistId.Value)
-                {
-                    TempData["ErrorMessage"] = "Geçersiz işlem.";
-                    return RedirectToAction(nameof(Index));
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
+                //if (!psychologistId.HasValue || model.Id != psychologistId.Value)
+                //{
+                //    TempData["ErrorMessage"] = "Geçersiz işlem.";
+                //    return RedirectToAction(nameof(Index));
+                //}
 
                 var response = await _psychologistService.UpdateAsync(model.Id, model);
 

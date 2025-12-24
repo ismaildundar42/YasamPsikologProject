@@ -31,18 +31,15 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
                 var response = await _workingHourService.GetAllAsync();
                 if (response.Success && response.Data != null)
                 {
                     // Sadece kendi çalışma saatlerini filtrele
                     var workingHours = response.Data
-                        .Where(w => w.PsychologistId == psychologistId.Value)
+                        .Where(w => w.PsychologistId == psychologistId)
                         .OrderBy(w => w.DayOfWeek)
                         .ThenBy(w => w.StartTime)
                         .ToList();
@@ -84,13 +81,10 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
-                model.PsychologistId = psychologistId.Value;
+                model.PsychologistId = psychologistId;
                 var response = await _workingHourService.CreateAsync(model);
 
                 if (response.Success)
@@ -120,17 +114,14 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
                 var response = await _workingHourService.GetByIdAsync(id);
                 if (response.Success && response.Data != null)
                 {
                     // Sadece kendi çalışma saatini düzenleyebilir
-                    if (response.Data.PsychologistId != psychologistId.Value)
+                    if (response.Data.PsychologistId != psychologistId)
                     {
                         TempData["ErrorMessage"] = "Bu çalışma saatine erişim yetkiniz yok.";
                         return RedirectToAction(nameof(Index));
@@ -171,14 +162,11 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
                 // Sadece kendi çalışma saatini güncelleyebilir
-                if (model.PsychologistId != psychologistId.Value)
+                if (model.PsychologistId != psychologistId)
                 {
                     TempData["ErrorMessage"] = "Bu çalışma saatine erişim yetkiniz yok.";
                     return RedirectToAction(nameof(Index));
@@ -211,11 +199,8 @@ namespace YasamPsikologProject.WebUi.Controllers
         {
             try
             {
-                var psychologistId = HttpContext.Session.GetPsychologistId();
-                if (!psychologistId.HasValue)
-                {
-                    return Json(new { success = false, message = "Oturum bulunamadı" });
-                }
+                // TEMPORARY: Using hardcoded ID for testing
+                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
 
                 var response = await _workingHourService.GetByIdAsync(id);
                 if (!response.Success || response.Data == null)
@@ -224,7 +209,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                 }
 
                 // Sadece kendi çalışma saatini silebilir
-                if (response.Data.PsychologistId != psychologistId.Value)
+                if (response.Data.PsychologistId != psychologistId)
                 {
                     return Json(new { success = false, message = "Bu çalışma saatine erişim yetkiniz yok" });
                 }
