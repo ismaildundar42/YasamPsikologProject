@@ -36,16 +36,16 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                // TEMPORARY: Using hardcoded ID for testing
-                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
-                //if (!psychologistId.HasValue)
-                //{
-                //    _logger.LogWarning("Psikolog ID bulunamadı");
-                //    return RedirectToAction("Login", "Account");
-                //}
+                // Session'dan psikolog ID'sini al
+                var psychologistId = HttpContext.Session.GetPsychologistId();
+                if (!psychologistId.HasValue)
+                {
+                    _logger.LogWarning("Psikolog ID bulunamadı");
+                    return RedirectToAction("Login", "Account");
+                }
 
                 // Psikolog bilgilerini çek
-                var psychologistResponse = await _psychologistService.GetByIdAsync(psychologistId);
+                var psychologistResponse = await _psychologistService.GetByIdAsync(psychologistId.Value);
                 if (psychologistResponse.Success && psychologistResponse.Data != null)
                 {
                     model.PsychologistInfo = psychologistResponse.Data;
@@ -57,7 +57,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                 {
                     // Şimdilik frontend'de filtreleme yapıyoruz (Backend hazır olunca kaldırılacak)
                     var appointments = appointmentsResponse.Data
-                        .Where(a => a.PsychologistId == psychologistId)
+                        .Where(a => a.PsychologistId == psychologistId.Value)
                         .ToList();
 
                     var today = DateTime.Today;
@@ -86,7 +86,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                 {
                     // Şimdilik frontend'de filtreleme yapıyoruz
                     model.TotalClients = clientsResponse.Data
-                        .Count(c => c.AssignedPsychologistId == psychologistId);
+                        .Count(c => c.AssignedPsychologistId == psychologistId.Value);
                 }
             }
             catch (Exception ex)
