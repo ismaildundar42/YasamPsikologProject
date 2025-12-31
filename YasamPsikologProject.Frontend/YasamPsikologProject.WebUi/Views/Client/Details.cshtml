@@ -1,0 +1,238 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.ClientDto
+@{
+    ViewData["Title"] = "Danışan Detayları";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Danışan Bilgileri -->
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-user mr-2"></i>
+                    Danışan Bilgileri
+                </h3>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Ad Soyad:</dt>
+                    <dd class="col-sm-8">@Model.User?.FirstName @Model.User?.LastName</dd>
+
+                    <dt class="col-sm-4">E-posta:</dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.User?.Email))
+                        {
+                            <a href="mailto:@Model.User.Email">@Model.User.Email</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Telefon:</dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.User?.PhoneNumber))
+                        {
+                            <a href="tel:@Model.User.PhoneNumber">@Model.User.PhoneNumber</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Doğum Tarihi:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.User?.DateOfBirth.HasValue == true)
+                        {
+                            @Model.User.DateOfBirth.Value.ToString("dd MMMM yyyy")
+                        }
+                        else
+                        {
+                            <span class="text-muted">Belirtilmemiş</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Atanmış Psikolog:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.AssignedPsychologistId.HasValue && Model.AssignedPsychologist?.User != null)
+                        {
+                            <span class="badge badge-info">@Model.AssignedPsychologist.User.FirstName @Model.AssignedPsychologist.User.LastName</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Atanmamış</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Tercih Edilen Bildirim:</dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.PreferredNotificationMethod))
+                        {
+                            @switch (Model.PreferredNotificationMethod)
+                            {
+                                case "Email":
+                                    <span class="badge badge-primary"><i class="fas fa-envelope"></i> E-posta</span>
+                                    break;
+                                case "SMS":
+                                    <span class="badge badge-success"><i class="fas fa-sms"></i> SMS</span>
+                                    break;
+                                case "WhatsApp":
+                                    <span class="badge badge-success"><i class="fab fa-whatsapp"></i> WhatsApp</span>
+                                    break;
+                                default:
+                                    <span>@Model.PreferredNotificationMethod</span>
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Kayıt Tarihi:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.User?.CreatedAt != null)
+                        {
+                            @Model.User.CreatedAt.ToString("dd MMMM yyyy HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">KVKK Onayı:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.KvkkConsent)
+                        {
+                            <span class="badge badge-success"><i class="fas fa-check"></i> Onaylandı</span>
+                            @if (Model.KvkkConsentDate.HasValue)
+                            {
+                                <small class="text-muted d-block">@Model.KvkkConsentDate.Value.ToString("dd.MM.yyyy HH:mm")</small>
+                            }
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger"><i class="fas fa-times"></i> Onaylanmadı</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Durum:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge badge-success">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">Pasif</span>
+                        }
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <dt class="col-sm-4">Notlar:</dt>
+                        <dd class="col-sm-8">
+                            <div class="alert alert-info mb-0">
+                                @Model.Notes
+                            </div>
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Hızlı İşlemler -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-bolt mr-2"></i>
+                    Hızlı İşlemler
+                </h3>
+            </div>
+            <div class="card-body">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-block">
+                    <i class="fas fa-edit"></i> Düzenle
+                </a>
+                <a asp-controller="Appointment" asp-action="Index" asp-route-clientId="@Model.Id" class="btn btn-info btn-block">
+                    <i class="fas fa-calendar"></i> Randevuları Görüntüle
+                </a>
+                <a asp-action="Index" class="btn btn-secondary btn-block">
+                    <i class="fas fa-arrow-left"></i> Listeye Dön
+                </a>
+                <hr>
+                <button type="button" class="btn btn-danger btn-block" onclick="deleteClient(@Model.Id)">
+                    <i class="fas fa-trash"></i> Sil
+                </button>
+            </div>
+        </div>
+
+        <!-- İstatistikler -->
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    İstatistikler
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <p class="text-muted mb-1">Toplam Randevu</p>
+                    <h3 class="mb-3">-</h3>
+                    
+                    <p class="text-muted mb-1">Tamamlanan Seans</p>
+                    <h3 class="mb-3">-</h3>
+                    
+                    <p class="text-muted mb-1">Bekleyen Randevu</p>
+                    <h3>-</h3>
+                </div>
+                <small class="text-muted d-block text-center mt-3">
+                    <i class="fas fa-info-circle"></i> İstatistikler yakında eklenecek
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteClient(id) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: 'Bu danışanı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, sil',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("Delete")/' + id,
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.success) {
+                                toastr.success(response.message);
+                                setTimeout(function () {
+                                    window.location.href = '@Url.Action("Index")';
+                                }, 1500);
+                            } else {
+                                toastr.error(response.message);
+                            }
+                        },
+                        error: function () {
+                            toastr.error('İşlem sırasında hata oluştu');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

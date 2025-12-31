@@ -30,15 +30,19 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                // TEMPORARY: Using hardcoded ID for testing
-                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
+                var psychologistId = HttpContext.Session.GetPsychologistId();
+                if (!psychologistId.HasValue)
+                {
+                    _logger.LogWarning("Psikolog ID bulunamadı");
+                    return RedirectToAction("Login", "Account");
+                }
 
                 var response = await _appointmentService.GetAllAsync();
                 if (response.Success && response.Data != null)
                 {
                     // Sadece kendi randevularını filtrele
                     var appointments = response.Data
-                        .Where(a => a.PsychologistId == psychologistId)
+                        .Where(a => a.PsychologistId == psychologistId.Value)
                         .OrderByDescending(a => a.AppointmentDate)
                         .ToList();
 
@@ -122,14 +126,18 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                // TEMPORARY: Using hardcoded ID for testing
-                var psychologistId = 8; // HttpContext.Session.GetPsychologistId();
+                var psychologistId = HttpContext.Session.GetPsychologistId();
+                if (!psychologistId.HasValue)
+                {
+                    _logger.LogWarning("Psikolog ID bulunamadı");
+                    return RedirectToAction("Login", "Account");
+                }
 
                 var response = await _appointmentService.GetByIdAsync(id);
                 if (response.Success && response.Data != null)
                 {
                     // Sadece kendi randevusunu görebilir
-                    if (response.Data.PsychologistId != psychologistId)
+                    if (response.Data.PsychologistId != psychologistId.Value)
                     {
                         TempData["ErrorMessage"] = "Bu randevuya erişim yetkiniz yok.";
                         return RedirectToAction(nameof(Index));

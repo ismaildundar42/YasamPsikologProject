@@ -52,7 +52,7 @@
                 events: '@Url.Action("GetCalendarEvents")',
                 eventClick: function (info) {
                     var eventId = info.event.id;
-                    window.location.href = '@Url.Action("Details")/' + eventId;
+                    window.location.href = '/Psychologist/Appointments/Details/' + eventId;
                 },
                 eventTimeFormat: {
                     hour: '2-digit',

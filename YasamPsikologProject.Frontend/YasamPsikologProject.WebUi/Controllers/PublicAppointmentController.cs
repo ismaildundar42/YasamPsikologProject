@@ -347,6 +347,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                     var newClient = new ClientDto
                     {
                         User = newUser,
+                        AssignedPsychologistId = psychologistId, // Randevu talebinde bulunduğu psikoloğa ata
                         KvkkConsent = kvkkConsent,
                         KvkkConsentDate = DateTime.Now,
                         IsActive = true,
