@@ -1,0 +1,239 @@
+@model YasamPsikologProject.WebUi.Models.ViewModels.AppointmentConfirmViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevu Onayı - Yaşam Psikoloji</title>
+    <link rel="stylesheet" href="~/css/appointment-theme.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+<div class="appointment-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Logo -->
+                <div class="text-center mb-4 fade-in">
+                    <img src="~/logo/yasam_logo.png" alt="Yaşam Psikoloji" class="appointment-logo-small mb-3" />
+                </div>
+                
+                <!-- Başlık -->
+                <div class="text-center mb-4 fade-in">
+                    <h1 class="text-primary" style="font-size: 2.5rem; font-weight: 700;">
+                        <i class="fas fa-check-circle"></i> Randevu Onayı
+                    </h1>
+                    <p class="text-muted" style="font-size: 1.1rem;">Randevu bilgilerinizi kontrol edin ve onaylayın</p>
+                </div>
+
+                <form asp-action="CreateAppointment" method="post">
+                    @* Only send psychologist ID *@
+                    <input type="hidden" name="PsychologistId" value="@Model.Psychologist.Id" />
+                    
+                    @* Appointment fields *@
+                    <input type="hidden" name="AppointmentDate" value="@Model.AppointmentDate.ToString("o")" />
+                    <input type="hidden" name="Duration" value="@Model.Duration" />
+                    <input type="hidden" name="IsOnline" value="@Model.IsOnline" />
+
+                    <!-- Psikolog Bilgileri -->
+                    <div class="appointment-card fade-in">
+                        <h3 class="text-primary mb-3">
+                            <i class="fas fa-user-md"></i> Psikolog Bilgileri
+                        </h3>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="psychologist-avatar" style="width: 80px; height: 80px; background: @(Model.Psychologist.CalendarColor ?? "#4CAF50"); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700;">
+                                @(Model.Psychologist.User?.FirstName?[0])@(Model.Psychologist.User?.LastName?[0])
+                            </div>
+                            <div>
+                                <h4 class="mb-1">@Model.Psychologist.User?.FirstName @Model.Psychologist.User?.LastName</h4>
+                                <p class="text-muted mb-0">@Model.Psychologist.Specialization</p>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-briefcase"></i> @Model.Psychologist.ExperienceYears yıl deneyim
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Randevu Detayları -->
+                    <div class="appointment-card fade-in">
+                        <h3 class="text-primary mb-3">
+                            <i class="fas fa-calendar-alt"></i> Randevu Detayları
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-calendar text-primary" style="font-size: 1.5rem;"></i>
+                                    <div>
+                                        <small class="text-muted">Tarih</small>
+                                        <p class="mb-0" style="font-weight: 600;">@Model.AppointmentDate.ToString("dd MMMM yyyy, dddd", new System.Globalization.CultureInfo("tr-TR"))</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-clock text-primary" style="font-size: 1.5rem;"></i>
+                                    <div>
+                                        <small class="text-muted">Saat</small>
+                                        <p class="mb-0" style="font-weight: 600;">@Model.AppointmentDate.ToString("HH:mm")</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-hourglass-half text-primary" style="font-size: 1.5rem;"></i>
+                                    <div>
+                                        <small class="text-muted">Süre</small>
+                                        <p class="mb-0" style="font-weight: 600;">@Model.Duration dakika</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas @(Model.IsOnline ? "fa-video" : "fa-user") text-primary" style="font-size: 1.5rem;"></i>
+                                    <div>
+                                        <small class="text-muted">Randevu Tipi</small>
+                                        <p class="mb-0" style="font-weight: 600;">@(Model.IsOnline ? "Online" : "Yüz Yüze")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ücret Bilgisi -->
+                    <div class="appointment-card fade-in" style="background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--bg-white) 100%);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="text-primary mb-1">
+                                    <i class="fas fa-money-bill-wave"></i> Toplam Ücret
+                                </h3>
+                                <p class="text-muted mb-0">Randevu ücreti</p>
+                            </div>
+                            <div class="text-right">
+                                <h2 class="text-primary mb-0" style="font-size: 2.5rem; font-weight: 700;">
+                                    @Model.TotalFee ₺
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İletişim Bilgileri -->
+                    <div class="appointment-card fade-in">
+                        <h3 class="text-primary mb-3">
+                            <i class="fas fa-user"></i> İletişim Bilgileriniz
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group-appointment">
+                                    <label class="form-label-appointment">
+                                        <i class="fas fa-user"></i> Ad *
+                                    </label>
+                                    <input type="text" 
+                                           name="clientFirstName" 
+                                           class="form-control-appointment" 
+                                           placeholder="Adınız"
+                                           required />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group-appointment">
+                                    <label class="form-label-appointment">
+                                        <i class="fas fa-user"></i> Soyad *
+                                    </label>
+                                    <input type="text" 
+                                           name="clientLastName" 
+                                           class="form-control-appointment" 
+                                           placeholder="Soyadınız"
+                                           required />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group-appointment">
+                                    <label class="form-label-appointment">
+                                        <i class="fas fa-envelope"></i> E-posta *
+                                    </label>
+                                    <input type="email" 
+                                           name="clientEmail" 
+                                           class="form-control-appointment" 
+                                           placeholder="ornek@email.com"
+                                           required />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group-appointment">
+                                    <label class="form-label-appointment">
+                                        <i class="fas fa-phone"></i> Telefon *
+                                    </label>
+                                    <input type="tel" 
+                                           name="clientPhone" 
+                                           class="form-control-appointment" 
+                                           placeholder="05551234567"
+                                           pattern="0[0-9]{10}"
+                                           required />
+                                    <small class="text-muted">Format: 05551234567</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danışan Notları -->
+                    <div class="appointment-card fade-in">
+                        <h3 class="text-primary mb-3">
+                            <i class="fas fa-sticky-note"></i> Notlarınız (Opsiyonel)
+                        </h3>
+                        <div class="form-group-appointment">
+                            <label class="form-label-appointment">
+                                Psikoloğunuzla paylaşmak istediğiniz notlar
+                            </label>
+                            <textarea name="clientNotes" 
+                                      class="form-control-appointment" 
+                                      rows="4" 
+                                      placeholder="Randevunuzla ilgili belirtmek istediğiniz özel durumlar varsa buraya yazabilirsiniz..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- KVKK Onayı -->
+                    <div class="appointment-card fade-in">
+                        <h3 class="text-primary mb-3">
+                            <i class="fas fa-shield-alt"></i> KVKK Onayı
+                        </h3>
+                        <div class="custom-checkbox">
+                            <input type="checkbox" 
+                                   name="kvkkConsent" 
+                                   id="kvkkConsent" 
+                                   value="true"
+                                   required />
+                            <label for="kvkkConsent">
+                                <strong>Kişisel verilerimin işlenmesine onay veriyorum.</strong>
+                                <br>
+                                <small class="text-muted">
+                                    Randevu oluşturarak, kişisel verilerinizin KVKK kapsamında işlenmesini kabul etmiş olursunuz.
+                                    Verileriniz sadece randevu yönetimi ve psikolojik danışmanlık hizmeti için kullanılacaktır.
+                                </small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Butonlar -->
+                    <div class="d-flex gap-2 justify-content-between fade-in">
+                        <a href="@Url.Action("SelectDateTime", new { psychologistId = Model.Psychologist.Id })" 
+                           class="btn-appointment-outline" style="flex: 1;">
+                            <i class="fas fa-arrow-left"></i> Geri Dön
+                        </a>
+                        <button type="submit" class="btn-appointment-primary" style="flex: 2;">
+                            <i class="fas fa-check-circle"></i> Randevuyu Onayla
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/appointment.js"></script>
+</body>
+</html>

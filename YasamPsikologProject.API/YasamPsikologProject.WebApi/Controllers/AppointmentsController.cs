@@ -261,10 +261,12 @@ namespace YasamPsikologProject.WebApi.Controllers
                 }
 
                 var slots = await _appointmentService.GetAvailableSlotsAsync(psychologistId, date, durationEnum);
+                var slotsList = slots.ToList();
                 
-                _logger.LogInformation($"Found {slots.Count()} available slots");
+                _logger.LogInformation($"Found {slotsList.Count} available slots");
                 
-                return Ok(slots);
+                // Always return OK with the list (empty or not)
+                return Ok(slotsList);
             }
             catch (Exception ex)
             {

@@ -1,0 +1,259 @@
+@model YasamPsikologProject.WebUi.Models.ViewModels.MyAppointmentsViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevularım - Yaşam Psikoloji</title>
+    <link rel="stylesheet" href="~/css/appointment-theme.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+<div class="appointment-container">
+    <div class="container">
+        <!-- Logo -->
+        <div class="text-center mb-4 fade-in">
+            <img src="~/logo/yasam_logo.png" alt="Yaşam Psikoloji" class="appointment-logo-small mb-3" />
+        </div>
+        
+        <!-- Başlık -->
+        <div class="text-center mb-4 fade-in">
+            <h1 class="text-primary" style="font-size: 2.5rem; font-weight: 700;">
+                <i class="fas fa-calendar-check"></i> Randevularım
+            </h1>
+            <p class="text-muted" style="font-size: 1.1rem;">Tüm randevularınızı buradan görüntüleyebilirsiniz</p>
+        </div>
+
+        <!-- Yeni Randevu Al Butonu -->
+        <div class="text-center mb-4 fade-in">
+            <a href="@Url.Action("Index")" class="btn-appointment-primary">
+                <i class="fas fa-plus-circle"></i> Yeni Randevu Al
+            </a>
+        </div>
+
+        <!-- Bekleyen Randevular -->
+        @if (Model.PendingAppointments.Any())
+        {
+            <div class="appointment-card fade-in">
+                <h3 class="text-primary mb-3">
+                    <i class="fas fa-hourglass-half"></i> Bekleyen Randevular
+                    <span class="status-badge status-pending" style="font-size: 0.8rem; margin-left: 1rem;">
+                        @Model.PendingAppointments.Count
+                    </span>
+                </h3>
+                <div class="table-responsive">
+                    <table class="appointment-table">
+                        <thead>
+                            <tr>
+                                <th>Psikolog</th>
+                                <th>Tarih & Saat</th>
+                                <th>Süre</th>
+                                <th>Tip</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appointment in Model.PendingAppointments)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@appointment.PsychologistName</strong>
+                                        <br>
+                                        <small class="text-muted">@appointment.Psychologist?.Specialization</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-calendar"></i> @appointment.AppointmentDate.ToString("dd MMM yyyy")
+                                        <br>
+                                        <i class="fas fa-clock"></i> @appointment.AppointmentDate.ToString("HH:mm")
+                                    </td>
+                                    <td>@appointment.Duration dk</td>
+                                    <td>
+                                        @if (appointment.IsOnline)
+                                        {
+                                            <i class="fas fa-video text-primary"></i> <span>Online</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-user text-primary"></i> <span>Yüz Yüze</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-pending">Beklemede</span>
+                                    </td>
+                                    <td>
+                                        <form asp-action="CancelAppointment" method="post" style="display: inline;" onsubmit="return confirmCancel()">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@appointment.Id" />
+                                            <input type="hidden" name="reason" id="cancelReason_@appointment.Id" />
+                                            <button type="submit" class="btn-appointment-secondary" style="background: var(--status-cancelled); color: white;">
+                                                <i class="fas fa-times"></i> İptal Et
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Gelecek Randevular -->
+        @if (Model.UpcomingAppointments.Any())
+        {
+            <div class="appointment-card fade-in">
+                <h3 class="text-primary mb-3">
+                    <i class="fas fa-calendar-plus"></i> Gelecek Randevular
+                    <span class="status-badge status-approved" style="font-size: 0.8rem; margin-left: 1rem;">
+                        @Model.UpcomingAppointments.Count
+                    </span>
+                </h3>
+                <div class="table-responsive">
+                    <table class="appointment-table">
+                        <thead>
+                            <tr>
+                                <th>Psikolog</th>
+                                <th>Tarih & Saat</th>
+                                <th>Süre</th>
+                                <th>Tip</th>
+                                <th>Durum</th>
+                                <th>Notlar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appointment in Model.UpcomingAppointments)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@appointment.PsychologistName</strong>
+                                        <br>
+                                        <small class="text-muted">@appointment.Psychologist?.Specialization</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-calendar"></i> @appointment.AppointmentDate.ToString("dd MMM yyyy")
+                                        <br>
+                                        <i class="fas fa-clock"></i> @appointment.AppointmentDate.ToString("HH:mm")
+                                    </td>
+                                    <td>@appointment.Duration dk</td>
+                                    <td>
+                                        @if (appointment.IsOnline)
+                                        {
+                                            <i class="fas fa-video text-primary"></i> <span>Online</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-user text-primary"></i> <span>Yüz Yüze</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-approved">Onaylandı</span>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(appointment.ClientNotes))
+                                        {
+                                            <small>@appointment.ClientNotes</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">-</small>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Geçmiş Randevular -->
+        @if (Model.PastAppointments.Any())
+        {
+            <div class="appointment-card fade-in">
+                <h3 class="text-primary mb-3">
+                    <i class="fas fa-history"></i> Geçmiş Randevular
+                </h3>
+                <div class="table-responsive">
+                    <table class="appointment-table">
+                        <thead>
+                            <tr>
+                                <th>Psikolog</th>
+                                <th>Tarih & Saat</th>
+                                <th>Süre</th>
+                                <th>Tip</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appointment in Model.PastAppointments.Take(10))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@appointment.PsychologistName</strong>
+                                        <br>
+                                        <small class="text-muted">@appointment.Psychologist?.Specialization</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-calendar"></i> @appointment.AppointmentDate.ToString("dd MMM yyyy")
+                                        <br>
+                                        <i class="fas fa-clock"></i> @appointment.AppointmentDate.ToString("HH:mm")
+                                    </td>
+                                    <td>@appointment.Duration dk</td>
+                                    <td>
+                                        @if (appointment.IsOnline)
+                                        {
+                                            <i class="fas fa-video text-primary"></i> <span>Online</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-user text-primary"></i> <span>Yüz Yüze</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-completed">Tamamlandı</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Randevu Yoksa -->
+        @if (!Model.PendingAppointments.Any() && !Model.UpcomingAppointments.Any() && !Model.PastAppointments.Any())
+        {
+            <div class="appointment-card text-center fade-in">
+                <i class="fas fa-calendar-times" style="font-size: 4rem; color: var(--primary-light); margin-bottom: 1rem;"></i>
+                <h3 class="text-muted">Henüz randevunuz bulunmamaktadır</h3>
+                <p class="text-muted">Hemen bir psikolog seçerek randevu oluşturabilirsiniz.</p>
+                <a href="@Url.Action("Index")" class="btn-appointment-primary">
+                    <i class="fas fa-plus-circle"></i> Randevu Al
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="~/js/appointment.js"></script>
+<script>
+    function confirmCancel() {
+        const reason = prompt('İptal sebebini giriniz:');
+        if (!reason) {
+            return false;
+        }
+        
+        // Form submit edilmeden önce reason'ı hidden input'a ata
+        event.target.querySelector('input[name="reason"]').value = reason;
+        
+        return confirm('Randevuyu iptal etmek istediğinizden emin misiniz?');
+    }
+</script>
+</body>
+</html>

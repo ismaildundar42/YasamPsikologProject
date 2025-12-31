@@ -1,0 +1,232 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevu Talebi Başarılı - Yaşam Psikoloji</title>
+    <link rel="stylesheet" href="~/css/appointment-theme.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        .success-animation {
+            animation: successPulse 0.6s ease-out;
+        }
+
+        @@keyframes successPulse {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            box-shadow: 0 10px 40px rgba(76, 175, 80, 0.3);
+        }
+
+        .success-icon i {
+            font-size: 4rem;
+            color: white;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            border-left: 4px solid #2196F3;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .info-box ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .info-box li {
+            color: #424242;
+            margin-bottom: 0.5rem;
+        }
+
+        .next-steps {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-top: 2rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .step-item:hover {
+            background: #f5f5f5;
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content h5 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .step-content p {
+            color: #666;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="appointment-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Logo -->
+                <div class="text-center mb-4 fade-in">
+                    <img src="~/logo/yasam_logo.png" alt="Yaşam Psikoloji" class="appointment-logo-small mb-3" />
+                </div>
+                
+                <!-- Success Card -->
+                <div class="appointment-card fade-in">
+                    <div class="success-icon success-animation">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    
+                    <div class="text-center">
+                        <h1 class="text-success mb-3" style="font-size: 2.5rem; font-weight: 700;">
+                            Randevu Talebiniz Alındı!
+                        </h1>
+                        <p class="text-muted" style="font-size: 1.2rem;">
+                            Talebiniz başarıyla oluşturuldu ve ilgili psikolog ile süper admin'e iletildi.
+                        </p>
+                        @if (ViewBag.AppointmentId != null)
+                        {
+                            <div class="mt-3">
+                                <span class="badge bg-primary" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                    Talep No: #@ViewBag.AppointmentId
+                                </span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="info-box">
+                        <h4>
+                            <i class="fas fa-info-circle"></i> Önemli Bilgiler
+                        </h4>
+                        <ul>
+                            <li>Randevu talebiniz <strong>"Onay Bekliyor"</strong> durumundadır.</li>
+                            <li>Hem psikolog hem de süper admin tarafından onaylanması gerekmektedir.</li>
+                            <li>Onay sürecinden sonra tarafınıza <strong>e-posta ve SMS</strong> ile bilgilendirme yapılacaktır.</li>
+                            <li>Randevunuz onaylandığında, randevu detayları ve ödeme bilgileri size iletilecektir.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Next Steps -->
+                    <div class="next-steps">
+                        <h3 class="text-primary mb-4">
+                            <i class="fas fa-list-check"></i> Sonraki Adımlar
+                        </h3>
+
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>Onay Bekleniyor</h5>
+                                <p>Psikolog ve süper admin talebinizi inceleyecek ve uygunluğunu değerlendirecektir.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>Bilgilendirme</h5>
+                                <p>Randevunuz onaylandığında veya herhangi bir değişiklik olduğunda size bilgi verilecektir.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>Randevu Kesinleşmesi</h5>
+                                <p>Onaydan sonra randevunuz kesinleşecek ve gerekli detaylar tarafınıza iletilecektir.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h5>Randevu Günü</h5>
+                                <p>Belirlenen tarih ve saatte randevunuza katılabilirsiniz.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="text-center mt-4">
+                        <a href="@Url.Action("Index", "PublicAppointment")" class="btn-appointment-primary">
+                            <i class="fas fa-home"></i> Ana Sayfaya Dön
+                        </a>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="text-center mt-4 pt-4" style="border-top: 1px solid #e0e0e0;">
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-question-circle"></i> Sorularınız için bizimle iletişime geçebilirsiniz
+                        </p>
+                        <p class="text-muted">
+                            <i class="fas fa-envelope"></i> info@yasampsikoloji.com &nbsp;|&nbsp;
+                            <i class="fas fa-phone"></i> 0555 123 45 67
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/appointment.js"></script>
+</body>
+</html>

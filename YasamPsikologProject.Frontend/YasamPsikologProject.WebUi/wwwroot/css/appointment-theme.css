@@ -1,0 +1,695 @@
+/* ============================================
+   YAŞAM PSİKOLOJİ - PREMIUM RANDEVU SİSTEMİ
+   Yeşil Tema - Modern & Profesyonel
+   ============================================ */
+
+/* ============================================
+   CSS Reset & Base Styles
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Premium Yeşil Palet */
+    --primary: #2E7D32;
+    --primary-dark: #1B5E20;
+    --primary-light: #4CAF50;
+    --primary-lighter: #81C784;
+    --primary-lightest: #C8E6C9;
+
+    /* Accent Colors */
+    --accent: #66BB6A;
+    --accent-gold: #FFD700;
+
+    /* Neutral Colors */
+    --white: #FFFFFF;
+    --gray-50: #FAFAFA;
+    --gray-100: #F5F5F5;
+    --gray-200: #EEEEEE;
+    --gray-300: #E0E0E0;
+    --gray-400: #BDBDBD;
+    --gray-500: #9E9E9E;
+    --gray-600: #757575;
+    --gray-700: #616161;
+    --gray-800: #424242;
+    --gray-900: #212121;
+
+    /* Semantic Colors */
+    --success: #4CAF50;
+    --warning: #FF9800;
+    --error: #F44336;
+    --info: #2196F3;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(46, 125, 50, 0.12);
+    --shadow-lg: 0 8px 24px rgba(46, 125, 50, 0.15);
+    --shadow-xl: 0 12px 36px rgba(46, 125, 50, 0.18);
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    /* Transitions */
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+    color: var(--gray-800);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Container & Layout
+   ============================================ */
+.appointment-container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 3rem 1rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ============================================
+   Logo
+   ============================================ */
+.appointment-logo {
+    max-width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 2px 8px rgba(46, 125, 50, 0.15));
+    transition: var(--transition);
+}
+
+.appointment-logo:hover {
+    transform: scale(1.03);
+    filter: drop-shadow(0 4px 12px rgba(46, 125, 50, 0.25));
+}
+
+.appointment-logo-small {
+    max-width: 80px;
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+.appointment-main-title {
+    font-size: 2.75rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 1.5rem 0 0.75rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+}
+
+.appointment-subtitle {
+    font-size: 1.125rem;
+    color: var(--gray-600);
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+/* ============================================
+   Cards
+   ============================================ */
+.appointment-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: var(--transition);
+    border: 1px solid rgba(46, 125, 50, 0.08);
+}
+
+.appointment-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    border-color: rgba(46, 125, 50, 0.15);
+}
+
+/* ============================================
+   Filter Bar
+   ============================================ */
+.filter-bar {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 2.5rem;
+    border: 2px solid var(--primary-lightest);
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label-appointment {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label-appointment i {
+    color: var(--primary);
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.form-control-appointment {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    transition: var(--transition);
+    background: var(--white);
+    color: var(--gray-800);
+}
+
+.search-box .form-control-appointment {
+    padding-left: 2.75rem;
+}
+
+.form-control-appointment:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.form-control-appointment:hover {
+    border-color: var(--primary-light);
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.btn-appointment-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: var(--white);
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-appointment-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+}
+
+.btn-appointment-primary:active {
+    transform: translateY(0);
+}
+
+.btn-appointment-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-appointment-outline:hover {
+    background: var(--primary);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   Psychologist Cards
+   ============================================ */
+.psychologist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.psychologist-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.psychologist-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-8px);
+    border-color: var(--primary-light);
+}
+
+.psychologist-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+}
+
+.psychologist-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.psychologist-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    margin: 0 auto 1rem;
+    object-fit: cover;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    position: relative;
+    z-index: 1;
+    background: var(--white);
+}
+
+.psychologist-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
+}
+
+.psychologist-specialization {
+    font-size: 1rem;
+    opacity: 0.95;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+}
+
+.psychologist-body {
+    padding: 2rem;
+}
+
+.psychologist-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+}
+
+.psychologist-info i {
+    margin-right: 0.75rem;
+    color: var(--primary);
+    width: 20px;
+    font-size: 1.1rem;
+}
+
+.psychologist-fee {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-align: center;
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, var(--primary-lightest) 0%, rgba(200, 230, 201, 0.5) 100%);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--primary-light);
+}
+
+/* ============================================
+   Date Selector (Minimal Dropdown)
+   ============================================ */
+.date-selector-container {
+    margin-top: 1rem;
+}
+
+.date-select {
+    font-size: 1.05rem;
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+}
+
+.section-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    color: var(--primary);
+}
+
+/* ============================================
+   Time Slots (Ultra Minimal)
+   ============================================ */
+.time-slots-container {
+    margin-top: 3rem;
+}
+
+.time-slots-header {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(46, 125, 50, 0.08);
+    letter-spacing: -0.3px;
+}
+
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+}
+
+.time-slot {
+    padding: 1rem 0.75rem;
+    border: 1px solid rgba(46, 125, 50, 0.15);
+    background: transparent;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    color: var(--gray-700);
+    font-size: 1rem;
+}
+
+.time-slot:hover:not(.disabled):not(.booked) {
+    background: rgba(46, 125, 50, 0.05);
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.time-slot.selected {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+}
+
+.time-slot.booked,
+.time-slot.disabled {
+    background: var(--gray-50);
+    color: var(--gray-400);
+    border-color: var(--gray-200);
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.time-slot.booked:hover,
+.time-slot.disabled:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-200);
+}
+
+/* ============================================
+   Status Badges
+   ============================================ */
+.status-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.status-approved {
+    background: #E8F5E9;
+    color: #1B5E20;
+}
+
+.status-completed {
+    background: #E3F2FD;
+    color: #0D47A1;
+}
+
+.status-cancelled {
+    background: #FFEBEE;
+    color: #B71C1C;
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+.appointment-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.appointment-table thead {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+}
+
+.appointment-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.appointment-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.appointment-table tbody tr {
+    transition: var(--transition);
+}
+
+.appointment-table tbody tr:hover {
+    background: var(--gray-50);
+}
+
+.appointment-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ============================================
+   Utilities
+   ============================================ */
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: var(--gray-600);
+}
+
+.text-primary {
+    color: var(--primary);
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-5 {
+    margin-bottom: 2rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-4 {
+    margin-top: 1.5rem;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-3 {
+    gap: 1rem;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+@media (max-width: 768px) {
+    .appointment-main-title {
+        font-size: 2rem;
+    }
+
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+
+    .psychologist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .date-grid {
+        gap: 0.5rem;
+    }
+
+    .time-slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    }
+
+    .appointment-container {
+        padding: 2rem 1rem;
+    }
+}
+
+/* ============================================
+   Custom Checkbox
+   ============================================ */
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.custom-checkbox label {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--gray-700);
+}

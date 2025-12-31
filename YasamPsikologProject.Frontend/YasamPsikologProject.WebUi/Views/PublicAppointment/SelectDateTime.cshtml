@@ -1,0 +1,327 @@
+@model YasamPsikologProject.WebUi.Models.ViewModels.AppointmentBookingViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tarih ve Saat Seçimi - Yaşam Psikoloji</title>
+    <link rel="stylesheet" href="~/css/appointment-theme.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+<div class="appointment-container">
+    <div class="container">
+        <!-- Logo -->
+        <div class="text-center mb-4 fade-in">
+            <img src="~/logo/yasam_logo.png" alt="Yaşam Psikoloji" class="appointment-logo-small mb-3" />
+        </div>
+        
+        <!-- Başlık ve Psikolog Bilgisi -->
+        <div class="appointment-card fade-in">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="psychologist-avatar" style="width: 80px; height: 80px; background: @(Model.Psychologist.CalendarColor ?? "#4CAF50"); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700;">
+                    @(Model.Psychologist.User?.FirstName?[0])@(Model.Psychologist.User?.LastName?[0])
+                </div>
+                <div>
+                    <h2 class="text-primary mb-1">
+                        @Model.Psychologist.User?.FirstName @Model.Psychologist.User?.LastName
+                    </h2>
+                    <p class="text-muted mb-0">@Model.Psychologist.Specialization</p>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-money-bill-wave"></i> @Model.Psychologist.ConsultationFee ₺
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Randevu Tipi ve Süre Seçimi -->
+        <div class="appointment-card fade-in">
+            <h3 class="text-primary mb-3">
+                <i class="fas fa-cog"></i> Randevu Ayarları
+            </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group-appointment">
+                        <label class="form-label-appointment">
+                            <i class="fas fa-clock"></i> Süre
+                        </label>
+                        <select id="durationSelect" class="form-control-appointment" onchange="updateDuration()">
+                            @foreach (var duration in Model.AvailableDurations)
+                            {
+                                <option value="@duration" selected="@(duration == Model.Duration)">@duration Dakika</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-appointment">
+                        <label class="form-label-appointment">
+                            <i class="fas fa-video"></i> Randevu Tipi
+                        </label>
+                        <select id="appointmentTypeSelect" class="form-control-appointment">
+                            @if (Model.Psychologist.IsOnlineConsultationAvailable)
+                            {
+                                <option value="true" selected="@Model.IsOnline">Online</option>
+                            }
+                            @if (Model.Psychologist.IsInPersonConsultationAvailable)
+                            {
+                                <option value="false" selected="@(!Model.IsOnline)">Yüz Yüze</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarih Seçimi (Minimal Dropdown) -->
+        <div class="appointment-card fade-in">
+            <h3 class="section-title">
+                <i class="fas fa-calendar-alt"></i> Tarih Seçin
+            </h3>
+            <div class="date-selector-container">
+                <select id="dateSelect" class="form-control-appointment date-select" onchange="onDateChange()">
+                    <option value="">Tarih seçiniz...</option>
+                </select>
+                <small class="text-muted mt-2 d-block">
+                    <i class="fas fa-info-circle"></i> Sadece psikoloğun çalışma günleri gösterilmektedir
+                </small>
+            </div>
+        </div>
+
+        <!-- Uygun Saatler -->
+        <div class="time-slots-container fade-in" id="timeSlotsContainer" style="display: none;">
+            <div class="appointment-card">
+                <div class="time-slots-header">
+                    <i class="fas fa-clock"></i> Uygun Saatler
+                    <span id="selectedDateDisplay" class="text-muted" style="font-size: 1rem; font-weight: 400;"></span>
+                </div>
+                <div id="timeSlotsGrid" class="time-slots-grid"></div>
+                <div class="text-center mt-4">
+                    <button type="button" 
+                            id="continueBtn" 
+                            class="btn-appointment-primary" 
+                            disabled
+                            onclick="continueToConfirm()">
+                        <i class="fas fa-arrow-right"></i> Devam Et
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/appointment.js"></script>
+<script>
+    let selectedDate = null;
+    let selectedTime = null;
+    const psychologistId = @Model.Psychologist.Id;
+    const workingDays = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.WorkingDays));
+
+    // Sayfa yüklendiğinde tarihleri oluştur
+    document.addEventListener('DOMContentLoaded', function() {
+        populateDateOptions();
+    });
+
+    // Tarih seçeneklerini oluştur (sadece çalışma günleri)
+    function populateDateOptions() {
+        const dateSelect = document.getElementById('dateSelect');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        
+        // Map JS day numbers to English day names (matching API format)
+        const dayNameMap = {
+            0: 'Sunday',
+            1: 'Monday',
+            2: 'Tuesday',
+            3: 'Wednesday',
+            4: 'Thursday',
+            5: 'Friday',
+            6: 'Saturday'
+        };
+        
+        // Önümüzdeki 60 gün için seçenekler oluştur
+        for (let i = 0; i < 60; i++) {
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+            
+            // JavaScript getDay(): 0=Pazar, 1=Pazartesi, ..., 6=Cumartesi
+            const jsDayOfWeek = date.getDay();
+            
+            // Convert to English day name for comparison with workingDays
+            const dayNameEnglish = dayNameMap[jsDayOfWeek];
+            
+            // Sadece çalışma günlerini ekle
+            if (workingDays.includes(dayNameEnglish)) {
+                const option = document.createElement('option');
+                // Use local date format to avoid timezone issues
+                const year = date.getFullYear();
+                const monthNum = String(date.getMonth() + 1).padStart(2, '0');
+                const dayNum = String(date.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${monthNum}-${dayNum}`;
+                option.value = dateStr;
+                
+                const day = date.getDate();
+                const month = monthNames[date.getMonth()];
+                const dayName = dayNames[jsDayOfWeek];
+                
+                option.textContent = `${day} ${month} - ${dayName}`;
+                dateSelect.appendChild(option);
+            }
+        }
+    }
+
+    // Tarih değiştiğinde
+    function onDateChange() {
+        const dateSelect = document.getElementById('dateSelect');
+        selectedDate = dateSelect.value;
+        selectedTime = null;
+        
+        if (selectedDate) {
+            const duration = parseInt(document.getElementById('durationSelect').value);
+            loadAvailableSlots(selectedDate, duration);
+            document.getElementById('timeSlotsContainer').style.display = 'block';
+        } else {
+            document.getElementById('timeSlotsContainer').style.display = 'none';
+        }
+        
+        document.getElementById('continueBtn').disabled = true;
+    }
+
+    async function loadAvailableSlots(date, duration) {
+        try {
+            console.log('=== Loading Available Slots ===');
+            console.log('Psychologist ID:', psychologistId);
+            console.log('Selected Date:', date);
+            console.log('Duration:', duration);
+            
+            showLoading();
+            
+            const url = `/Admin/PublicAppointment/GetAvailableSlots?psychologistId=${psychologistId}&date=${date}&duration=${duration}`;
+            console.log('API URL:', url);
+            
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
+            console.log('Response OK:', response.ok);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Response data:', data);
+            console.log('Response keys:', Object.keys(data));
+            
+            // Handle response format from controller
+            const success = data.success;
+            const slots = data.slots || [];
+            const message = data.message || '';
+            
+            console.log('Parsed - Success:', success, 'Slots count:', slots.length, 'Message:', message);
+            
+            if (success && slots && slots.length > 0) {
+                console.log('✓ Found', slots.length, 'available slots');
+                renderTimeSlots(slots);
+                
+                // Update selected date display
+                const dateObj = new Date(date);
+                const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+                const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+                const formattedDate = `${dateObj.getDate()} ${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()} - ${dayNames[dateObj.getDay()]}`;
+                document.getElementById('selectedDateDisplay').textContent = formattedDate;
+            } else {
+                console.warn('✗ No slots available');
+                const errorMessage = message || 'Bu tarih için uygun saat bulunmamaktadır.';
+                document.getElementById('timeSlotsGrid').innerHTML = 
+                    `<div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-2">${errorMessage}</p>
+                        <small class="text-muted">Lütfen başka bir tarih seçiniz veya farklı bir süre deneyin.</small>
+                    </div>`;
+            }
+            
+            hideLoading();
+        } catch (error) {
+            console.error('✗ Error loading available slots:', error);
+            console.error('Error details:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            });
+            
+            document.getElementById('timeSlotsGrid').innerHTML = 
+                `<div class="text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <p class="text-danger mb-2">Uygun saatler yüklenirken bir hata oluştu.</p>
+                    <small class="text-muted">Lütfen tekrar deneyin veya farklı bir tarih seçin.</small>
+                    <small class="text-danger d-block mt-2">${error.message}</small>
+                </div>`;
+            hideLoading();
+        }
+    }
+
+    function renderTimeSlots(slots) {
+        const container = document.getElementById('timeSlotsGrid');
+        container.innerHTML = slots.map(slot => {
+            return `
+                <div class="time-slot" onclick="selectTime('${slot.value}', this)">
+                    ${slot.time}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function selectTime(time, element) {
+        selectedTime = time;
+        
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.classList.remove('selected');
+        });
+        
+        element.classList.add('selected');
+        document.getElementById('continueBtn').disabled = false;
+    }
+
+    function updateDuration() {
+        if (selectedDate) {
+            const duration = parseInt(document.getElementById('durationSelect').value);
+            loadAvailableSlots(selectedDate, duration);
+        }
+    }
+
+    function continueToConfirm() {
+        if (!selectedTime) {
+            showToast('Lütfen bir saat seçiniz', 'warning');
+            return;
+        }
+        
+        const isOnline = document.getElementById('appointmentTypeSelect').value === 'true';
+        const duration = parseInt(document.getElementById('durationSelect').value);
+        
+        window.location.href = `/PublicAppointment/ConfirmAppointment?psychologistId=${psychologistId}&appointmentDate=${selectedTime}&duration=${duration}&isOnline=${isOnline}`;
+    }
+
+    function showLoading() {
+        document.getElementById('timeSlotsGrid').innerHTML = 
+            '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i></div>';
+    }
+
+    function hideLoading() {
+        // Loading gizleme işlemi renderTimeSlots'ta yapılıyor
+    }
+
+    function showToast(message, type) {
+        alert(message);
+    }
+</script>
+</body>
+</html>

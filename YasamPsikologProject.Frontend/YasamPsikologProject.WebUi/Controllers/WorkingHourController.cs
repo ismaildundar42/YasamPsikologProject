@@ -109,7 +109,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                     psychologistId);
             }
 
-            // Haftanın günleri
+            // Haftanın günleri - WeekDay enum string isimleri kullanılıyor (API bunu bekliyor)
             ViewBag.DaysOfWeek = new SelectList(new[]
             {
                 new { Value = "Monday", Text = "Pazartesi" },
@@ -225,15 +225,15 @@ namespace YasamPsikologProject.WebUi.Controllers
                 }
 
                 ViewBag.DaysOfWeek = new SelectList(new[]
-                {
-                    new { Value = "Monday", Text = "Pazartesi" },
-                    new { Value = "Tuesday", Text = "Salı" },
-                    new { Value = "Wednesday", Text = "Çarşamba" },
-                    new { Value = "Thursday", Text = "Perşembe" },
-                    new { Value = "Friday", Text = "Cuma" },
-                    new { Value = "Saturday", Text = "Cumartesi" },
-                    new { Value = "Sunday", Text = "Pazar" }
-                }, "Value", "Text", response.Data.DayOfWeek);
+        {
+            new { Value = "Monday", Text = "Pazartesi" },
+            new { Value = "Tuesday", Text = "Salı" },
+            new { Value = "Wednesday", Text = "Çarşamba" },
+            new { Value = "Thursday", Text = "Perşembe" },
+            new { Value = "Friday", Text = "Cuma" },
+            new { Value = "Saturday", Text = "Cumartesi" },
+            new { Value = "Sunday", Text = "Pazar" }
+        }, "Value", "Text", response.Data.DayOfWeek);
 
                 return View(response.Data);
             }

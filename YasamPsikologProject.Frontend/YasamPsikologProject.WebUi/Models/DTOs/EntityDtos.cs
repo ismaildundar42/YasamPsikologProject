@@ -126,7 +126,7 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
     {
         public int Id { get; set; }
         public int PsychologistId { get; set; }
-        public int DayOfWeek { get; set; }
+        public string DayOfWeek { get; set; } = null!;
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public bool IsAvailable { get; set; }
