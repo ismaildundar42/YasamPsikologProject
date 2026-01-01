@@ -20,9 +20,23 @@ namespace YasamPsikologProject.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? psychologistId, [FromQuery] string? status)
         {
             var appointments = await _appointmentService.GetAllAsync();
+            
+            // Psikolog filtreleme
+            if (psychologistId.HasValue && psychologistId.Value > 0)
+            {
+                appointments = appointments.Where(a => a.PsychologistId == psychologistId.Value).ToList();
+            }
+            
+            // Durum filtreleme
+            if (!string.IsNullOrEmpty(status))
+            {
+                var statusList = status.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                appointments = appointments.Where(a => statusList.Contains(a.Status.ToString(), StringComparer.OrdinalIgnoreCase)).ToList();
+            }
+            
             var appointmentDtos = appointments.Select(a => new
             {
                 a.Id,
@@ -205,16 +219,39 @@ namespace YasamPsikologProject.WebApi.Controllers
         }
 
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(int id, [FromQuery] AppointmentStatusUpdateDto dto)
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] AppointmentStatusUpdateDto dto)
         {
             try
             {
-                var appointment = await _appointmentService.UpdateStatusAsync(id, dto.Status, dto.Reason);
-                return Ok(appointment);
+                _logger.LogInformation("API UpdateStatus: Updating appointment {Id} status to {Status}, reason: {Reason}", 
+                    id, dto.Status, dto.Reason);
+                
+                // String'i enum'a çevir
+                if (!Enum.TryParse<AppointmentStatus>(dto.Status, true, out var statusEnum))
+                {
+                    _logger.LogWarning("API UpdateStatus: Invalid status value: {Status}", dto.Status);
+                    return BadRequest(new { success = false, message = $"Geçersiz durum değeri: {dto.Status}" });
+                }
+                
+                var appointment = await _appointmentService.UpdateStatusAsync(id, statusEnum, dto.Reason);
+                
+                if (appointment == null)
+                {
+                    _logger.LogWarning("API UpdateStatus: Appointment {Id} not found", id);
+                    return NotFound(new { success = false, message = "Randevu bulunamadı." });
+                }
+                
+                _logger.LogInformation("API UpdateStatus: Successfully updated appointment {Id}", id);
+                return Ok(new { 
+                    success = true, 
+                    message = "Randevu durumu güncellendi.",
+                    data = appointment 
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                _logger.LogError(ex, "API UpdateStatus: Error updating appointment {Id} status", id);
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
@@ -278,7 +315,7 @@ namespace YasamPsikologProject.WebApi.Controllers
 
     public class AppointmentStatusUpdateDto
     {
-        public AppointmentStatus Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public string? Reason { get; set; }
     }
 

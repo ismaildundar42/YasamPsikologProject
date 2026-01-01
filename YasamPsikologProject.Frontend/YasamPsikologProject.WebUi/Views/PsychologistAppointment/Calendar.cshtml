@@ -4,15 +4,81 @@
 }
 
 <!-- FullCalendar CSS -->
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css' rel='stylesheet' />
 
 <div class="row">
-    <div class="col-12">
+    <div class="col-md-3">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-filter"></i> Filtreler
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Durum Filtreleri -->
+                <div class="form-group">
+                    <label><strong>Randevu Durumu</strong></label>
+                    <div class="custom-control custom-checkbox">
+                        <input class="custom-control-input status-filter" type="checkbox" 
+                               id="status_pending" value="Pending" checked>
+                        <label class="custom-control-label" for="status_pending">
+                            <span class="badge badge-warning">Bekliyor</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input class="custom-control-input status-filter" type="checkbox" 
+                               id="status_confirmed" value="Confirmed" checked>
+                        <label class="custom-control-label" for="status_confirmed">
+                            <span class="badge badge-success">Onaylandı</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input class="custom-control-input status-filter" type="checkbox" 
+                               id="status_completed" value="Completed" checked>
+                        <label class="custom-control-label" for="status_completed">
+                            <span class="badge badge-info">Tamamlandı</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input class="custom-control-input status-filter" type="checkbox" 
+                               id="status_cancelled" value="Cancelled">
+                        <label class="custom-control-label" for="status_cancelled">
+                            <span class="badge badge-danger">İptal</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input class="custom-control-input status-filter" type="checkbox" 
+                               id="status_noshow" value="NoShow">
+                        <label class="custom-control-label" for="status_noshow">
+                            <span class="badge badge-secondary">Gelmedi</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-block mt-3" id="refreshCalendar">
+                    <i class="fas fa-sync"></i> Takvimi Yenile
+                </button>
+            </div>
+        </div>
+        
+        <div class="card card-info mt-3">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle"></i> Bilgi
+                </h3>
+            </div>
+            <div class="card-body">
+                <p><small>Randevulara tıklayarak detaylarını görebilir ve durum değiştirebilirsiniz.</small></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
         <div class="card card-primary">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-calendar mr-2"></i>
-                    Randevu Takvimi
+                    Randevu Takvimim
                 </h3>
                 <div class="card-tools">
                     <a asp-action="Index" class="btn btn-sm btn-light">
@@ -29,15 +95,17 @@
 
 @section Scripts {
     <!-- FullCalendar JS -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/tr.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/locales/tr.global.min.js'></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var calendarEl = document.getElementById('calendar');
+            var allEvents = [];
+            
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 locale: 'tr',
-                initialView: 'dayGridMonth',
+                initialView: 'timeGridWeek',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
@@ -49,22 +117,269 @@
                     week: 'Hafta',
                     day: 'Gün'
                 },
-                events: '@Url.Action("GetCalendarEvents")',
+                slotMinTime: '08:00:00',
+                slotMaxTime: '20:00:00',
+                slotDuration: '00:15:00', // 15 dakikalık dilimler
+                slotLabelInterval: '00:30:00', // Etiketler 30 dakikada bir
+                allDaySlot: false,
+                editable: false,
+                selectable: true,
+                selectMirror: true,
+                dayMaxEvents: true,
+                weekends: true,
+                businessHours: {
+                    daysOfWeek: [1, 2, 3, 4, 5],
+                    startTime: '09:00',
+                    endTime: '18:00'
+                },
+                events: function(info, successCallback, failureCallback) {
+                    $.ajax({
+                        url: '@Url.Action("GetCalendarEvents")',
+                        type: 'GET',
+                        success: function(data) {
+                            allEvents = data;
+                            var filteredEvents = filterEvents(data);
+                            successCallback(filteredEvents);
+                        },
+                        error: function() {
+                            failureCallback();
+                            toastr.error('Takvim yüklenirken hata oluştu.');
+                        }
+                    });
+                },
                 eventClick: function (info) {
-                    var eventId = info.event.id;
-                    window.location.href = '/Psychologist/Appointments/Details/' + eventId;
+                    showAppointmentDetails(info);
                 },
                 eventTimeFormat: {
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: false
                 },
-                slotMinTime: '08:00:00',
-                slotMaxTime: '20:00:00',
                 height: 'auto',
                 contentHeight: 650
             });
+            
             calendar.render();
+
+            // Filtreleme fonksiyonu
+            function filterEvents(events) {
+                var selectedStatuses = [];
+                $('.status-filter:checked').each(function() {
+                    selectedStatuses.push($(this).val());
+                });
+                
+                return events.filter(function(event) {
+                    return selectedStatuses.length === 0 || selectedStatuses.includes(event.extendedProps.status);
+                });
+            }
+            
+            // Durum etiketini al
+            function getStatusLabel(status) {
+                switch(status) {
+                    case 'Pending':
+                        return '<span class="badge badge-warning">Bekliyor</span>';
+                    case 'Confirmed':
+                        return '<span class="badge badge-success">Onaylandı</span>';
+                    case 'Completed':
+                        return '<span class="badge badge-info">Tamamlandı</span>';
+                    case 'Cancelled':
+                        return '<span class="badge badge-danger">İptal Edildi</span>';
+                    case 'NoShow':
+                        return '<span class="badge badge-secondary">Gelmedi</span>';
+                    default:
+                        return status;
+                }
+            }
+            
+            // Randevu detaylarını göster
+            function showAppointmentDetails(info) {
+                var event = info.event;
+                var props = event.extendedProps;
+                
+                var html = `
+                    <div style="text-align: left;">
+                        <p><strong>Danışan:</strong> ${event.title}</p>
+                        <p><strong>Tarih:</strong> ${event.start.toLocaleDateString('tr-TR')}</p>
+                        <p><strong>Saat:</strong> ${event.start.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} - 
+                           ${event.end.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}</p>
+                        <p><strong>Durum:</strong> ${getStatusLabel(props.status)}</p>
+                        <p><strong>Süre:</strong> ${props.duration} dk</p>
+                        <p><strong>Tür:</strong> ${props.isOnline ? 'Online' : 'Yüz Yüze'}</p>
+                    </div>
+                `;
+                
+                var buttons = {};
+                
+                if (props.status === 'Pending') {
+                    buttons['Onayla'] = function() {
+                        updateAppointmentStatus(event.id, 'Confirmed');
+                    };
+                    buttons['İptal Et'] = function() {
+                        cancelAppointment(event.id);
+                    };
+                } else if (props.status === 'Confirmed') {
+                    buttons['Beklemede\'ye Al'] = function() {
+                        updateAppointmentStatus(event.id, 'Pending');
+                    };
+                    buttons['Tamamlandı Olarak İşaretle'] = function() {
+                        updateAppointmentStatus(event.id, 'Completed');
+                    };
+                    buttons['İptal Et'] = function() {
+                        cancelAppointment(event.id);
+                    };
+                }
+                
+                buttons['Detaylar'] = function() {
+                    window.location.href = '/Psychologist/Appointments/Details/' + event.id;
+                };
+                
+                buttons['Kapat'] = function() {
+                    Swal.close();
+                };
+                
+                Swal.fire({
+                    title: event.title,
+                    html: html,
+                    showConfirmButton: false,
+                    showCancelButton: false,
+                    width: 600,
+                    customClass: {
+                        actions: 'swal-actions-custom'
+                    },
+                    didOpen: () => {
+                        const actionsContainer = Swal.getActions();
+                        actionsContainer.innerHTML = '';
+                        
+                        Object.keys(buttons).forEach(function(btnText) {
+                            const btn = document.createElement('button');
+                            btn.className = 'btn btn-sm mx-1 ' + getButtonClass(btnText);
+                            btn.innerText = btnText;
+                            btn.onclick = buttons[btnText];
+                            actionsContainer.appendChild(btn);
+                        });
+                    }
+                });
+            }
+            
+            // Buton class'ını al
+            function getButtonClass(btnText) {
+                if (btnText === 'Onayla' || btnText === 'Tamamlandı Olarak İşaretle') return 'btn-success';
+                if (btnText === 'İptal Et') return 'btn-danger';
+                if (btnText === 'Beklemede\'ye Al') return 'btn-warning';
+                if (btnText === 'Detaylar') return 'btn-info';
+                return 'btn-secondary';
+            }
+            
+            // Randevu durumunu güncelle
+            function updateAppointmentStatus(appointmentId, newStatus) {
+                var url = '@Url.Action("UpdateStatus", "PsychologistAppointment")';
+                console.log('updateAppointmentStatus - URL:', url);
+                console.log('updateAppointmentStatus - ID:', appointmentId, 'Status:', newStatus);
+                
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        id: appointmentId,
+                        status: newStatus
+                    },
+                    success: function(response) {
+                        console.log('updateAppointmentStatus - Response:', response);
+                        Swal.close();
+                        if (response.success) {
+                            toastr.success('Randevu durumu güncellendi');
+                            calendar.refetchEvents();
+                        } else {
+                            toastr.error('Hata: ' + (response.message || 'Bilinmeyen hata'));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('updateAppointmentStatus - Error:', xhr, status, error);
+                        console.error('updateAppointmentStatus - Response:', xhr.responseText);
+                        var errorMsg = 'Durum güncellenirken hata oluştu';
+                        if (xhr.responseJSON?.message) {
+                            errorMsg += ': ' + xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            errorMsg += ': ' + xhr.responseText;
+                        }
+                        toastr.error(errorMsg);
+                    }
+                });
+            }
+            
+            // Randevuyu iptal et
+            function cancelAppointment(appointmentId) {
+                Swal.fire({
+                    title: 'Randevuyu İptal Et',
+                    html: '<textarea id="cancellationReason" class="swal2-textarea" placeholder="İptal nedeni (zorunlu)"></textarea>',
+                    showCancelButton: true,
+                    confirmButtonText: 'İptal Et',
+                    cancelButtonText: 'Vazgeç',
+                    confirmButtonColor: '#dc3545',
+                    preConfirm: () => {
+                        const reason = document.getElementById('cancellationReason').value;
+                        if (!reason) {
+                            Swal.showValidationMessage('İptal nedeni zorunludur');
+                            return false;
+                        }
+                        return reason;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var url = '@Url.Action("UpdateStatus", "PsychologistAppointment")';
+                        console.log('cancelAppointment - URL:', url);
+                        console.log('cancelAppointment - ID:', appointmentId, 'Reason:', result.value);
+                        
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            data: {
+                                id: appointmentId,
+                                status: 'Cancelled',
+                                reason: result.value
+                            },
+                            success: function(response) {
+                                console.log('cancelAppointment - Response:', response);
+                                if (response.success) {
+                                    toastr.success('Randevu iptal edildi');
+                                    calendar.refetchEvents();
+                                } else {
+                                    toastr.error('Hata: ' + (response.message || 'Bilinmeyen hata'));
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('cancelAppointment - Error:', xhr, status, error);
+                                console.error('cancelAppointment - Response:', xhr.responseText);
+                                var errorMsg = 'Randevu iptal edilirken hata oluştu';
+                                if (xhr.responseJSON?.message) {
+                                    errorMsg += ': ' + xhr.responseJSON.message;
+                                } else if (xhr.responseText) {
+                                    errorMsg += ': ' + xhr.responseText;
+                                }
+                                toastr.error(errorMsg);
+                            }
+                        });
+                    }
+                });
+            }
+
+            $('#refreshCalendar').on('click', function() {
+                calendar.refetchEvents();
+                toastr.success('Takvim yenilendi');
+            });
+
+            $('.status-filter').on('change', function() {
+                calendar.refetchEvents();
+            });
         });
     </script>
+    
+    <style>
+        .swal-actions-custom {
+            display: flex !important;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+    </style>
 }

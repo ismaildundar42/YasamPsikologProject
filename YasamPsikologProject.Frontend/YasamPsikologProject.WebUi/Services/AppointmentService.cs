@@ -13,6 +13,7 @@ namespace YasamPsikologProject.WebUi.Services
         Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, int duration);
         Task<ApiResponse<AppointmentDto>> CreateAsync(AppointmentDto appointment);
         Task<ApiResponse<AppointmentDto>> UpdateAsync(int id, AppointmentDto appointment);
+        Task<ApiResponse> UpdateStatusAsync(int id, string status, string? reason = null);
         Task<ApiResponse> CancelAsync(int id, string reason);
     }
 
@@ -51,6 +52,24 @@ namespace YasamPsikologProject.WebUi.Services
         public async Task<ApiResponse<AppointmentDto>> UpdateAsync(int id, AppointmentDto appointment)
         {
             return await PutAsync<AppointmentDto, AppointmentDto>($"api/appointments/{id}", appointment);
+        }
+
+        public async Task<ApiResponse> UpdateStatusAsync(int id, string status, string? reason = null)
+        {
+            // API endpoint'e doğru formatta gönder - DTO property isimleri büyük harfle başlamalı
+            var requestData = new 
+            { 
+                Status = status,
+                Reason = reason 
+            };
+            
+            var response = await PatchAsync<object, object>($"api/appointments/{id}/status", requestData);
+            return new ApiResponse
+            {
+                Success = response.Success,
+                Message = response.Message,
+                Errors = response.Errors
+            };
         }
 
         public async Task<ApiResponse> CancelAsync(int id, string reason)

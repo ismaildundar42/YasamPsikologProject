@@ -65,11 +65,14 @@ namespace YasamPsikologProject.WebUi.Services
 
                 if (response.IsSuccessStatusCode)
                 {
+                    _logger.LogInformation("API POST success: {Endpoint} - Status: {StatusCode}", endpoint, response.StatusCode);
+                    
                     var responseData = JsonConvert.DeserializeObject<TResponse>(responseContent);
                     return new ApiResponse<TResponse>
                     {
                         Success = true,
-                        Data = responseData
+                        Data = responseData,
+                        Message = "İşlem başarılı"
                     };
                 }
 
@@ -144,6 +147,51 @@ namespace YasamPsikologProject.WebUi.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"API PUT exception: {endpoint}");
+                return new ApiResponse<TResponse>
+                {
+                    Success = false,
+                    Message = "Bağlantı hatası",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
+        }
+
+        protected async Task<ApiResponse<TResponse>> PatchAsync<TRequest, TResponse>(string endpoint, TRequest data)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                var request = new HttpRequestMessage(new HttpMethod("PATCH"), endpoint)
+                {
+                    Content = content
+                };
+                
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = JsonConvert.DeserializeObject<TResponse>(responseContent);
+                    return new ApiResponse<TResponse>
+                    {
+                        Success = true,
+                        Data = responseData
+                    };
+                }
+
+                _logger.LogWarning($"API PATCH failed: {endpoint} - Status: {response.StatusCode}");
+                return new ApiResponse<TResponse>
+                {
+                    Success = false,
+                    Message = $"Güncelleme başarısız: {response.StatusCode}",
+                    Errors = new List<string> { responseContent }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"API PATCH exception: {endpoint}");
                 return new ApiResponse<TResponse>
                 {
                     Success = false,

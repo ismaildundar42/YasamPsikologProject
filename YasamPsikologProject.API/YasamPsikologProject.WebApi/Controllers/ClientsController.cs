@@ -49,6 +49,14 @@ namespace YasamPsikologProject.WebApi.Controllers
                     {
                         Id = c.AssignedPsychologist.Id,
                         UserId = c.AssignedPsychologist.UserId,
+                        User = c.AssignedPsychologist.User == null ? null : new
+                        {
+                            Id = c.AssignedPsychologist.User.Id,
+                            FirstName = c.AssignedPsychologist.User.FirstName,
+                            LastName = c.AssignedPsychologist.User.LastName,
+                            Email = c.AssignedPsychologist.User.Email,
+                            PhoneNumber = c.AssignedPsychologist.User.PhoneNumber
+                        },
                         LicenseNumber = c.AssignedPsychologist.LicenseNumber,
                         Specialization = c.AssignedPsychologist.Specialization
                     },
@@ -98,6 +106,14 @@ namespace YasamPsikologProject.WebApi.Controllers
                     {
                         Id = client.AssignedPsychologist.Id,
                         UserId = client.AssignedPsychologist.UserId,
+                        User = client.AssignedPsychologist.User == null ? null : new
+                        {
+                            Id = client.AssignedPsychologist.User.Id,
+                            FirstName = client.AssignedPsychologist.User.FirstName,
+                            LastName = client.AssignedPsychologist.User.LastName,
+                            Email = client.AssignedPsychologist.User.Email,
+                            PhoneNumber = client.AssignedPsychologist.User.PhoneNumber
+                        },
                         LicenseNumber = client.AssignedPsychologist.LicenseNumber,
                         Specialization = client.AssignedPsychologist.Specialization
                     },

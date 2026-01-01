@@ -153,6 +153,17 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 appointment.CancelledAt = DateTime.UtcNow;
             }
 
+            // Randevu onaylandığında, danışanın atanmış psikoloğunu güncelle
+            if (status == AppointmentStatus.Confirmed && appointment.ClientId > 0)
+            {
+                var client = await _unitOfWork.ClientRepository.GetByIdAsync(appointment.ClientId);
+                if (client != null && client.AssignedPsychologistId != appointment.PsychologistId)
+                {
+                    client.AssignedPsychologistId = appointment.PsychologistId;
+                    _unitOfWork.ClientRepository.Update(client);
+                }
+            }
+
             _unitOfWork.AppointmentRepository.Update(appointment);
             await _unitOfWork.SaveChangesAsync();
             return appointment;

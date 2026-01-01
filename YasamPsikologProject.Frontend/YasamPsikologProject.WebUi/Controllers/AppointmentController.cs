@@ -95,10 +95,12 @@ namespace YasamPsikologProject.WebUi.Controllers
                         textColor = "#fff",
                         extendedProps = new
                         {
+                            psychologistId = a.PsychologistId,
                             psychologist = $"{a.Psychologist?.User?.FirstName} {a.Psychologist?.User?.LastName}",
                             client = $"{a.Client?.User?.FirstName} {a.Client?.User?.LastName}",
                             status = a.Status,
-                            notes = a.Notes
+                            notes = a.Notes,
+                            cancellationReason = a.CancellationReason
                         }
                     });
                     
@@ -267,6 +269,30 @@ namespace YasamPsikologProject.WebUi.Controllers
             {
                 _logger.LogError(ex, "Randevu iptal edilirken hata");
                 return Json(new { success = false, message = "İşlem sırasında hata oluştu." });
+            }
+        }
+
+        [HttpPost]
+        [Route("UpdateStatus")]
+        public async Task<IActionResult> UpdateStatus(int id, string status, string? reason = null)
+        {
+            try
+            {
+                _logger.LogInformation("UpdateStatus called: id={Id}, status={Status}, reason={Reason}", id, status, reason);
+                
+                var response = await _appointmentService.UpdateStatusAsync(id, status, reason);
+                if (response.Success)
+                {
+                    return Json(new { success = true, message = "Randevu durumu güncellendi." });
+                }
+
+                _logger.LogWarning("UpdateStatus failed: {Message}", response.Message);
+                return Json(new { success = false, message = response.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateStatus exception");
+                return Json(new { success = false, message = "Hata: " + ex.Message });
             }
         }
 

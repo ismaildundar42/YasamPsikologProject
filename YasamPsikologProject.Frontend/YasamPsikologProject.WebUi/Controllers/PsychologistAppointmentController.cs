@@ -88,20 +88,25 @@ namespace YasamPsikologProject.WebUi.Controllers
                         .Select(a => new
                         {
                             id = a.Id,
-                            title = a.ClientName,
+                            title = a.ClientName ?? $"{a.Client?.User?.FirstName} {a.Client?.User?.LastName}",
                             start = a.AppointmentDate.ToString("yyyy-MM-ddTHH:mm:ss"),
                             end = a.AppointmentEndDate.ToString("yyyy-MM-ddTHH:mm:ss"),
                             backgroundColor = a.Status == "Pending" ? "#ffc107" :
                                             a.Status == "Confirmed" ? "#28a745" :
-                                            a.Status == "Completed" ? "#17a2b8" : "#dc3545",
+                                            a.Status == "Completed" ? "#17a2b8" : 
+                                            a.Status == "Cancelled" ? "#dc3545" : "#6c757d",
                             borderColor = a.Status == "Pending" ? "#ffc107" :
                                         a.Status == "Confirmed" ? "#28a745" :
-                                        a.Status == "Completed" ? "#17a2b8" : "#dc3545",
+                                        a.Status == "Completed" ? "#17a2b8" : 
+                                        a.Status == "Cancelled" ? "#dc3545" : "#6c757d",
+                            textColor = "#fff",
                             extendedProps = new
                             {
                                 status = a.Status,
                                 duration = a.Duration,
-                                isOnline = a.IsOnline
+                                isOnline = a.IsOnline,
+                                notes = a.Notes,
+                                cancellationReason = a.CancellationReason
                             }
                         })
                         .ToList();
@@ -199,43 +204,50 @@ namespace YasamPsikologProject.WebUi.Controllers
         }
 
         [HttpPost]
-        [Route("UpdateStatus/{id}")]
-        public async Task<IActionResult> UpdateStatus(int id, [FromBody] string status)
+        [Route("UpdateStatus")]
+        public async Task<IActionResult> UpdateStatus(int id, string status, string? reason = null)
         {
             try
             {
+                _logger.LogInformation("UpdateStatus called: id={Id}, status={Status}, reason={Reason}", id, status, reason);
+                
                 var psychologistId = HttpContext.Session.GetPsychologistId();
                 if (!psychologistId.HasValue)
                 {
+                    _logger.LogWarning("UpdateStatus: Session psychologistId not found");
                     return Json(new { success = false, message = "Oturum bulunamadı" });
                 }
 
-                var response = await _appointmentService.GetByIdAsync(id);
-                if (!response.Success || response.Data == null)
+                var appointmentResponse = await _appointmentService.GetByIdAsync(id);
+                if (!appointmentResponse.Success || appointmentResponse.Data == null)
                 {
+                    _logger.LogWarning("UpdateStatus: Appointment {Id} not found", id);
                     return Json(new { success = false, message = "Randevu bulunamadı" });
                 }
 
                 // Sadece kendi randevusunu güncelleyebilir
-                if (response.Data.PsychologistId != psychologistId.Value)
+                if (appointmentResponse.Data.PsychologistId != psychologistId.Value)
                 {
+                    _logger.LogWarning("UpdateStatus: Unauthorized access attempt by psychologist {PsychId} to appointment {AppId}", 
+                        psychologistId.Value, id);
                     return Json(new { success = false, message = "Bu randevuya erişim yetkiniz yok" });
                 }
 
-                response.Data.Status = status;
-                var updateResponse = await _appointmentService.UpdateAsync(id, response.Data);
+                var response = await _appointmentService.UpdateStatusAsync(id, status, reason);
 
-                if (updateResponse.Success)
+                if (response.Success)
                 {
+                    _logger.LogInformation("UpdateStatus: Successfully updated appointment {Id} to {Status}", id, status);
                     return Json(new { success = true, message = "Randevu durumu güncellendi" });
                 }
 
-                return Json(new { success = false, message = updateResponse.Message });
+                _logger.LogWarning("UpdateStatus: Failed to update - {Message}", response.Message);
+                return Json(new { success = false, message = response.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Randevu durumu güncellenirken hata");
-                return Json(new { success = false, message = "İşlem sırasında hata oluştu" });
+                _logger.LogError(ex, "UpdateStatus: Exception occurred");
+                return Json(new { success = false, message = "İşlem sırasında hata oluştu: " + ex.Message });
             }
         }
     }

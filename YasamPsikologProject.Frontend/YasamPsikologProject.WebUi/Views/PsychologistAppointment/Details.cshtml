@@ -187,10 +187,12 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: '@Url.Action("UpdateStatus", new { id = Model.Id })',
+                            url: '@Url.Action("UpdateStatus", "PsychologistAppointment")',
                             type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify(status),
+                            data: {
+                                id: @Model.Id,
+                                status: status
+                            },
                             success: function (response) {
                                 if (response.success) {
                                     toastr.success(response.message);
@@ -201,8 +203,13 @@
                                     toastr.error(response.message);
                                 }
                             },
-                            error: function () {
-                                toastr.error('İşlem sırasında hata oluştu');
+                            error: function (xhr) {
+                                console.error('UpdateStatus error:', xhr);
+                                var errorMsg = 'İşlem sırasında hata oluştu';
+                                if (xhr.responseJSON?.message) {
+                                    errorMsg += ': ' + xhr.responseJSON.message;
+                                }
+                                toastr.error(errorMsg);
                             }
                         });
                     }
