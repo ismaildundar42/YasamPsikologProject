@@ -79,10 +79,12 @@ namespace YasamPsikologProject.WebUi.Controllers
             }
         }
 
+        [HttpGet]
         [HttpPost]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+            TempData["SuccessMessage"] = "Başarıyla çıkış yaptınız.";
             return RedirectToAction(nameof(Login));
         }
 
