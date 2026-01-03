@@ -218,7 +218,7 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
 
             int slotDuration = (int)duration;
             int breakDuration = 10; // Varsayılan ara süre
-            int totalSlotDuration = slotDuration + breakDuration; // Randevu + ara süre
+            int slotInterval = 10; // Her 10 dakikada bir kontrol et (minimum slot aralığı)
             
             var currentTime = date.Date.Add(workingHour.StartTime);
             var endTime = date.Date.Add(workingHour.EndTime);
@@ -226,14 +226,14 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             while (currentTime.AddMinutes(slotDuration) <= endTime)
             {
                 var slotEnd = currentTime.AddMinutes(slotDuration);
-                var slotEndWithBreak = currentTime.AddMinutes(totalSlotDuration);
                 
-                // Çakışma kontrolü - ara süre dahil
+                // Çakışma kontrolü - randevunun kendisi + buffer süresini kontrol et
                 bool hasConflict = appointments.Any(a => 
                     a.Status != AppointmentStatus.Cancelled &&
+                    // Mevcut randevular buffer süresi dahil AppointmentEndDate'e kadar bloke eder
                     ((currentTime >= a.AppointmentDate && currentTime < a.AppointmentEndDate) ||
-                     (slotEndWithBreak > a.AppointmentDate && slotEndWithBreak <= a.AppointmentEndDate) ||
-                     (currentTime <= a.AppointmentDate && slotEndWithBreak >= a.AppointmentEndDate)));
+                     (slotEnd > a.AppointmentDate && slotEnd <= a.AppointmentEndDate) ||
+                     (currentTime <= a.AppointmentDate && slotEnd > a.AppointmentDate)));
 
                 if (!hasConflict)
                 {
@@ -244,8 +244,8 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                     }
                 }
 
-                // Bir sonraki slot için ara süre dahil ilerle
-                currentTime = currentTime.AddMinutes(totalSlotDuration);
+                // Sabit aralıklarla ilerle (10 dakika) - böylece her olası başlangıç saatini kontrol ederiz
+                currentTime = currentTime.AddMinutes(slotInterval);
             }
 
             return availableSlots;
