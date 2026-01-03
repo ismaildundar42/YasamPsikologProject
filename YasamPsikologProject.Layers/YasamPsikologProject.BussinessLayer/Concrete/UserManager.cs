@@ -44,11 +44,12 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (string.IsNullOrWhiteSpace(user.PasswordHash))
                 throw new Exception("Şifre boş olamaz.");
 
+            // Test için hashleme devre dışı - Canlıya geçerken aktif edilecek
             // Şifre zaten hash edilmişse (BCrypt hash $2a$ ile başlar) tekrar hash etme
-            if (!user.PasswordHash.StartsWith("$2a$") && !user.PasswordHash.StartsWith("$2b$"))
-            {
-                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
-            }
+            //if (!user.PasswordHash.StartsWith("$2a$") && !user.PasswordHash.StartsWith("$2b$"))
+            //{
+            //    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+            //}
             
             await _unitOfWork.UserRepository.AddAsync(user);
             await _unitOfWork.SaveChangesAsync();

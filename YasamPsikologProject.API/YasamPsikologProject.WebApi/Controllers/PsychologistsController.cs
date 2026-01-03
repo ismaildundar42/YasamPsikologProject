@@ -131,7 +131,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                     LastName = dto.LastName,
                     Email = dto.Email,
                     PhoneNumber = dto.PhoneNumber,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Temp123!"), // Geçici şifre
+                    PasswordHash = "Temp123!", // Geçici şifre - Test için hashlenmeden
                     Role = UserRole.Psychologist,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
