@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <!-- Tarih Seçimi (Minimal Dropdown) -->
+        <!-- Tarih Seçimi -->
         <div class="appointment-card fade-in">
             <h3 class="section-title">
                 <i class="fas fa-calendar-alt"></i> Tarih Seçin
@@ -111,7 +111,8 @@
         </div>
     </div>
 </div>
-
+https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
 <script src="~/js/appointment.js"></script>
 <script>
     let selectedDate = null;
@@ -119,61 +120,54 @@
     const psychologistId = @Model.Psychologist.Id;
     const workingDays = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.WorkingDays));
 
-    // Sayfa yüklendiğinde tarihleri oluştur
+    // Map English day names to JS day numbers
+    const dayNameToNumber = {
+        'Sunday': 0,
+        'Monday': 1,
+        'Tuesday': 2,
+        'Wednesday': 3,
+        'Thursday': 4,
+        'Friday': 5,
+        'Saturday': 6
+    };
+    
+    // Convert working days to numbers
+    const workingDayNumbers = workingDays.map(day => dayNameToNumber[day]);
+
+    // Sayfa yüklendiğinde takvimi başlat
     document.addEventListener('DOMContentLoaded', function() {
-        populateDateOptions();
+        setupDatePicker();
     });
 
-    // Tarih seçeneklerini oluştur (sadece çalışma günleri)
-    function populateDateOptions() {
-        const dateSelect = document.getElementById('dateSelect');
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+    // Flatpickr takvimi ayarla
+    function setupDatePicker() {
+        const dateInput = document.getElementById('dateSelect');
         
-        const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-        const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-        
-        // Map JS day numbers to English day names (matching API format)
-        const dayNameMap = {
-            0: 'Sunday',
-            1: 'Monday',
-            2: 'Tuesday',
-            3: 'Wednesday',
-            4: 'Thursday',
-            5: 'Friday',
-            6: 'Saturday'
-        };
-        
-        // Önümüzdeki 60 gün için seçenekler oluştur
-        for (let i = 0; i < 60; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
-            
-            // JavaScript getDay(): 0=Pazar, 1=Pazartesi, ..., 6=Cumartesi
-            const jsDayOfWeek = date.getDay();
-            
-            // Convert to English day name for comparison with workingDays
-            const dayNameEnglish = dayNameMap[jsDayOfWeek];
-            
-            // Sadece çalışma günlerini ekle
-            if (workingDays.includes(dayNameEnglish)) {
-                const option = document.createElement('option');
-                // Use local date format to avoid timezone issues
-                const year = date.getFullYear();
-                const monthNum = String(date.getMonth() + 1).padStart(2, '0');
-                const dayNum = String(date.getDate()).padStart(2, '0');
-                const dateStr = `${year}-${monthNum}-${dayNum}`;
-                option.value = dateStr;
-                
-                const day = date.getDate();
-                const month = monthNames[date.getMonth()];
-                const dayName = dayNames[jsDayOfWeek];
-                
-                option.textContent = `${day} ${month} - ${dayName}`;
-                dateSelect.appendChild(option);
+        flatpickr(dateInput, {
+            locale: 'tr',
+            dateFormat: 'Y-m-d',
+            minDate: 'today',
+            maxDate: new Date().fp_incr(60), // 60 gün sonrasına kadar
+            inline: false,
+            disable: [
+                function(date) {
+                    // Çalışma günü değilse disable et
+                    return !workingDayNumbers.includes(date.getDay());
+                }
+            ],
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    selectedDate = dateStr;
+                    onDateChange();
+                }
+            },
+            onReady: function(selectedDates, dateStr, instance) {
+                // Takvimi açıldığında stilleri ayarla
+                const calendarContainer = instance.calendarContainer;
+                calendarContainer.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)
+                document.getElementById('timeSlotsContainer').style.display = 'none';
             }
-        }
+        });
     }
 
     // Tarih değiştiğinde

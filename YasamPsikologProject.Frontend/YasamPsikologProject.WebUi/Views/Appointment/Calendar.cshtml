@@ -114,8 +114,8 @@
                 slotLabelInterval: '00:30:00', // Etiketler 30 dakikada bir
                 allDaySlot: false,
                 editable: false,
-                selectable: true,
-                selectMirror: true,
+                selectable: false,
+                selectMirror: false,
                 dayMaxEvents: true,
                 weekends: true,
                 businessHours: {
@@ -141,8 +141,8 @@
                 eventClick: function(info) {
                     showAppointmentDetails(info);
                 },
-                select: function(info) {
-                    window.location.href = '@Url.Action("Create")?date=' + info.startStr;
+                dateClick: function(info) {
+                    showDayAppointments(info.date);
                 }
             });
 
@@ -285,6 +285,78 @@
                     }
                 });
             }
+            
+            // Günlük randevuları göster
+            function showDayAppointments(date) {
+                var dayStart = new Date(date);
+                dayStart.setHours(0, 0, 0, 0);
+                var dayEnd = new Date(date);
+                dayEnd.setHours(23, 59, 59, 999);
+                
+                // O güne ait randevuları filtrele
+                var dayEvents = allEvents.filter(function(event) {
+                    var eventStart = new Date(event.start);
+                    return eventStart >= dayStart && eventStart <= dayEnd;
+                });
+                
+                // Seçili filtreleri uygula
+                dayEvents = filterEvents(dayEvents);
+                
+                // Saate göre sırala
+                dayEvents.sort(function(a, b) {
+                    return new Date(a.start) - new Date(b.start);
+                });
+                
+                if (dayEvents.length === 0) {
+                    Swal.fire({
+                        title: date.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+                        html: '<p class="text-muted">Bu gün için randevu bulunmamaktadır.</p>',
+                        icon: 'info',
+                        confirmButtonText: 'Tamam'
+                    });
+                    return;
+                }
+                
+                var html = '<div style="max-height: 500px; overflow-y: auto;">';
+                html += '<table class="table table-sm table-hover">';
+                html += '<thead><tr><th>Saat</th><th>Psikolog</th><th>Danışan</th><th>Durum</th></tr></thead>';
+                html += '<tbody>';
+                
+                dayEvents.forEach(function(event) {
+                    var eventStart = new Date(event.start);
+                    var eventEnd = new Date(event.end);
+                    var timeStr = eventStart.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}) + 
+                                  ' - ' + 
+                                  eventEnd.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
+                    
+                    html += '<tr style="cursor: pointer;" onclick="showEventById(' + event.id + ')">';
+                    html += '<td><strong>' + timeStr + '</strong></td>';
+                    html += '<td>' + event.extendedProps.psychologist + '</td>';
+                    html += '<td>' + event.extendedProps.client + '</td>';
+                    html += '<td>' + getStatusLabel(event.extendedProps.status) + '</td>';
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                html += '</div>';
+                
+                Swal.fire({
+                    title: date.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+                    html: html,
+                    width: 800,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Kapat'
+                });
+            }
+            
+            // Event ID'sine göre detay göster
+            window.showEventById = function(eventId) {
+                var event = calendar.getEventById(eventId);
+                if (event) {
+                    showAppointmentDetails({ event: event });
+                }
+            };
+            
             
             // Buton class'ını al
             function getButtonClass(btnText) {

@@ -108,42 +108,20 @@
                             <p class="psychologist-specialization">@psychologist.Specialization</p>
                         </div>
                         <div class="psychologist-body">
-                            <div class="psychologist-info">
-                                <i class="fas fa-briefcase"></i>
-                                <span>@psychologist.ExperienceYears yıl deneyim</span>
-                            </div>
-                            @if (!string.IsNullOrEmpty(psychologist.Education))
+                            @if (psychologist.IsOnlineConsultationAvailable)
                             {
                                 <div class="psychologist-info">
-                                    <i class="fas fa-graduation-cap"></i>
-                                    <span>@psychologist.Education</span>
-                                </div>
-                            }
-                            <div class="psychologist-info">
-                                <i class="fas fa-clock"></i>
-                                <span>@psychologist.ConsultationDuration dakika</span>
-                            </div>
-                            <div class="psychologist-info">
-                                @if (psychologist.IsOnlineConsultationAvailable)
-                                {
                                     <i class="fas fa-video"></i>
                                     <span>Online</span>
-                                }
-                                @if (psychologist.IsInPersonConsultationAvailable)
-                                {
-                                    <i class="fas fa-user"></i>
-                                    <span>Yüz Yüze</span>
-                                }
-                            </div>
-                            @if (!string.IsNullOrEmpty(psychologist.Biography))
-                            {
-                                <div class="mt-2 mb-2">
-                                    <small class="text-muted">@psychologist.Biography</small>
                                 </div>
                             }
-                            <div class="psychologist-fee">
-                                @psychologist.ConsultationFee ₺
-                            </div>
+                            @if (psychologist.IsInPersonConsultationAvailable)
+                            {
+                                <div class="psychologist-info">
+                                    <i class="fas fa-user"></i>
+                                    <span>Yüz Yüze</span>
+                                </div>
+                            }
                             <a href="@Url.Action("SelectDateTime", new { psychologistId = psychologist.Id })" 
                                class="btn-appointment-primary" 
                                style="width: 100%; text-decoration: none; display: block; text-align: center;">
