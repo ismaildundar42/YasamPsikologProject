@@ -19,18 +19,34 @@
                 }
                 
                 <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+                    
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    
                     <!-- Kullanıcı Bilgileri -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Ad *</label>
-                                <input type="text" class="form-control" name="User.FirstName" value="@Model?.User?.FirstName" required>
+                                <input type="text" class="form-control" name="User.FirstName" value="@Model?.User?.FirstName" 
+                                       data-val="true" data-val-required="Ad alanı zorunludur" required>
+                                <span class="text-danger field-validation-valid" data-valmsg-for="User.FirstName" data-valmsg-replace="true"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Soyad *</label>
-                                <input type="text" class="form-control" name="User.LastName" value="@Model?.User?.LastName" required>
+                                <input type="text" class="form-control" name="User.LastName" value="@Model?.User?.LastName" 
+                                       data-val="true" data-val-required="Soyad alanı zorunludur" required>
+                                <span class="text-danger field-validation-valid" data-valmsg-for="User.LastName" data-valmsg-replace="true"></span>
                             </div>
                         </div>
                     </div>
@@ -39,13 +55,20 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Email *</label>
-                                <input type="email" class="form-control" name="User.Email" value="@Model?.User?.Email" required>
+                                <input type="email" class="form-control" name="User.Email" value="@Model?.User?.Email" 
+                                       data-val="true" data-val-required="Email alanı zorunludur" 
+                                       data-val-email="Geçerli bir email adresi giriniz" required>
+                                <span class="text-danger field-validation-valid" data-valmsg-for="User.Email" data-valmsg-replace="true"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Telefon *</label>
-                                <input type="tel" class="form-control" name="User.PhoneNumber" value="@Model?.User?.PhoneNumber" required>
+                                <input type="tel" class="form-control" name="User.PhoneNumber" value="@Model?.User?.PhoneNumber" 
+                                       pattern="0[0-9]{10}" placeholder="05551234567"
+                                       data-val="true" data-val-required="Telefon alanı zorunludur" required>
+                                <small class="form-text text-muted">Format: 05551234567 (11 hane)</small>
+                                <span class="text-danger field-validation-valid" data-valmsg-for="User.PhoneNumber" data-valmsg-replace="true"></span>
                             </div>
                         </div>
                     </div>
@@ -58,13 +81,19 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Uzmanlık Alanı *</label>
-                                <input type="text" class="form-control" asp-for="Specialization" placeholder="Klinik Psikoloji, Aile Terapisi vb." required>
+                                <input type="text" class="form-control" asp-for="Specialization" 
+                                       placeholder="Klinik Psikoloji, Aile Terapisi vb." 
+                                       data-val="true" data-val-required="Uzmanlık alanı zorunludur" required>
+                                <span class="text-danger field-validation-valid" asp-validation-for="Specialization"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Lisans Numarası *</label>
-                                <input type="text" class="form-control" asp-for="LicenseNumber" placeholder="TR-PSY-12345" required>
+                                <input type="text" class="form-control" asp-for="LicenseNumber" 
+                                       placeholder="TR-PSY-12345" 
+                                       data-val="true" data-val-required="Lisans numarası zorunludur" required>
+                                <span class="text-danger field-validation-valid" asp-validation-for="LicenseNumber"></span>
                             </div>
                         </div>
                     </div>
@@ -73,20 +102,27 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Seans Ücreti (₺) *</label>
-                                <input type="number" step="0.01" class="form-control" asp-for="ConsultationFee" required>
+                                <input type="number" step="0.01" min="0" class="form-control" asp-for="ConsultationFee" 
+                                       data-val="true" data-val-required="Seans ücreti zorunludur" 
+                                       data-val-number="Geçerli bir sayı giriniz" required>
+                                <span class="text-danger field-validation-valid" asp-validation-for="ConsultationFee"></span>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Seans Süresi (Dakika) *</label>
-                                <input type="number" class="form-control" asp-for="ConsultationDuration" value="50" min="15" max="240" required>
+                                <input type="number" class="form-control" asp-for="ConsultationDuration" 
+                                       value="@(Model?.ConsultationDuration ?? 50)" min="15" max="240" 
+                                       data-val="true" data-val-required="Seans süresi zorunludur" required>
                                 <small class="form-text text-muted">15-240 dakika</small>
+                                <span class="text-danger field-validation-valid" asp-validation-for="ConsultationDuration"></span>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Takvim Rengi *</label>
-                                <input type="color" class="form-control" asp-for="CalendarColor" value="@(Model?.CalendarColor ?? "#4CAF50")" required>
+                                <input type="color" class="form-control" asp-for="CalendarColor" 
+                                       value="@(Model?.CalendarColor ?? "#4CAF50")" required>
                                 <small class="form-text text-muted">Randevu rengi</small>
                             </div>
                         </div>
@@ -114,11 +150,32 @@
 </div>
 
 @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         $(document).ready(function() {
+            // Form submit handler
             $('form').on('submit', function(e) {
-                var submitBtn = $(this).find('button[type="submit"]');
+                var form = $(this);
+                
+                // Client-side validation check
+                if (!form.valid()) {
+                    e.preventDefault();
+                    toastr.error('Lütfen tüm alanları doğru şekilde doldurunuz.');
+                    return false;
+                }
+                
+                // Disable submit button
+                var submitBtn = form.find('button[type="submit"]');
                 submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Kaydediliyor...');
+            });
+
+            // Telefon input için mask
+            $('input[name="User.PhoneNumber"]').on('input', function() {
+                var value = $(this).val().replace(/\D/g, '');
+                if (value.length > 11) {
+                    value = value.substring(0, 11);
+                }
+                $(this).val(value);
             });
         });
     </script>

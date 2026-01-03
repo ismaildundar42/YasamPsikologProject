@@ -1,0 +1,141 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.PsychologistDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Psikolog Detayları";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">@ViewData["PageTitle"]</h3>
+                <div class="card-tools">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-warning">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </a>
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Geri
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Kullanıcı Bilgileri -->
+                <h5 class="mb-3">Kişisel Bilgiler</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Ad Soyad:</dt>
+                    <dd class="col-sm-8">@Model.User?.FirstName @Model.User?.LastName</dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">
+                        <a href="mailto:@Model.User?.Email">@Model.User?.Email</a>
+                    </dd>
+
+                    <dt class="col-sm-4">Telefon:</dt>
+                    <dd class="col-sm-8">
+                        <a href="tel:@Model.User?.PhoneNumber">@Model.User?.PhoneNumber</a>
+                    </dd>
+
+                    <dt class="col-sm-4">Rol:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge badge-info">@Model.User?.Role</span>
+                    </dd>
+
+                    <dt class="col-sm-4">Durum:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge badge-success">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">Pasif</span>
+                        }
+                    </dd>
+                </dl>
+
+                <hr>
+
+                <!-- Psikolog Bilgileri -->
+                <h5 class="mb-3">Uzmanlık Bilgileri</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Uzmanlık Alanı:</dt>
+                    <dd class="col-sm-8">@Model.Specialization</dd>
+
+                    <dt class="col-sm-4">Lisans Numarası:</dt>
+                    <dd class="col-sm-8">
+                        <code>@Model.LicenseNumber</code>
+                    </dd>
+
+                    <dt class="col-sm-4">Seans Ücreti:</dt>
+                    <dd class="col-sm-8">
+                        <strong>@Model.ConsultationFee.ToString("N2") ₺</strong>
+                    </dd>
+
+                    <dt class="col-sm-4">Seans Süresi:</dt>
+                    <dd class="col-sm-8">@Model.ConsultationDuration dakika</dd>
+
+                    <dt class="col-sm-4">Takvim Rengi:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge" style="background-color: @Model.CalendarColor; color: white; padding: 8px 15px;">
+                            @Model.CalendarColor
+                        </span>
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Biography))
+                    {
+                        <dt class="col-sm-4">Biyografi:</dt>
+                        <dd class="col-sm-8">@Model.Biography</dd>
+                    }
+
+                    <dt class="col-sm-4">Online Danışmanlık:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsOnlineConsultationAvailable)
+                        {
+                            <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Mevcut
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">
+                                <i class="fas fa-times"></i> Mevcut Değil
+                            </span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Yüz Yüze Danışmanlık:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsInPersonConsultationAvailable)
+                        {
+                            <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Mevcut
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">
+                                <i class="fas fa-times"></i> Mevcut Değil
+                            </span>
+                        }
+                    </dd>
+                </dl>
+
+                @if (Model.User?.CreatedAt != null)
+                {
+                    <hr>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> Kayıt Tarihi: @Model.User.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                    </small>
+                }
+            </div>
+            <div class="card-footer">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Düzenle
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Listeye Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

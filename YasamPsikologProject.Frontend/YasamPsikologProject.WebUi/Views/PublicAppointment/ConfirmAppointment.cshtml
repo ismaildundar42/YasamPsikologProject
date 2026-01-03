@@ -52,9 +52,6 @@
                             <div>
                                 <h4 class="mb-1">@Model.Psychologist.User?.FirstName @Model.Psychologist.User?.LastName</h4>
                                 <p class="text-muted mb-0">@Model.Psychologist.Specialization</p>
-                                <p class="text-muted mb-0">
-                                    <i class="fas fa-briefcase"></i> @Model.Psychologist.ExperienceYears yıl deneyim
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -100,23 +97,6 @@
                                         <p class="mb-0" style="font-weight: 600;">@(Model.IsOnline ? "Online" : "Yüz Yüze")</p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ücret Bilgisi -->
-                    <div class="appointment-card fade-in" style="background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--bg-white) 100%);">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="text-primary mb-1">
-                                    <i class="fas fa-money-bill-wave"></i> Toplam Ücret
-                                </h3>
-                                <p class="text-muted mb-0">Randevu ücreti</p>
-                            </div>
-                            <div class="text-right">
-                                <h2 class="text-primary mb-0" style="font-size: 2.5rem; font-weight: 700;">
-                                    @Model.TotalFee ₺
-                                </h2>
                             </div>
                         </div>
                     </div>
@@ -175,6 +155,18 @@
                                            pattern="0[0-9]{10}"
                                            required />
                                     <small class="text-muted">Format: 05551234567</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group-appointment">
+                                    <label class="form-label-appointment">
+                                        <i class="fas fa-bell"></i> Bildirim Tercihi *
+                                    </label>
+                                    <select name="preferredNotification" class="form-control-appointment" required>
+                                        <option value="WhatsApp" selected>WhatsApp</option>
+                                        <option value="Email">E-posta</option>
+                                    </select>
+                                    <small class="text-muted">Randevu bilgilendirmeleri için tercih edilen kanal</small>
                                 </div>
                             </div>
                         </div>

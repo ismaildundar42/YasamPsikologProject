@@ -278,10 +278,11 @@ namespace YasamPsikologProject.WebUi.Controllers
             string clientFirstName,
             string clientLastName,
             string clientEmail,
-            string clientPhone)
+            string clientPhone,
+            string preferredNotification = "WhatsApp")
         {
-            _logger.LogInformation("CreateAppointment called - PsychologistId: {PsychologistId}, Date: {Date}, Duration: {Duration}, IsOnline: {IsOnline}, KvkkConsent: {KvkkConsent}, Client: {FirstName} {LastName}, Email: {Email}",
-                psychologistId, appointmentDate, duration, isOnline, kvkkConsent, clientFirstName, clientLastName, clientEmail);
+            _logger.LogInformation("CreateAppointment called - PsychologistId: {PsychologistId}, Date: {Date}, Duration: {Duration}, IsOnline: {IsOnline}, KvkkConsent: {KvkkConsent}, Client: {FirstName} {LastName}, Email: {Email}, PreferredNotification: {PreferredNotification}",
+                psychologistId, appointmentDate, duration, isOnline, kvkkConsent, clientFirstName, clientLastName, clientEmail, preferredNotification);
 
             // Validate required fields
             if (string.IsNullOrWhiteSpace(clientFirstName) || string.IsNullOrWhiteSpace(clientLastName) || 
@@ -351,6 +352,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                         KvkkConsent = kvkkConsent,
                         KvkkConsentDate = DateTime.Now,
                         IsActive = true,
+                        PreferredNotificationMethod = preferredNotification, // WhatsApp veya Email
                         Notes = $"Randevu talebi ile oluşturuldu - {DateTime.Now:yyyy-MM-dd HH:mm}"
                     };
 

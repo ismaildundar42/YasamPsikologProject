@@ -29,7 +29,7 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             var notification = new AppointmentNotification
             {
                 AppointmentId = appointment.Id,
-                NotificationType = client.PreferredNotificationMethod ?? NotificationType.SMS,
+                NotificationType = client.PreferredNotificationMethod ?? NotificationType.WhatsApp,
                 RecipientContact = client.User.PhoneNumber,
                 RecipientPhoneNumber = client.User.PhoneNumber,
                 RecipientEmail = client.User.Email,
@@ -71,7 +71,7 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             var notification = new AppointmentNotification
             {
                 AppointmentId = appointment.Id,
-                NotificationType = client.PreferredNotificationMethod ?? NotificationType.SMS,
+                NotificationType = client.PreferredNotificationMethod ?? NotificationType.WhatsApp,
                 RecipientContact = client.User.PhoneNumber,
                 RecipientPhoneNumber = client.User.PhoneNumber,
                 RecipientEmail = client.User.Email,
@@ -116,7 +116,7 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             var notification = new AppointmentNotification
             {
                 AppointmentId = appointment.Id,
-                NotificationType = client.PreferredNotificationMethod ?? NotificationType.SMS,
+                NotificationType = client.PreferredNotificationMethod ?? NotificationType.WhatsApp,
                 RecipientContact = client.User.PhoneNumber,
                 RecipientPhoneNumber = client.User.PhoneNumber,
                 RecipientEmail = client.User.Email,

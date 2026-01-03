@@ -57,6 +57,8 @@ namespace YasamPsikologProject.WebUi.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PsychologistDto model)
         {
+            ViewData["PageTitle"] = "Yeni Psikolog";
+            
             if (!ModelState.IsValid)
             {
                 var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
@@ -71,11 +73,57 @@ namespace YasamPsikologProject.WebUi.Controllers
                 if (model.User == null)
                 {
                     _logger.LogWarning("User bilgisi null");
+                    ModelState.AddModelError("", "Kullanıcı bilgileri eksik.");
                     TempData["ErrorMessage"] = "Kullanıcı bilgileri eksik.";
                     return View(model);
                 }
 
-                _logger.LogInformation("Psikolog oluşturuluyor: {Email}", model.User.Email);
+                // Gerekli alanları kontrol et
+                if (string.IsNullOrWhiteSpace(model.User.FirstName))
+                {
+                    ModelState.AddModelError("User.FirstName", "Ad alanı zorunludur");
+                    TempData["ErrorMessage"] = "Ad alanı zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.User.LastName))
+                {
+                    ModelState.AddModelError("User.LastName", "Soyad alanı zorunludur");
+                    TempData["ErrorMessage"] = "Soyad alanı zorunludur";
+                    return View(model);
+                }
+ 
+                if (string.IsNullOrWhiteSpace(model.User.Email))
+                {
+                    ModelState.AddModelError("User.Email", "Email alanı zorunludur");
+                    TempData["ErrorMessage"] = "Email alanı zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.User.PhoneNumber))
+                {
+                    ModelState.AddModelError("User.PhoneNumber", "Telefon alanı zorunludur");
+                    TempData["ErrorMessage"] = "Telefon alanı zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.LicenseNumber))
+                {
+                    ModelState.AddModelError("LicenseNumber", "Lisans numarası zorunludur");
+                    TempData["ErrorMessage"] = "Lisans numarası zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.Specialization))
+                {
+                    ModelState.AddModelError("Specialization", "Uzmanlık alanı zorunludur");
+                    TempData["ErrorMessage"] = "Uzmanlık alanı zorunludur";
+                    return View(model);
+                }
+
+                _logger.LogInformation("Psikolog oluşturuluyor: {Email}, {FirstName} {LastName}", 
+                    model.User.Email, model.User.FirstName, model.User.LastName);
+                
                 var response = await _psychologistService.CreateAsync(model);
                 
                 if (response.Success)
@@ -127,6 +175,8 @@ namespace YasamPsikologProject.WebUi.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, PsychologistDto model)
         {
+            ViewData["PageTitle"] = "Psikolog Düzenle";
+            
             if (id != model.Id)
             {
                 TempData["ErrorMessage"] = "Geçersiz işlem.";
@@ -143,7 +193,59 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                _logger.LogInformation("Psikolog güncelleniyor: ID={Id}", id);
+                // User bilgilerini kontrol et
+                if (model.User == null)
+                {
+                    _logger.LogWarning("User bilgisi null");
+                    ModelState.AddModelError("", "Kullanıcı bilgileri eksik.");
+                    TempData["ErrorMessage"] = "Kullanıcı bilgileri eksik.";
+                    return View(model);
+                }
+
+                // Gerekli alanları kontrol et
+                if (string.IsNullOrWhiteSpace(model.User.FirstName))
+                {
+                    ModelState.AddModelError("User.FirstName", "Ad alanı zorunludur");
+                    TempData["ErrorMessage"] = "Ad alanı zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.User.LastName))
+                {
+                    ModelState.AddModelError("User.LastName", "Soyad alanı zorunludur");
+                    TempData["ErrorMessage"] = "Soyad alanı zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.User.Email))
+                {
+                    ModelState.AddModelError("User.Email", "Email alanı zorunludur");
+                    TempData["ErrorMessage"] = "Email alanı zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.User.PhoneNumber))
+                {
+                    ModelState.AddModelError("User.PhoneNumber", "Telefon alanı zorunludur");
+                    TempData["ErrorMessage"] = "Telefon alanı zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.LicenseNumber))
+                {
+                    ModelState.AddModelError("LicenseNumber", "Lisans numarası zorunludur");
+                    TempData["ErrorMessage"] = "Lisans numarası zorunludur";
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.Specialization))
+                {
+                    ModelState.AddModelError("Specialization", "Uzmanlık alanı zorunludur");
+                    TempData["ErrorMessage"] = "Uzmanlık alanı zorunludur";
+                    return View(model);
+                }
+
+                _logger.LogInformation("Psikolog güncelleniyor: ID={Id}, Email={Email}", id, model.User.Email);
                 var response = await _psychologistService.UpdateAsync(id, model);
                 
                 if (response.Success)
