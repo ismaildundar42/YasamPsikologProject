@@ -431,6 +431,136 @@ body {
 }
 
 /* ============================================
+   Calendar Styles
+   ============================================ */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary-lightest) 0%, var(--primary-lighter) 100%);
+    border-radius: var(--radius-md);
+}
+
+.calendar-month-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.calendar-nav-btn {
+    background: var(--white);
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.calendar-nav-btn:hover {
+    background: var(--primary);
+    color: var(--white);
+    transform: scale(1.1);
+}
+
+.calendar-nav-btn:active {
+    transform: scale(0.95);
+}
+
+.calendar-container {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.calendar-weekday {
+    text-align: center;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: var(--transition);
+    position: relative;
+}
+
+.calendar-day.empty {
+    background: transparent;
+}
+
+.calendar-day.past {
+    color: var(--gray-300);
+    background: var(--gray-50);
+    cursor: not-allowed;
+}
+
+.calendar-day.unavailable {
+    color: var(--gray-400);
+    background: var(--gray-100);
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.calendar-day.available {
+    color: var(--primary-dark);
+    background: var(--primary-lightest);
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.calendar-day.available:hover {
+    background: var(--primary-lighter);
+    border-color: var(--primary);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+    z-index: 1;
+}
+
+.calendar-day.available.selected {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary-dark);
+    box-shadow: var(--shadow-lg);
+    transform: scale(1.05);
+    font-weight: 700;
+}
+
+/* ============================================
    Time Slots (Ultra Minimal)
    ============================================ */
 .time-slots-container {
@@ -668,6 +798,33 @@ body {
 
     .appointment-container {
         padding: 2rem 1rem;
+    }
+
+    /* Takvim mobil düzenlemeleri */
+    .calendar-header {
+        padding: 0.75rem;
+    }
+
+    .calendar-month-title {
+        font-size: 1.2rem;
+    }
+
+    .calendar-nav-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+
+    .calendar-container {
+        padding: 1rem;
+    }
+
+    .calendar-weekday {
+        font-size: 0.75rem;
+    }
+
+    .calendar-day {
+        font-size: 0.9rem;
     }
 }
 

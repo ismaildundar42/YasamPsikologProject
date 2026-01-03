@@ -75,19 +75,40 @@
             </div>
         </div>
 
-        <!-- Tarih Seçimi (Minimal Dropdown) -->
+        <!-- Tarih Seçimi (Takvim Görünümü) -->
         <div class="appointment-card fade-in">
             <h3 class="section-title">
                 <i class="fas fa-calendar-alt"></i> Tarih Seçin
             </h3>
-            <div class="date-selector-container">
-                <select id="dateSelect" class="form-control-appointment date-select" onchange="onDateChange()">
-                    <option value="">Tarih seçiniz...</option>
-                </select>
-                <small class="text-muted mt-2 d-block">
-                    <i class="fas fa-info-circle"></i> Sadece psikoloğun çalışma günleri gösterilmektedir
-                </small>
+            
+            <!-- Ay Navigasyonu -->
+            <div class="calendar-header">
+                <button type="button" class="calendar-nav-btn" onclick="previousMonth()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h4 class="calendar-month-title" id="currentMonthTitle"></h4>
+                <button type="button" class="calendar-nav-btn" onclick="nextMonth()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
+
+            <!-- Takvim Grid -->
+            <div class="calendar-container">
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">Pzt</div>
+                    <div class="calendar-weekday">Sal</div>
+                    <div class="calendar-weekday">Çar</div>
+                    <div class="calendar-weekday">Per</div>
+                    <div class="calendar-weekday">Cum</div>
+                    <div class="calendar-weekday">Cmt</div>
+                    <div class="calendar-weekday">Paz</div>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
+            </div>
+
+            <small class="text-muted mt-3 d-block">
+                <i class="fas fa-info-circle"></i> Sadece psikoloğun çalışma günleri gösterilmektedir
+            </small>
         </div>
 
         <!-- Uygun Saatler -->
@@ -118,79 +139,138 @@
     let selectedTime = null;
     const psychologistId = @Model.Psychologist.Id;
     const workingDays = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.WorkingDays));
+    
+    let currentMonth = new Date();
+    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const dayNameMap = {
+        0: 'Sunday',
+        1: 'Monday',
+        2: 'Tuesday',
+        3: 'Wednesday',
+        4: 'Thursday',
+        5: 'Friday',
+        6: 'Saturday'
+    };
 
-    // Sayfa yüklendiğinde tarihleri oluştur
+    // Sayfa yüklendiğinde takvimi oluştur
     document.addEventListener('DOMContentLoaded', function() {
-        populateDateOptions();
+        renderCalendar();
     });
 
-    // Tarih seçeneklerini oluştur (sadece çalışma günleri)
-    function populateDateOptions() {
-        const dateSelect = document.getElementById('dateSelect');
+    // Takvimi render et
+    function renderCalendar() {
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth();
+        
+        // Başlığı güncelle
+        document.getElementById('currentMonthTitle').textContent = `${monthNames[month]} ${year}`;
+        
+        // Ayın ilk gününü bul
+        const firstDay = new Date(year, month, 1);
+        // Pazartesi'den başlamak için: 0=Pazar -> 6, 1=Pazartesi -> 0, vs.
+        const firstDayOfWeek = (firstDay.getDay() + 6) % 7;
+        
+        // Ayın son günü
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        
+        // Takvim grid'ini temizle
+        const calendarDays = document.getElementById('calendarDays');
+        calendarDays.innerHTML = '';
+        
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-        const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        // Boş günler ekle (ayın başlangıcından önce)
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'calendar-day empty';
+            calendarDays.appendChild(emptyDiv);
+        }
         
-        // Map JS day numbers to English day names (matching API format)
-        const dayNameMap = {
-            0: 'Sunday',
-            1: 'Monday',
-            2: 'Tuesday',
-            3: 'Wednesday',
-            4: 'Thursday',
-            5: 'Friday',
-            6: 'Saturday'
-        };
-        
-        // Önümüzdeki 60 gün için seçenekler oluştur
-        for (let i = 0; i < 60; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
+        // Günleri ekle
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day';
+            dayDiv.textContent = day;
             
-            // JavaScript getDay(): 0=Pazar, 1=Pazartesi, ..., 6=Cumartesi
-            const jsDayOfWeek = date.getDay();
-            
-            // Convert to English day name for comparison with workingDays
-            const dayNameEnglish = dayNameMap[jsDayOfWeek];
-            
-            // Sadece çalışma günlerini ekle
-            if (workingDays.includes(dayNameEnglish)) {
-                const option = document.createElement('option');
-                // Use local date format to avoid timezone issues
-                const year = date.getFullYear();
-                const monthNum = String(date.getMonth() + 1).padStart(2, '0');
-                const dayNum = String(date.getDate()).padStart(2, '0');
-                const dateStr = `${year}-${monthNum}-${dayNum}`;
-                option.value = dateStr;
+            // Geçmiş tarihler
+            if (date < today) {
+                dayDiv.classList.add('past');
+            } else {
+                // Çalışma günü kontrolü
+                const jsDayOfWeek = date.getDay();
+                const dayNameEnglish = dayNameMap[jsDayOfWeek];
                 
-                const day = date.getDate();
-                const month = monthNames[date.getMonth()];
-                const dayName = dayNames[jsDayOfWeek];
-                
-                option.textContent = `${day} ${month} - ${dayName}`;
-                dateSelect.appendChild(option);
+                if (workingDays.includes(dayNameEnglish)) {
+                    dayDiv.classList.add('available');
+                    const dateStr = formatDateToString(date);
+                    dayDiv.onclick = () => selectDate(dateStr, dayDiv);
+                } else {
+                    dayDiv.classList.add('unavailable');
+                }
             }
+            
+            calendarDays.appendChild(dayDiv);
         }
     }
 
-    // Tarih değiştiğinde
-    function onDateChange() {
-        const dateSelect = document.getElementById('dateSelect');
-        selectedDate = dateSelect.value;
+    // Tarih formatla (YYYY-MM-DD)
+    function formatDateToString(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Tarih seç
+    function selectDate(dateStr, element) {
+        selectedDate = dateStr;
         selectedTime = null;
         
+        // Tüm seçili günleri temizle
+        document.querySelectorAll('.calendar-day').forEach(day => {
+            day.classList.remove('selected');
+        });
+        
+        // Seçili günü işaretle
+        element.classList.add('selected');
+        
+        // Saatleri yükle
+        const duration = parseInt(document.getElementById('durationSelect').value);
+        loadAvailableSlots(dateStr, duration);
+        document.getElementById('timeSlotsContainer').style.display = 'block';
+        document.getElementById('continueBtn').disabled = true;
+    }
+
+    // Önceki ay
+    function previousMonth() {
+        const today = new Date();
+        today.setDate(1);
+        today.setHours(0, 0, 0, 0);
+        
+        // Geçmiş ayları gösterme
+        const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+        if (prevMonth >= today) {
+            currentMonth = prevMonth;
+            renderCalendar();
+        }
+    }
+
+    // Sonraki ay
+    function nextMonth() {
+        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+        renderCalendar();
+    }
+
+    // Süre değiştiğinde
+    function updateDuration() {
         if (selectedDate) {
             const duration = parseInt(document.getElementById('durationSelect').value);
             loadAvailableSlots(selectedDate, duration);
-            document.getElementById('timeSlotsContainer').style.display = 'block';
-        } else {
-            document.getElementById('timeSlotsContainer').style.display = 'none';
         }
-        
-        document.getElementById('continueBtn').disabled = true;
     }
 
     async function loadAvailableSlots(date, duration) {
@@ -229,7 +309,7 @@
                 renderTimeSlots(slots);
                 
                 // Update selected date display
-                const dateObj = new Date(date);
+                const dateObj = new Date(date + 'T00:00:00'); // Local timezone
                 const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
                     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
                 const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
