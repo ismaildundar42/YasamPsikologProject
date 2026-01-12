@@ -17,8 +17,9 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
         public async Task<IEnumerable<Client>> GetAllAsync()
         {
             // Soft delete filtresi ile birlikte User ve AssignedPsychologist bilgilerini getir
+            // Sadece EN AZ 1 RANDEVUSU OLAN danışanları göster
             return await _context.Clients
-                .Where(c => !c.IsDeleted)
+                .Where(c => !c.IsDeleted && _context.Appointments.Any(a => a.ClientId == c.Id))
                 .Include(c => c.User)
                 .Include(c => c.AssignedPsychologist)
                     .ThenInclude(p => p.User)
@@ -47,8 +48,11 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
 
         public async Task<IEnumerable<Client>> GetByPsychologistAsync(int psychologistId)
         {
+            // Sadece EN AZ 1 RANDEVUSU OLAN danışanları göster
             return await _context.Clients
-                .Where(c => !c.IsDeleted && c.AssignedPsychologistId == psychologistId)
+                .Where(c => !c.IsDeleted 
+                    && c.AssignedPsychologistId == psychologistId
+                    && _context.Appointments.Any(a => a.ClientId == c.Id))
                 .Include(c => c.User)
                 .ToListAsync();
         }
