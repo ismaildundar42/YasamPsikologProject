@@ -41,8 +41,8 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
             var query = _context.Appointments
                 .Where(a => a.PsychologistId == psychologistId
                          && a.Status != AppointmentStatus.Cancelled
-                         && a.AppointmentDate < endDate
-                         && a.AppointmentEndDate > startDate);
+                         && a.AppointmentDate < endDate  // Mevcut randevu, yeni randevu bitmeden başlıyorsa
+                         && a.AppointmentEndDate > startDate); // Mevcut randevu, yeni randevu başladıktan sonra bitiyorsa
 
             if (excludeAppointmentId.HasValue)
             {

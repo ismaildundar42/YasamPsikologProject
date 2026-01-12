@@ -248,15 +248,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
 
             int slotDuration = (int)duration;
             int bufferDuration = workingHour.BufferDuration; // Psikologun buffer süresi
-            int slotInterval = 10; // Her 10 dakikada bir kontrol et (minimum slot aralığı)
+            int slotInterval = 1; // Her dakika kontrol et ama sadece uygun zamanları göster
             
             var currentTime = date.Date.Add(workingHour.StartTime);
             var endTime = date.Date.Add(workingHour.EndTime);
 
             while (currentTime.AddMinutes(slotDuration) <= endTime)
             {
-                // Slot süresi = Randevu süresi + Buffer süresi (sonraki randevu için gerekli boşluk)
-                var slotEnd = currentTime.AddMinutes(slotDuration + bufferDuration);
+                // Sadece 5'in katı saatleri göster (örn: 10:00, 10:05, 10:10, 10:15...)
+                if (currentTime.Minute % 5 != 0)
+                {
+                    currentTime = currentTime.AddMinutes(slotInterval);
+                    continue;
+                }
+                
+                // Slot kontrolü için sadece randevu süresi (buffer AppointmentEndDate'te zaten var)
+                var slotEnd = currentTime.AddMinutes(slotDuration);
                 
                 // Slot bitiş saati çalışma saatini geçmemeli
                 if (slotEnd > endTime)
@@ -277,14 +284,19 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 // Mola zamanı değilse diğer kontrollere geç
                 if (!isInBreakTime)
                 {
-                    // Çakışma kontrolü - randevunun kendisi + buffer süresini kontrol et
-                    // Not: AppointmentEndDate zaten duration + buffer içeriyor
+                    // Çakışma kontrolü - AppointmentEndDate'e GÜVENME, DİNAMİK HESAPLA!
+                    // Mevcut randevuların gerçek bitiş saatini hesapla (buffer dahil)
                     bool hasConflict = appointments.Any(a => 
-                        a.Status != AppointmentStatus.Cancelled &&
-                        // Mevcut randevular buffer süresi dahil AppointmentEndDate'e kadar bloke eder
-                        ((currentTime >= a.AppointmentDate && currentTime < a.AppointmentEndDate) ||
-                         (slotEnd > a.AppointmentDate && slotEnd <= a.AppointmentEndDate) ||
-                         (currentTime <= a.AppointmentDate && slotEnd > a.AppointmentDate)));
+                    {
+                        if (a.Status == AppointmentStatus.Cancelled)
+                            return false;
+                        
+                        // Gerçek bitiş saati = Başlangıç + Duration + BreakDuration
+                        var actualEndDate = a.AppointmentDate.AddMinutes((int)a.Duration + a.BreakDuration);
+                        
+                        // Yeni slot başlangıcı, mevcut randevunun bitişinden ÖNCE mi?
+                        return currentTime < actualEndDate;
+                    });
 
                     if (!hasConflict)
                     {

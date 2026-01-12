@@ -112,8 +112,8 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Randevular Arası Ara Süresi (dakika)</label>
-                                <input asp-for="BufferDuration" type="number" min="0" max="60" class="form-control" />
-                                <small class="text-muted">Randevular arasında bekleme süresi (varsayılan: 10 dakika)</small>
+                                <input asp-for="BufferDuration" type="number" min="0" max="60" step="5" class="form-control" />
+                                <small class="text-muted">5'in katları olarak girin (5, 10, 15, 20... dakika) - Varsayılan: 10</small>
                                 <span asp-validation-for="BufferDuration" class="text-danger text-xs"></span>
                             </div>
                         </div>
