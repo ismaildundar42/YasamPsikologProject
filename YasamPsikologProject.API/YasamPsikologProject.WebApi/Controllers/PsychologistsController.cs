@@ -44,7 +44,6 @@ namespace YasamPsikologProject.WebApi.Controllers
                         IsActive = p.User.IsActive,
                         CreatedAt = p.User.CreatedAt
                     },
-                    Biography = p.Biography,
                     CalendarColor = p.CalendarColor,
                     IsActive = p.IsActive
                 }).ToList();
@@ -82,7 +81,6 @@ namespace YasamPsikologProject.WebApi.Controllers
                         IsActive = psychologist.User.IsActive,
                         CreatedAt = psychologist.User.CreatedAt
                     },
-                    Biography = psychologist.Biography,
                     CalendarColor = psychologist.CalendarColor,
                     IsActive = psychologist.IsActive
                 };
@@ -157,7 +155,6 @@ namespace YasamPsikologProject.WebApi.Controllers
                         IsActive = createdUser.IsActive,
                         CreatedAt = createdUser.CreatedAt
                     },
-                    Biography = createdPsychologist.Biography,
                     CalendarColor = createdPsychologist.CalendarColor,
                     IsActive = createdPsychologist.IsActive
                 };
@@ -222,7 +219,6 @@ namespace YasamPsikologProject.WebApi.Controllers
                         IsActive = user.IsActive,
                         CreatedAt = user.CreatedAt
                     },
-                    Biography = updatedPsychologist.Biography,
                     CalendarColor = updatedPsychologist.CalendarColor,
                     IsActive = updatedPsychologist.IsActive
                 };

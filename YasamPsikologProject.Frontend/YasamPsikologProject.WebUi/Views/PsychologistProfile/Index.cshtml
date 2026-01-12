@@ -18,9 +18,6 @@
                 <p class="text-muted text-center">Psikolog</p>
 
                 <ul class="list-group list-group-unbordered mb-3">
-                    <li class="list-group-item">
-                        <b>Deneyim</b> <a class="float-right">@Model.ExperienceYears yıl</a>
-                    </li>
                 </ul>
 
                 <a asp-action="Edit" class="btn btn-primary btn-block"><i class="fas fa-edit"></i> Profili Düzenle</a>
@@ -71,26 +68,6 @@
             </div>
             <div class="card-body">
                 <dl class="row">
-                    <dt class="col-sm-4">Deneyim:</dt>
-                    <dd class="col-sm-8">@Model.ExperienceYears yıl</dd>
-
-                    @if (!string.IsNullOrEmpty(Model.Education))
-                    {
-                        <dt class="col-sm-4">Eğitim:</dt>
-                        <dd class="col-sm-8">@Model.Education</dd>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Model.Certifications))
-                    {
-                        <dt class="col-sm-4">Sertifikalar:</dt>
-                        <dd class="col-sm-8">@Model.Certifications</dd>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Model.Biography))
-                    {
-                        <dt class="col-sm-4">Biyografi:</dt>
-                        <dd class="col-sm-8">@Model.Biography</dd>
-                    }
                 </dl>
             </div>
         </div>

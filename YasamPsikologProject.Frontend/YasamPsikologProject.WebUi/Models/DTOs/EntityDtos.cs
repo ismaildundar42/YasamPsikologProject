@@ -34,18 +34,6 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public int UserId { get; set; }
         public UserDto? User { get; set; }
         
-        [StringLength(1000, ErrorMessage = "Biyografi en fazla 1000 karakter olabilir")]
-        public string? Biography { get; set; }
-        
-        [Range(0, 50, ErrorMessage = "Deneyim yılı 0-50 arasında olmalıdır")]
-        public int ExperienceYears { get; set; } = 0;
-        
-        [StringLength(500, ErrorMessage = "Eğitim en fazla 500 karakter olabilir")]
-        public string? Education { get; set; }
-        
-        [StringLength(500, ErrorMessage = "Sertifikalar en fazla 500 karakter olabilir")]
-        public string? Certifications { get; set; }
-        
         [RegularExpression(@"^#[0-9A-Fa-f]{6}$", ErrorMessage = "Renk kodu hex formatında olmalıdır (örn: #4CAF50)")]
         public string? CalendarColor { get; set; }
         

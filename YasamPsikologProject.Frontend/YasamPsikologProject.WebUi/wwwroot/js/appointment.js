@@ -71,14 +71,6 @@ const AppointmentSystem = {
                 </div>
                 <div class="psychologist-body">
                     <div class="psychologist-info">
-                        <i class="fas fa-briefcase"></i>
-                        <span>${p.experienceYears} yıl deneyim</span>
-                    </div>
-                    <div class="psychologist-info">
-                        <i class="fas fa-graduation-cap"></i>
-                        <span>${p.education || 'Bilgi yok'}</span>
-                    </div>
-                    <div class="psychologist-info">
                         <i class="fas fa-video"></i>
                         <span>${p.isOnlineConsultationAvailable ? 'Online' : ''} ${p.isInPersonConsultationAvailable ? 'Yüz Yüze' : ''}</span>
                     </div>

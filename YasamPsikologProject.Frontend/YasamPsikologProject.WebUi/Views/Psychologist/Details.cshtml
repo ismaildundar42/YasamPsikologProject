@@ -65,12 +65,6 @@
                         </span>
                     </dd>
 
-                    @if (!string.IsNullOrEmpty(Model.Biography))
-                    {
-                        <dt class="col-sm-4">Biyografi:</dt>
-                        <dd class="col-sm-8">@Model.Biography</dd>
-                    }
-
                     <dt class="col-sm-4">Online Danışmanlık:</dt>
                     <dd class="col-sm-8">
                         @if (Model.IsOnlineConsultationAvailable)

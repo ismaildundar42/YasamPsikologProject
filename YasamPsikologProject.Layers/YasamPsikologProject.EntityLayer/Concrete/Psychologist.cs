@@ -13,18 +13,6 @@ namespace YasamPsikologProject.EntityLayer.Concrete
         [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; } = null!;
 
-        [MaxLength(1000)]
-        public string? Biography { get; set; }
-
-        [Range(0, 50, ErrorMessage = "Deneyim yılı 0-50 arasında olmalıdır")]
-        public int ExperienceYears { get; set; } = 0;
-
-        [MaxLength(500)]
-        public string? Education { get; set; }
-
-        [MaxLength(500)]
-        public string? Certifications { get; set; }
-
         // Google Calendar renk kodu (hex format: #FF5733)
         [MaxLength(7)]
         public string CalendarColor { get; set; } = "#3788D8";
