@@ -31,8 +31,13 @@ namespace YasamPsikologProject.WebApi.Controllers
                     StartTime = w.StartTime.ToString(@"hh\:mm"),
                     EndTime = w.EndTime.ToString(@"hh\:mm"),
                     w.IsAvailable,
-                    BreakStartTime = w.BreakStartTime?.ToString(@"hh\:mm"),
-                    BreakEndTime = w.BreakEndTime?.ToString(@"hh\:mm"),
+                    BreakTimes = w.BreakTimes.Select(b => new
+                    {
+                        b.Id,
+                        StartTime = b.StartTime.ToString(@"hh\:mm"),
+                        EndTime = b.EndTime.ToString(@"hh\:mm"),
+                        b.Notes
+                    }).ToList(),
                     w.Notes
                 });
                 return Ok(dtos);
@@ -60,8 +65,14 @@ namespace YasamPsikologProject.WebApi.Controllers
                     StartTime = workingHour.StartTime.ToString(@"hh\:mm"),
                     EndTime = workingHour.EndTime.ToString(@"hh\:mm"),
                     workingHour.IsAvailable,
-                    BreakStartTime = workingHour.BreakStartTime?.ToString(@"hh\:mm"),
-                    BreakEndTime = workingHour.BreakEndTime?.ToString(@"hh\:mm"),
+                    workingHour.BufferDuration,
+                    BreakTimes = workingHour.BreakTimes.Select(b => new
+                    {
+                        b.Id,
+                        StartTime = b.StartTime.ToString(@"hh\:mm"),
+                        EndTime = b.EndTime.ToString(@"hh\:mm"),
+                        b.Notes
+                    }).ToList(),
                     workingHour.Notes
                 };
 
@@ -87,8 +98,14 @@ namespace YasamPsikologProject.WebApi.Controllers
                     StartTime = w.StartTime.ToString(@"hh\:mm"),
                     EndTime = w.EndTime.ToString(@"hh\:mm"),
                     w.IsAvailable,
-                    BreakStartTime = w.BreakStartTime?.ToString(@"hh\:mm"),
-                    BreakEndTime = w.BreakEndTime?.ToString(@"hh\:mm"),
+                    w.BufferDuration,
+                    BreakTimes = w.BreakTimes.Select(b => new
+                    {
+                        b.Id,
+                        StartTime = b.StartTime.ToString(@"hh\:mm"),
+                        EndTime = b.EndTime.ToString(@"hh\:mm"),
+                        b.Notes
+                    }).ToList(),
                     w.Notes
                 });
                 return Ok(dtos);
@@ -127,10 +144,23 @@ namespace YasamPsikologProject.WebApi.Controllers
                     StartTime = TimeSpan.Parse(dto.StartTime),
                     EndTime = TimeSpan.Parse(dto.EndTime),
                     IsAvailable = dto.IsAvailable,
-                    BreakStartTime = !string.IsNullOrEmpty(dto.BreakStartTime) ? TimeSpan.Parse(dto.BreakStartTime) : null,
-                    BreakEndTime = !string.IsNullOrEmpty(dto.BreakEndTime) ? TimeSpan.Parse(dto.BreakEndTime) : null,
+                    BufferDuration = dto.BufferDuration,
                     Notes = dto.Notes
                 };
+
+                // BreakTimes ekle
+                if (dto.BreakTimes != null && dto.BreakTimes.Any())
+                {
+                    foreach (var breakDto in dto.BreakTimes)
+                    {
+                        workingHour.BreakTimes.Add(new BreakTime
+                        {
+                            StartTime = TimeSpan.Parse(breakDto.StartTime),
+                            EndTime = TimeSpan.Parse(breakDto.EndTime),
+                            Notes = breakDto.Notes
+                        });
+                    }
+                }
 
                 var created = await _workingHourService.CreateAsync(workingHour);
                 
@@ -142,8 +172,14 @@ namespace YasamPsikologProject.WebApi.Controllers
                     StartTime = created.StartTime.ToString(@"hh\:mm"),
                     EndTime = created.EndTime.ToString(@"hh\:mm"),
                     created.IsAvailable,
-                    BreakStartTime = created.BreakStartTime?.ToString(@"hh\:mm"),
-                    BreakEndTime = created.BreakEndTime?.ToString(@"hh\:mm"),
+                    created.BufferDuration,
+                    BreakTimes = created.BreakTimes.Select(b => new
+                    {
+                        b.Id,
+                        StartTime = b.StartTime.ToString(@"hh\:mm"),
+                        EndTime = b.EndTime.ToString(@"hh\:mm"),
+                        b.Notes
+                    }).ToList(),
                     created.Notes
                 };
                 
@@ -174,9 +210,23 @@ namespace YasamPsikologProject.WebApi.Controllers
                 existing.StartTime = TimeSpan.Parse(dto.StartTime);
                 existing.EndTime = TimeSpan.Parse(dto.EndTime);
                 existing.IsAvailable = dto.IsAvailable;
-                existing.BreakStartTime = !string.IsNullOrEmpty(dto.BreakStartTime) ? TimeSpan.Parse(dto.BreakStartTime) : null;
-                existing.BreakEndTime = !string.IsNullOrEmpty(dto.BreakEndTime) ? TimeSpan.Parse(dto.BreakEndTime) : null;
+                existing.BufferDuration = dto.BufferDuration;
                 existing.Notes = dto.Notes;
+
+                // BreakTimes'ı güncelle - eskilerini sil, yenilerini ekle
+                existing.BreakTimes.Clear();
+                if (dto.BreakTimes != null && dto.BreakTimes.Any())
+                {
+                    foreach (var breakDto in dto.BreakTimes)
+                    {
+                        existing.BreakTimes.Add(new BreakTime
+                        {
+                            StartTime = TimeSpan.Parse(breakDto.StartTime),
+                            EndTime = TimeSpan.Parse(breakDto.EndTime),
+                            Notes = breakDto.Notes
+                        });
+                    }
+                }
 
                 var updated = await _workingHourService.UpdateAsync(existing);
                 
@@ -188,8 +238,14 @@ namespace YasamPsikologProject.WebApi.Controllers
                     StartTime = updated.StartTime.ToString(@"hh\:mm"),
                     EndTime = updated.EndTime.ToString(@"hh\:mm"),
                     updated.IsAvailable,
-                    BreakStartTime = updated.BreakStartTime?.ToString(@"hh\:mm"),
-                    BreakEndTime = updated.BreakEndTime?.ToString(@"hh\:mm"),
+                    updated.BufferDuration,
+                    BreakTimes = updated.BreakTimes.Select(b => new
+                    {
+                        b.Id,
+                        StartTime = b.StartTime.ToString(@"hh\:mm"),
+                        EndTime = b.EndTime.ToString(@"hh\:mm"),
+                        b.Notes
+                    }).ToList(),
                     updated.Notes
                 };
                 

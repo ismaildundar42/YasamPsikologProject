@@ -67,6 +67,19 @@ namespace YasamPsikologProject.WebApi.DTOs
         public bool KvkkConsent { get; set; }
     }
 
+    public class BreakTimeDto
+    {
+        public int Id { get; set; }
+        
+        [Required(ErrorMessage = "Mola başlangıç saati zorunludur")]
+        public string StartTime { get; set; } = null!;
+
+        [Required(ErrorMessage = "Mola bitiş saati zorunludur")]
+        public string EndTime { get; set; } = null!;
+
+        public string? Notes { get; set; }
+    }
+
     public class CreateWorkingHourDto
     {
         [Required(ErrorMessage = "Psikolog seçimi zorunludur")]
@@ -82,8 +95,8 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string EndTime { get; set; } = null!;
 
         public bool IsAvailable { get; set; } = true;
-        public string? BreakStartTime { get; set; }
-        public string? BreakEndTime { get; set; }
+        public int BufferDuration { get; set; } = 10;
+        public List<BreakTimeDto>? BreakTimes { get; set; }
         public string? Notes { get; set; }
     }
 
@@ -99,8 +112,8 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string EndTime { get; set; } = null!;
 
         public bool IsAvailable { get; set; } = true;
-        public string? BreakStartTime { get; set; }
-        public string? BreakEndTime { get; set; }
+        public int BufferDuration { get; set; } = 10;
+        public List<BreakTimeDto>? BreakTimes { get; set; }
         public string? Notes { get; set; }
     }
 

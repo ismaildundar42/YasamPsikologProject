@@ -96,6 +96,14 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public string PsychologistName => Psychologist != null ? $"{Psychologist.User?.FirstName} {Psychologist.User?.LastName}" : "N/A";
     }
 
+    public class BreakTimeDto
+    {
+        public int Id { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+        public string? Notes { get; set; }
+    }
+
     public class WorkingHourDto
     {
         public int Id { get; set; }
@@ -104,8 +112,8 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public bool IsAvailable { get; set; }
-        public TimeSpan? BreakStartTime { get; set; }
-        public TimeSpan? BreakEndTime { get; set; }
+        public int BufferDuration { get; set; } = 10;
+        public List<BreakTimeDto>? BreakTimes { get; set; }
         public string? Notes { get; set; }
     }
 

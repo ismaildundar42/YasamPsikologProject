@@ -52,9 +52,12 @@
                                     <td>@wh.StartTime.ToString(@"hh\:mm")</td>
                                     <td>@wh.EndTime.ToString(@"hh\:mm")</td>
                                     <td>
-                                        @if (wh.BreakStartTime.HasValue && wh.BreakEndTime.HasValue)
+                                        @if (wh.BreakTimes != null && wh.BreakTimes.Any())
                                         {
-                                            @wh.BreakStartTime.Value.ToString(@"hh\:mm") <text> - </text> @wh.BreakEndTime.Value.ToString(@"hh\:mm")
+                                            foreach (var bt in wh.BreakTimes)
+                                            {
+                                                @bt.StartTime.ToString(@"hh\:mm") <text> - </text> @bt.EndTime.ToString(@"hh\:mm") <br />
+                                            }
                                         }
                                         else
                                         {

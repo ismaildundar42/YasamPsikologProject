@@ -110,16 +110,49 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Mola Başlangıç</label>
-                                <input asp-for="BreakStartTime" type="time" class="form-control" />
-                                <span asp-validation-for="BreakStartTime" class="text-danger text-xs"></span>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Randevular Arası Ara Süresi (dakika)</label>
+                                <input asp-for="BufferDuration" type="number" min="0" max="60" class="form-control" />
+                                <small class="text-muted">Randevular arasında bekleme süresi (varsayılan: 10 dakika)</small>
+                                <span asp-validation-for="BufferDuration" class="text-danger text-xs"></span>
                             </div>
+                        </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Mola Bitiş</label>
-                                <input asp-for="BreakEndTime" type="time" class="form-control" />
-                                <span asp-validation-for="BreakEndTime" class="text-danger text-xs"></span>
+                        <!-- Molalar -->
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Molalar</label>
+                                <button type="button" class="btn btn-sm btn-success mb-2" id="addBreakBtn">
+                                    <i class="fas fa-plus"></i> Mola Ekle
+                                </button>
+                                <div id="breakTimesContainer">
+                                    @if (Model.BreakTimes != null && Model.BreakTimes.Any())
+                                    {
+                                        for (int i = 0; i < Model.BreakTimes.Count; i++)
+                                        {
+                                            <div class="card mb-2 break-time-item" data-index="@i">
+                                                <div class="card-body">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-5">
+                                                            <label class="form-label">Başlangıç</label>
+                                                            <input type="time" name="BreakTimes[@i].StartTime" value="@Model.BreakTimes[i].StartTime.ToString(@"hh\:mm")" class="form-control" required />
+                                                            <input type="hidden" name="BreakTimes[@i].Id" value="@Model.BreakTimes[i].Id" />
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <label class="form-label">Bitiş</label>
+                                                            <input type="time" name="BreakTimes[@i].EndTime" value="@Model.BreakTimes[i].EndTime.ToString(@"hh\:mm")" class="form-control" required />
+                                                        </div>
+                                                        <div class="col-md-2 text-end">
+                                                            <button type="button" class="btn btn-danger btn-sm remove-break-btn" style="margin-top: 25px;">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
                             </div>
                         </div>
 
@@ -159,4 +192,41 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        let breakTimeIndex = @(Model.BreakTimes?.Count ?? 0);
+
+        document.getElementById('addBreakBtn').addEventListener('click', function() {
+            const container = document.getElementById('breakTimesContainer');
+            const breakTimeHtml = `
+                <div class="card mb-2 break-time-item" data-index="${breakTimeIndex}">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-5">
+                                <label class="form-label">Başlangıç</label>
+                                <input type="time" name="BreakTimes[${breakTimeIndex}].StartTime" class="form-control" required />
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Bitiş</label>
+                                <input type="time" name="BreakTimes[${breakTimeIndex}].EndTime" class="form-control" required />
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <button type="button" class="btn btn-danger btn-sm remove-break-btn" style="margin-top: 25px;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', breakTimeHtml);
+            breakTimeIndex++;
+        });
+
+        document.getElementById('breakTimesContainer').addEventListener('click', function(e) {
+            if (e.target.closest('.remove-break-btn')) {
+                e.target.closest('.break-time-item').remove();
+            }
+        });
+    </script>
 }

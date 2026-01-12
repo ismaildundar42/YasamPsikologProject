@@ -152,8 +152,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                     AppointmentDate = dto.AppointmentDate,
                     Duration = duration,
                     Status = status,
-                    PsychologistNotes = dto.Notes,
-                    AppointmentEndDate = dto.AppointmentDate.AddMinutes(dto.Duration + 10) // 10 dk ara ekle
+                    PsychologistNotes = dto.Notes
+                    // BreakDuration ve AppointmentEndDate AppointmentManager tarafından set edilecek
                 };
 
                 var createdAppointment = await _appointmentService.CreateAsync(appointment);
@@ -204,8 +204,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 existingAppointment.Duration = duration;
                 existingAppointment.Status = status;
                 existingAppointment.PsychologistNotes = dto.Notes;
-                existingAppointment.BreakDuration = dto.BreakDuration;
-                existingAppointment.AppointmentEndDate = dto.AppointmentDate.AddMinutes(dto.Duration + dto.BreakDuration);
+                // BreakDuration ve AppointmentEndDate AppointmentManager.UpdateAsync tarafından set edilecek
 
                 var updatedAppointment = await _appointmentService.UpdateAsync(existingAppointment);
                 return Ok(updatedAppointment);

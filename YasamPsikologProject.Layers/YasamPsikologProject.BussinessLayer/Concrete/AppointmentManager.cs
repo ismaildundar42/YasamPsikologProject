@@ -58,7 +58,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (psychologist == null)
                 throw new Exception("Psikolog bulunamadı.");
 
-            // Randevu bitiş saatini hesapla (süre + ara süre)
+            // Çalışma saatleri kontrolü - buffer süresini almak için önce al
+            var appointmentDayOfWeek = appointment.AppointmentDate.DayOfWeek == DayOfWeek.Sunday
+                ? WeekDay.Sunday
+                : (WeekDay)((int)appointment.AppointmentDate.DayOfWeek);
+            
+            var workingHour = await _unitOfWork.WorkingHourRepository.GetByPsychologistAndDayAsync(
+                appointment.PsychologistId, 
+                appointmentDayOfWeek);
+
+            if (workingHour == null || !workingHour.IsAvailable)
+                throw new Exception("Psikolog bu günde çalışmamaktadır.");
+
+            // Buffer süresini WorkingHour'dan al
+            appointment.BreakDuration = workingHour.BufferDuration;
+
+            // Randevu bitiş saatini hesapla (süre + buffer süresi)
             int durationMinutes = (int)appointment.Duration;
             int totalMinutes = durationMinutes + appointment.BreakDuration;
             appointment.AppointmentEndDate = appointment.AppointmentDate.AddMinutes(totalMinutes);
@@ -72,21 +87,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 throw new Exception("Bu saatte zaten bir randevu bulunmaktadır.");
             }
 
-            // Çalışma saatleri kontrolü
-            var appointmentDayOfWeek = appointment.AppointmentDate.DayOfWeek == DayOfWeek.Sunday
-                ? WeekDay.Sunday
-                : (WeekDay)((int)appointment.AppointmentDate.DayOfWeek);
-            
-            var workingHour = await _unitOfWork.WorkingHourRepository.GetByPsychologistAndDayAsync(
-                appointment.PsychologistId, 
-                appointmentDayOfWeek);
-
-            if (workingHour == null || !workingHour.IsAvailable)
-                throw new Exception("Psikolog bu günde çalışmamaktadır.");
-
+            // Randevu, çalışma saatleri içinde mi kontrol et
             var appointmentTime = appointment.AppointmentDate.TimeOfDay;
             if (appointmentTime < workingHour.StartTime || appointment.AppointmentEndDate.TimeOfDay > workingHour.EndTime)
                 throw new Exception("Randevu saatleri çalışma saatleri dışındadır.");
+
+            // Mola saatleri kontrolü - SADECE mola zamanı (mola bitince hemen randevu başlayabilir)
+            bool isInBreakTime = workingHour.BreakTimes.Any(b =>
+            {
+                // Randevunun herhangi bir kısmı mola zamanına denk geliyorsa
+                return (appointment.AppointmentDate.TimeOfDay >= b.StartTime && appointment.AppointmentDate.TimeOfDay < b.EndTime) ||
+                       (appointment.AppointmentEndDate.TimeOfDay > b.StartTime && appointment.AppointmentEndDate.TimeOfDay <= b.EndTime) ||
+                       (appointment.AppointmentDate.TimeOfDay <= b.StartTime && appointment.AppointmentEndDate.TimeOfDay > b.StartTime);
+            });
+
+            if (isInBreakTime)
+                throw new Exception("Randevu saatleri psikologun mola saatlerine denk gelmektedir.");
 
             // İzin günü kontrolü
             if (await _unitOfWork.UnavailableTimeRepository.HasUnavailableTimeAsync(
@@ -120,7 +136,21 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (existing == null)
                 throw new Exception("Randevu bulunamadı.");
 
-            // Randevu bitiş saatini hesapla (süre + ara süre)
+            // Çalışma saatlerinden buffer süresini al
+            var appointmentDayOfWeek = appointment.AppointmentDate.DayOfWeek == DayOfWeek.Sunday
+                ? WeekDay.Sunday
+                : (WeekDay)((int)appointment.AppointmentDate.DayOfWeek);
+            
+            var workingHour = await _unitOfWork.WorkingHourRepository.GetByPsychologistAndDayAsync(
+                appointment.PsychologistId, 
+                appointmentDayOfWeek);
+
+            if (workingHour != null)
+            {
+                appointment.BreakDuration = workingHour.BufferDuration;
+            }
+
+            // Randevu bitiş saatini hesapla (süre + buffer süresi)
             int durationMinutes = (int)appointment.Duration;
             int totalMinutes = durationMinutes + appointment.BreakDuration;
             appointment.AppointmentEndDate = appointment.AppointmentDate.AddMinutes(totalMinutes);
@@ -217,7 +247,7 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 date.Date.AddDays(1));
 
             int slotDuration = (int)duration;
-            int breakDuration = 10; // Varsayılan ara süre
+            int bufferDuration = workingHour.BufferDuration; // Psikologun buffer süresi
             int slotInterval = 10; // Her 10 dakikada bir kontrol et (minimum slot aralığı)
             
             var currentTime = date.Date.Add(workingHour.StartTime);
@@ -225,22 +255,44 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
 
             while (currentTime.AddMinutes(slotDuration) <= endTime)
             {
-                var slotEnd = currentTime.AddMinutes(slotDuration);
+                // Slot süresi = Randevu süresi + Buffer süresi (sonraki randevu için gerekli boşluk)
+                var slotEnd = currentTime.AddMinutes(slotDuration + bufferDuration);
                 
-                // Çakışma kontrolü - randevunun kendisi + buffer süresini kontrol et
-                bool hasConflict = appointments.Any(a => 
-                    a.Status != AppointmentStatus.Cancelled &&
-                    // Mevcut randevular buffer süresi dahil AppointmentEndDate'e kadar bloke eder
-                    ((currentTime >= a.AppointmentDate && currentTime < a.AppointmentEndDate) ||
-                     (slotEnd > a.AppointmentDate && slotEnd <= a.AppointmentEndDate) ||
-                     (currentTime <= a.AppointmentDate && slotEnd > a.AppointmentDate)));
-
-                if (!hasConflict)
+                // Slot bitiş saati çalışma saatini geçmemeli
+                if (slotEnd > endTime)
+                    break;
+                
+                // Mola saatleri kontrolü - SADECE mola zamanı (mola bitince hemen randevu başlayabilir)
+                bool isInBreakTime = workingHour.BreakTimes.Any(b =>
                 {
-                    if (!await _unitOfWork.UnavailableTimeRepository.HasUnavailableTimeAsync(
-                        psychologistId, currentTime, slotEnd))
+                    var breakStart = date.Date.Add(b.StartTime);
+                    var breakEnd = date.Date.Add(b.EndTime);
+                    
+                    // Randevunun herhangi bir kısmı mola zamanına denk geliyorsa
+                    return (currentTime >= breakStart && currentTime < breakEnd) ||
+                           (slotEnd > breakStart && slotEnd <= breakEnd) ||
+                           (currentTime <= breakStart && slotEnd > breakStart);
+                });
+
+                // Mola zamanı değilse diğer kontrollere geç
+                if (!isInBreakTime)
+                {
+                    // Çakışma kontrolü - randevunun kendisi + buffer süresini kontrol et
+                    // Not: AppointmentEndDate zaten duration + buffer içeriyor
+                    bool hasConflict = appointments.Any(a => 
+                        a.Status != AppointmentStatus.Cancelled &&
+                        // Mevcut randevular buffer süresi dahil AppointmentEndDate'e kadar bloke eder
+                        ((currentTime >= a.AppointmentDate && currentTime < a.AppointmentEndDate) ||
+                         (slotEnd > a.AppointmentDate && slotEnd <= a.AppointmentEndDate) ||
+                         (currentTime <= a.AppointmentDate && slotEnd > a.AppointmentDate)));
+
+                    if (!hasConflict)
                     {
-                        availableSlots.Add(currentTime);
+                        if (!await _unitOfWork.UnavailableTimeRepository.HasUnavailableTimeAsync(
+                            psychologistId, currentTime, slotEnd))
+                        {
+                            availableSlots.Add(currentTime);
+                        }
                     }
                 }
 

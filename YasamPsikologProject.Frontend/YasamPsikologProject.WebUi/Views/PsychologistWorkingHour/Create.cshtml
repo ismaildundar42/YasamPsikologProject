@@ -41,20 +41,25 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <div class="form-group">
-                                <label asp-for="BreakStartTime">Mola Başlangıç</label>
-                                <input asp-for="BreakStartTime" type="time" class="form-control" />
-                                <span asp-validation-for="BreakStartTime" class="text-danger"></span>
-                                <small class="form-text text-muted">İsteğe bağlı</small>
+                                <label asp-for="BufferDuration">Randevular Arası Ara Süresi (dakika)</label>
+                                <input asp-for="BufferDuration" type="number" min="0" max="60" class="form-control" value="10" />
+                                <small class="form-text text-muted">Randevular arasında bekleme süresi</small>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
                             <div class="form-group">
-                                <label asp-for="BreakEndTime">Mola Bitiş</label>
-                                <input asp-for="BreakEndTime" type="time" class="form-control" />
-                                <span asp-validation-for="BreakEndTime" class="text-danger"></span>
-                                <small class="form-text text-muted">İsteğe bağlı</small>
+                                <label>Molalar</label>
+                                <button type="button" class="btn btn-sm btn-success mb-2" id="addBreakBtn">
+                                    <i class="fas fa-plus"></i> Mola Ekle
+                                </button>
+                                <div id="breakTimesContainer">
+                                    <!-- Molalar buraya eklenecek -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -84,4 +89,41 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        let breakTimeIndex = 0;
+
+        document.getElementById('addBreakBtn').addEventListener('click', function() {
+            const container = document.getElementById('breakTimesContainer');
+            const breakTimeHtml = `
+                <div class="card mb-2 break-time-item" data-index="${breakTimeIndex}">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-5">
+                                <label class="form-label">Başlangıç</label>
+                                <input type="time" name="BreakTimes[${breakTimeIndex}].StartTime" class="form-control" required />
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Bitiş</label>
+                                <input type="time" name="BreakTimes[${breakTimeIndex}].EndTime" class="form-control" required />
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <button type="button" class="btn btn-danger btn-sm remove-break-btn" style="margin-top: 25px;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', breakTimeHtml);
+            breakTimeIndex++;
+        });
+
+        document.getElementById('breakTimesContainer').addEventListener('click', function(e) {
+            if (e.target.closest('.remove-break-btn')) {
+                e.target.closest('.break-time-item').remove();
+            }
+        });
+    </script>
 }

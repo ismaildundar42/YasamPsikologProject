@@ -15,6 +15,7 @@ namespace YasamPsikologProject.DataAccessLayer.EntityFramework
         public DbSet<Client> Clients { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<WorkingHour> WorkingHours { get; set; }
+        public DbSet<BreakTime> BreakTimes { get; set; }
         public DbSet<UnavailableTime> UnavailableTimes { get; set; }
         public DbSet<AppointmentNotification> AppointmentNotifications { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
@@ -33,6 +34,7 @@ namespace YasamPsikologProject.DataAccessLayer.EntityFramework
             modelBuilder.Entity<Client>().HasQueryFilter(c => !c.IsDeleted);
             modelBuilder.Entity<Appointment>().HasQueryFilter(a => !a.IsDeleted);
             modelBuilder.Entity<WorkingHour>().HasQueryFilter(w => !w.IsDeleted);
+            modelBuilder.Entity<BreakTime>().HasQueryFilter(b => !b.IsDeleted);
             modelBuilder.Entity<UnavailableTime>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<AppointmentNotification>().HasQueryFilter(n => !n.IsDeleted);
             modelBuilder.Entity<AuditLog>().HasQueryFilter(l => !l.IsDeleted);

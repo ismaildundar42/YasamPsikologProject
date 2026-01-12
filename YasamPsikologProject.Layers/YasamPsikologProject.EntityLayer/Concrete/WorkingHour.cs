@@ -29,9 +29,11 @@ namespace YasamPsikologProject.EntityLayer.Concrete
         // Bu gün aktif mi? (geçici olarak kapatma için)
         public bool IsAvailable { get; set; } = true;
 
-        // Öğle arası gibi molalar için (opsiyonel)
-        public TimeSpan? BreakStartTime { get; set; }
-        public TimeSpan? BreakEndTime { get; set; }
+        // Randevular arası buffer süresi (dakika) - varsayılan 10
+        public int BufferDuration { get; set; } = 10;
+
+        // Molalar (birden fazla mola olabilir)
+        public virtual ICollection<BreakTime> BreakTimes { get; set; } = new List<BreakTime>();
 
         [MaxLength(500)]
         public string? Notes { get; set; }

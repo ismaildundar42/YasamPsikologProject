@@ -208,11 +208,14 @@
                                                 <span class="time-badge">@item.EndTime.ToString(@"hh\:mm")</span>
                                             </td>
                                             <td>
-                                                @if (item.BreakStartTime.HasValue && item.BreakEndTime.HasValue)
+                                                @if (item.BreakTimes != null && item.BreakTimes.Any())
                                                 {
-                                                    <span class="break-badge">
-                                                        @item.BreakStartTime.Value.ToString(@"hh\:mm") - @item.BreakEndTime.Value.ToString(@"hh\:mm")
-                                                    </span>
+                                                    foreach (var breakTime in item.BreakTimes)
+                                                    {
+                                                        <span class="break-badge d-block mb-1">
+                                                            @breakTime.StartTime.ToString(@"hh\:mm") - @breakTime.EndTime.ToString(@"hh\:mm")
+                                                        </span>
+                                                    }
                                                 }
                                                 else
                                                 {
