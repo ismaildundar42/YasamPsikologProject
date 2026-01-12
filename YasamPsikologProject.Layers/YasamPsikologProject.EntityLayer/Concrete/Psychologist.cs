@@ -13,14 +13,6 @@ namespace YasamPsikologProject.EntityLayer.Concrete
         [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; } = null!;
 
-        [Required(ErrorMessage = "Lisans numarası zorunludur")]
-        [MaxLength(50)]
-        public string LicenseNumber { get; set; } = null!;
-
-        [Required(ErrorMessage = "Uzmanlık alanı zorunludur")]
-        [MaxLength(200)]
-        public string Specialization { get; set; } = null!;
-
         [MaxLength(1000)]
         public string? Biography { get; set; }
 
@@ -36,13 +28,6 @@ namespace YasamPsikologProject.EntityLayer.Concrete
         // Google Calendar renk kodu (hex format: #FF5733)
         [MaxLength(7)]
         public string CalendarColor { get; set; } = "#3788D8";
-
-        // Seans ücret ve süre bilgileri
-        [Range(0, 100000, ErrorMessage = "Seans ücreti 0-100000 arasında olmalıdır")]
-        public decimal ConsultationFee { get; set; } = 0;
-
-        [Range(15, 240, ErrorMessage = "Seans süresi 15-240 dakika arasında olmalıdır")]
-        public int ConsultationDuration { get; set; } = 50;
 
         // Online/Yüz yüze seçenekleri
         public bool IsOnlineConsultationAvailable { get; set; } = true;

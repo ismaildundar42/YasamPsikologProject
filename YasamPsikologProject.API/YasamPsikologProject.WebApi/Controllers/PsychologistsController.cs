@@ -44,12 +44,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                         IsActive = p.User.IsActive,
                         CreatedAt = p.User.CreatedAt
                     },
-                    LicenseNumber = p.LicenseNumber,
-                    Specialization = p.Specialization,
                     Biography = p.Biography,
                     CalendarColor = p.CalendarColor,
-                    ConsultationFee = p.ConsultationFee,
-                    ConsultationDuration = p.ConsultationDuration,
                     IsActive = p.IsActive
                 }).ToList();
                 
@@ -86,12 +82,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                         IsActive = psychologist.User.IsActive,
                         CreatedAt = psychologist.User.CreatedAt
                     },
-                    LicenseNumber = psychologist.LicenseNumber,
-                    Specialization = psychologist.Specialization,
                     Biography = psychologist.Biography,
                     CalendarColor = psychologist.CalendarColor,
-                    ConsultationFee = psychologist.ConsultationFee,
-                    ConsultationDuration = psychologist.ConsultationDuration,
                     IsActive = psychologist.IsActive
                 };
 
@@ -143,11 +135,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 var psychologist = new Psychologist
                 {
                     UserId = createdUser.Id,
-                    LicenseNumber = dto.LicenseNumber,
-                    Specialization = dto.Specialization,
                     CalendarColor = dto.CalendarColor ?? "#4CAF50",
-                    ConsultationFee = dto.ConsultationFee,
-                    ConsultationDuration = 50, // Varsayılan değer
                     IsActive = dto.IsActive
                 };
 
@@ -169,12 +157,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                         IsActive = createdUser.IsActive,
                         CreatedAt = createdUser.CreatedAt
                     },
-                    LicenseNumber = createdPsychologist.LicenseNumber,
-                    Specialization = createdPsychologist.Specialization,
                     Biography = createdPsychologist.Biography,
                     CalendarColor = createdPsychologist.CalendarColor,
-                    ConsultationFee = createdPsychologist.ConsultationFee,
-                    ConsultationDuration = createdPsychologist.ConsultationDuration,
                     IsActive = createdPsychologist.IsActive
                 };
                 
@@ -216,10 +200,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 }
 
                 // Psychologist bilgilerini güncelle
-                existing.LicenseNumber = dto.LicenseNumber;
-                existing.Specialization = dto.Specialization;
                 existing.CalendarColor = dto.CalendarColor ?? "#4CAF50";
-                existing.ConsultationFee = dto.ConsultationFee;
                 existing.IsActive = dto.IsActive;
                 existing.UpdatedAt = DateTime.UtcNow;
 
@@ -241,12 +222,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                         IsActive = user.IsActive,
                         CreatedAt = user.CreatedAt
                     },
-                    LicenseNumber = updatedPsychologist.LicenseNumber,
-                    Specialization = updatedPsychologist.Specialization,
                     Biography = updatedPsychologist.Biography,
                     CalendarColor = updatedPsychologist.CalendarColor,
-                    ConsultationFee = updatedPsychologist.ConsultationFee,
-                    ConsultationDuration = updatedPsychologist.ConsultationDuration,
                     IsActive = updatedPsychologist.IsActive
                 };
                 

@@ -34,14 +34,6 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public int UserId { get; set; }
         public UserDto? User { get; set; }
         
-        [Required(ErrorMessage = "Lisans numarası zorunludur")]
-        [StringLength(50, ErrorMessage = "Lisans numarası en fazla 50 karakter olabilir")]
-        public string LicenseNumber { get; set; } = null!;
-        
-        [Required(ErrorMessage = "Uzmanlık alanı zorunludur")]
-        [StringLength(200, ErrorMessage = "Uzmanlık alanı en fazla 200 karakter olabilir")]
-        public string Specialization { get; set; } = null!;
-        
         [StringLength(1000, ErrorMessage = "Biyografi en fazla 1000 karakter olabilir")]
         public string? Biography { get; set; }
         
@@ -56,12 +48,6 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         
         [RegularExpression(@"^#[0-9A-Fa-f]{6}$", ErrorMessage = "Renk kodu hex formatında olmalıdır (örn: #4CAF50)")]
         public string? CalendarColor { get; set; }
-        
-        [Range(0, 100000, ErrorMessage = "Konsültasyon ücreti 0-100000 arasında olmalıdır")]
-        public decimal ConsultationFee { get; set; }
-        
-        [Range(15, 240, ErrorMessage = "Konsültasyon süresi 15-240 dakika arasında olmalıdır")]
-        public int ConsultationDuration { get; set; } = 50;
         
         public bool IsOnlineConsultationAvailable { get; set; } = true;
         public bool IsInPersonConsultationAvailable { get; set; } = true;

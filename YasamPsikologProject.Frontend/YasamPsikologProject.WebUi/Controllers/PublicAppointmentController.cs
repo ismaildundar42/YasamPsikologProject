@@ -30,14 +30,13 @@ namespace YasamPsikologProject.WebUi.Controllers
 
         // GET: /PublicAppointment/Index - Psikolog Listesi
         [HttpGet]
-        public async Task<IActionResult> Index(string? search, string? specialization, bool? onlineOnly)
+        public async Task<IActionResult> Index(string? search, bool? onlineOnly)
         {
             ViewData["PageTitle"] = "Randevu Al";
 
             var model = new PsychologistListViewModel
             {
                 SearchTerm = search,
-                SpecializationFilter = specialization,
                 OnlineOnly = onlineOnly
             };
 
@@ -54,14 +53,8 @@ namespace YasamPsikologProject.WebUi.Controllers
                         var searchLower = search.ToLower();
                         psychologists = psychologists.Where(p =>
                             (p.User?.FirstName?.ToLower().Contains(searchLower) ?? false) ||
-                            (p.User?.LastName?.ToLower().Contains(searchLower) ?? false) ||
-                            (p.Specialization?.ToLower().Contains(searchLower) ?? false)
+                            (p.User?.LastName?.ToLower().Contains(searchLower) ?? false)
                         ).ToList();
-                    }
-
-                    if (!string.IsNullOrEmpty(specialization))
-                    {
-                        psychologists = psychologists.Where(p => p.Specialization == specialization).ToList();
                     }
 
                     if (onlineOnly == true)
@@ -70,14 +63,6 @@ namespace YasamPsikologProject.WebUi.Controllers
                     }
 
                     model.Psychologists = psychologists;
-
-                    // Uzmanlık alanları listesi
-                    model.Specializations = response.Data
-                        .Where(p => !string.IsNullOrEmpty(p.Specialization))
-                        .Select(p => p.Specialization)
-                        .Distinct()
-                        .OrderBy(s => s)
-                        .ToList();
                 }
             }
             catch (Exception ex)
@@ -247,7 +232,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                 if (response.Success && response.Data != null)
                 {
                     model.Psychologist = response.Data;
-                    model.TotalFee = response.Data.ConsultationFee;
+                    model.TotalFee = 0; // Artık ücret bilgisi yok
                 }
                 else
                 {

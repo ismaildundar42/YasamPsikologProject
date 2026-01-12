@@ -84,7 +84,7 @@
                                             @foreach (var psychologist in psychologists)
                                             {
                                                 <option value="@psychologist.Id" selected="@(psychologist.Id == Model.PsychologistId)">
-                                                    @psychologist.User?.FirstName @psychologist.User?.LastName - @psychologist.Specialization
+                                                    @psychologist.User?.FirstName @psychologist.User?.LastName
                                                 </option>
                                             }
                                         }

@@ -39,23 +39,9 @@
                             <input type="text" 
                                    name="search" 
                                    class="form-control-appointment" 
-                                   placeholder="İsim veya uzmanlık alanı ara..." 
+                                   placeholder="İsim ara..." 
                                    value="@Model.SearchTerm" />
                         </div>
-                    </div>
-
-                    <!-- Uzmanlık Alanı -->
-                    <div class="filter-item">
-                        <label class="form-label-appointment">
-                            <i class="fas fa-briefcase"></i> Uzmanlık Alanı
-                        </label>
-                        <select name="specialization" class="form-control-appointment">
-                            <option value="">Tümü</option>
-                            @foreach (var spec in Model.Specializations)
-                            {
-                                <option value="@spec" selected="@(spec == Model.SpecializationFilter)">@spec</option>
-                            }
-                        </select>
                     </div>
 
                     <!-- Online Filtresi -->
@@ -105,7 +91,6 @@
                             <h3 class="psychologist-name">
                                 @psychologist.User?.FirstName @psychologist.User?.LastName
                             </h3>
-                            <p class="psychologist-specialization">@psychologist.Specialization</p>
                         </div>
                         <div class="psychologist-body">
                             @if (psychologist.IsOnlineConsultationAvailable)

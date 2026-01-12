@@ -12,14 +12,6 @@ namespace YasamPsikologProject.DataAccessLayer.EntityFramework.Configurations
 
             builder.HasKey(p => p.Id);
 
-            builder.Property(p => p.LicenseNumber)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            builder.HasIndex(p => p.LicenseNumber)
-                .IsUnique()
-                .HasDatabaseName("IX_Psychologists_LicenseNumber");
-
             builder.HasIndex(p => p.UserId)
                 .IsUnique()
                 .HasDatabaseName("IX_Psychologists_UserId");

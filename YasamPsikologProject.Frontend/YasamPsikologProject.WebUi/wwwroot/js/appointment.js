@@ -68,7 +68,6 @@ const AppointmentSystem = {
                         ${this.getInitials(p.user?.firstName, p.user?.lastName)}
                     </div>
                     <h3 class="psychologist-name">${p.user?.firstName} ${p.user?.lastName}</h3>
-                    <p class="psychologist-specialization">${p.specialization}</p>
                 </div>
                 <div class="psychologist-body">
                     <div class="psychologist-info">
@@ -82,9 +81,6 @@ const AppointmentSystem = {
                     <div class="psychologist-info">
                         <i class="fas fa-video"></i>
                         <span>${p.isOnlineConsultationAvailable ? 'Online' : ''} ${p.isInPersonConsultationAvailable ? 'Yüz Yüze' : ''}</span>
-                    </div>
-                    <div class="psychologist-fee">
-                        ${p.consultationFee} ₺
                     </div>
                     <button class="btn-appointment-primary w-100">Randevu Al</button>
                 </div>

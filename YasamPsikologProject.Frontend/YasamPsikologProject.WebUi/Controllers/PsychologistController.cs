@@ -107,20 +107,6 @@ namespace YasamPsikologProject.WebUi.Controllers
                     return View(model);
                 }
 
-                if (string.IsNullOrWhiteSpace(model.LicenseNumber))
-                {
-                    ModelState.AddModelError("LicenseNumber", "Lisans numarası zorunludur");
-                    TempData["ErrorMessage"] = "Lisans numarası zorunludur";
-                    return View(model);
-                }
-
-                if (string.IsNullOrWhiteSpace(model.Specialization))
-                {
-                    ModelState.AddModelError("Specialization", "Uzmanlık alanı zorunludur");
-                    TempData["ErrorMessage"] = "Uzmanlık alanı zorunludur";
-                    return View(model);
-                }
-
                 _logger.LogInformation("Psikolog oluşturuluyor: {Email}, {FirstName} {LastName}", 
                     model.User.Email, model.User.FirstName, model.User.LastName);
                 
@@ -228,20 +214,6 @@ namespace YasamPsikologProject.WebUi.Controllers
                 {
                     ModelState.AddModelError("User.PhoneNumber", "Telefon alanı zorunludur");
                     TempData["ErrorMessage"] = "Telefon alanı zorunludur";
-                    return View(model);
-                }
-
-                if (string.IsNullOrWhiteSpace(model.LicenseNumber))
-                {
-                    ModelState.AddModelError("LicenseNumber", "Lisans numarası zorunludur");
-                    TempData["ErrorMessage"] = "Lisans numarası zorunludur";
-                    return View(model);
-                }
-
-                if (string.IsNullOrWhiteSpace(model.Specialization))
-                {
-                    ModelState.AddModelError("Specialization", "Uzmanlık alanı zorunludur");
-                    TempData["ErrorMessage"] = "Uzmanlık alanı zorunludur";
                     return View(model);
                 }
 

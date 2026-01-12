@@ -56,24 +56,8 @@
                 <hr>
 
                 <!-- Psikolog Bilgileri -->
-                <h5 class="mb-3">Uzmanlık Bilgileri</h5>
+                <h5 class="mb-3">Görsel Ayarlar</h5>
                 <dl class="row">
-                    <dt class="col-sm-4">Uzmanlık Alanı:</dt>
-                    <dd class="col-sm-8">@Model.Specialization</dd>
-
-                    <dt class="col-sm-4">Lisans Numarası:</dt>
-                    <dd class="col-sm-8">
-                        <code>@Model.LicenseNumber</code>
-                    </dd>
-
-                    <dt class="col-sm-4">Seans Ücreti:</dt>
-                    <dd class="col-sm-8">
-                        <strong>@Model.ConsultationFee.ToString("N2") ₺</strong>
-                    </dd>
-
-                    <dt class="col-sm-4">Seans Süresi:</dt>
-                    <dd class="col-sm-8">@Model.ConsultationDuration dakika</dd>
-
                     <dt class="col-sm-4">Takvim Rengi:</dt>
                     <dd class="col-sm-8">
                         <span class="badge" style="background-color: @Model.CalendarColor; color: white; padding: 8px 15px;">

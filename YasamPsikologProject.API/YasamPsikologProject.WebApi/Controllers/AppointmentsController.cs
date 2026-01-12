@@ -53,7 +53,6 @@ namespace YasamPsikologProject.WebApi.Controllers
                         a.Psychologist.User.Email,
                         a.Psychologist.User.PhoneNumber
                     } : null,
-                    a.Psychologist.Specialization,
                     a.Psychologist.CalendarColor
                 } : null,
                 a.ClientId,

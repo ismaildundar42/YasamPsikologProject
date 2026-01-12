@@ -31,13 +31,6 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
                 .FirstOrDefaultAsync(p => p.UserId == userId);
         }
 
-        public async Task<Psychologist?> GetByLicenseNumberAsync(string licenseNumber)
-        {
-            return await _context.Psychologists
-                .Include(p => p.User)
-                .FirstOrDefaultAsync(p => p.LicenseNumber == licenseNumber);
-        }
-
         public async Task<IEnumerable<Psychologist>> GetActiveWithWorkingHoursAsync()
         {
             return await _context.Psychologists

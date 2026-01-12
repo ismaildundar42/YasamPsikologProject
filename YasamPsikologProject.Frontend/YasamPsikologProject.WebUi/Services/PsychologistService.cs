@@ -45,10 +45,7 @@ namespace YasamPsikologProject.WebUi.Services
                     LastName = psychologist.User?.LastName ?? throw new ArgumentNullException(nameof(psychologist.User.LastName), "Soyad alanı boş olamaz"),
                     Email = psychologist.User?.Email ?? throw new ArgumentNullException(nameof(psychologist.User.Email), "Email alanı boş olamaz"),
                     PhoneNumber = psychologist.User?.PhoneNumber ?? throw new ArgumentNullException(nameof(psychologist.User.PhoneNumber), "Telefon alanı boş olamaz"),
-                    LicenseNumber = psychologist.LicenseNumber ?? throw new ArgumentNullException(nameof(psychologist.LicenseNumber), "Lisans numarası boş olamaz"),
-                    Specialization = psychologist.Specialization ?? throw new ArgumentNullException(nameof(psychologist.Specialization), "Uzmanlık alanı boş olamaz"),
                     CalendarColor = psychologist.CalendarColor ?? "#4CAF50",
-                    ConsultationFee = psychologist.ConsultationFee,
                     IsActive = psychologist.IsActive
                 };
                 
@@ -78,10 +75,7 @@ namespace YasamPsikologProject.WebUi.Services
                 LastName = psychologist.User?.LastName ?? throw new ArgumentNullException(nameof(psychologist.User.LastName)),
                 Email = psychologist.User?.Email ?? throw new ArgumentNullException(nameof(psychologist.User.Email)),
                 PhoneNumber = psychologist.User?.PhoneNumber ?? throw new ArgumentNullException(nameof(psychologist.User.PhoneNumber)),
-                LicenseNumber = psychologist.LicenseNumber,
-                Specialization = psychologist.Specialization,
                 CalendarColor = psychologist.CalendarColor ?? "#4CAF50",
-                ConsultationFee = psychologist.ConsultationFee,
                 IsActive = psychologist.IsActive
             };
             

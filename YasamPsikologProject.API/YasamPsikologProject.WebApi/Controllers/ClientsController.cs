@@ -56,9 +56,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                             LastName = c.AssignedPsychologist.User.LastName,
                             Email = c.AssignedPsychologist.User.Email,
                             PhoneNumber = c.AssignedPsychologist.User.PhoneNumber
-                        },
-                        LicenseNumber = c.AssignedPsychologist.LicenseNumber,
-                        Specialization = c.AssignedPsychologist.Specialization
+                        }
                     },
                     Address = c.Address,
                     Notes = c.Notes,
@@ -113,9 +111,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                             LastName = client.AssignedPsychologist.User.LastName,
                             Email = client.AssignedPsychologist.User.Email,
                             PhoneNumber = client.AssignedPsychologist.User.PhoneNumber
-                        },
-                        LicenseNumber = client.AssignedPsychologist.LicenseNumber,
-                        Specialization = client.AssignedPsychologist.Specialization
+                        }
                     },
                     Address = client.Address,
                     Notes = client.Notes,

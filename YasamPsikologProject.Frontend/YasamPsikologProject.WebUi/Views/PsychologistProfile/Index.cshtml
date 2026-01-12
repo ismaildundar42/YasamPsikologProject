@@ -19,13 +19,7 @@
 
                 <ul class="list-group list-group-unbordered mb-3">
                     <li class="list-group-item">
-                        <b>Uzmanlık</b> <a class="float-right">@Model.Specialization</a>
-                    </li>
-                    <li class="list-group-item">
                         <b>Deneyim</b> <a class="float-right">@Model.ExperienceYears yıl</a>
-                    </li>
-                    <li class="list-group-item">
-                        <b>Lisans No</b> <a class="float-right">@Model.LicenseNumber</a>
                     </li>
                 </ul>
 
@@ -77,12 +71,6 @@
             </div>
             <div class="card-body">
                 <dl class="row">
-                    <dt class="col-sm-4">Uzmanlık Alanı:</dt>
-                    <dd class="col-sm-8">@Model.Specialization</dd>
-
-                    <dt class="col-sm-4">Lisans Numarası:</dt>
-                    <dd class="col-sm-8">@Model.LicenseNumber</dd>
-
                     <dt class="col-sm-4">Deneyim:</dt>
                     <dd class="col-sm-8">@Model.ExperienceYears yıl</dd>
 
@@ -107,22 +95,16 @@
             </div>
         </div>
 
-        <!-- Seans Bilgileri -->
+        <!-- Seans Ayarları -->
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-calendar-check mr-2"></i>
-                    Seans Bilgileri
+                    Seans Ayarları
                 </h3>
             </div>
             <div class="card-body">
                 <dl class="row">
-                    <dt class="col-sm-4">Seans Ücreti:</dt>
-                    <dd class="col-sm-8">@Model.ConsultationFee TL</dd>
-
-                    <dt class="col-sm-4">Seans Süresi:</dt>
-                    <dd class="col-sm-8">@Model.ConsultationDuration dakika</dd>
-
                     <dt class="col-sm-4">Online Görüşme:</dt>
                     <dd class="col-sm-8">
                         @if (Model.IsOnlineConsultationAvailable)

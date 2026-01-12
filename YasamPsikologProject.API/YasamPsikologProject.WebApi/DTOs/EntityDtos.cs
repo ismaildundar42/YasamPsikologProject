@@ -22,19 +22,8 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string PhoneNumber { get; set; } = null!;
 
         // Psychologist bilgileri
-        [Required(ErrorMessage = "Lisans numarası zorunludur")]
-        [StringLength(50)]
-        public string LicenseNumber { get; set; } = null!;
-        
-        [Required(ErrorMessage = "Uzmanlık alanı zorunludur")]
-        [StringLength(200)]
-        public string Specialization { get; set; } = null!;
-        
         [RegularExpression(@"^#[0-9A-Fa-f]{6}$", ErrorMessage = "Renk kodu hex formatında olmalıdır")]
         public string? CalendarColor { get; set; }
-        
-        [Range(0, 100000)]
-        public decimal ConsultationFee { get; set; }
         
         public bool IsActive { get; set; } = true;
     }
@@ -45,10 +34,7 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
-        public string LicenseNumber { get; set; } = null!;
-        public string Specialization { get; set; } = null!;
         public string? CalendarColor { get; set; }
-        public decimal ConsultationFee { get; set; }
         public bool IsActive { get; set; }
     }
 
