@@ -29,78 +29,38 @@ builder.Services.AddSession(options =>
 // Filters
 builder.Services.AddScoped<PsychologistAuthorizationFilter>();
 
-
-// HttpClient with Polly
-var retryPolicy = HttpPolicyExtensions
-    .HandleTransientHttpError()
-    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
-
-var circuitBreakerPolicy = HttpPolicyExtensions
-    .HandleTransientHttpError()
-    .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
-
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
 
-// HTTPS sertifika bypass (Development)
-var httpClientHandler = new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-};
-
-// HTTP Client Services - API Consume
+// HTTP Client Services - API Consume (WITHOUT POLLY - causes handler disposal issues)
 builder.Services.AddHttpClient<IApiAuthService, AuthService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
     client.Timeout = TimeSpan.FromSeconds(30);
-})
-.ConfigurePrimaryHttpMessageHandler(() => httpClientHandler)
-.AddPolicyHandler(retryPolicy)
-.AddPolicyHandler(circuitBreakerPolicy);
+});
 
 builder.Services.AddHttpClient<IApiPsychologistService, PsychologistService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl!);
     client.Timeout = TimeSpan.FromSeconds(30);
-})
-.ConfigurePrimaryHttpMessageHandler(() => httpClientHandler)
-.AddPolicyHandler(retryPolicy)
-.AddPolicyHandler(circuitBreakerPolicy);
+});
 
 builder.Services.AddHttpClient<IApiClientService, ClientService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl!);
     client.Timeout = TimeSpan.FromSeconds(30);
-})
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-})
-.AddPolicyHandler(retryPolicy)
-.AddPolicyHandler(circuitBreakerPolicy);
+});
 
 builder.Services.AddHttpClient<IApiAppointmentService, AppointmentService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl!);
     client.Timeout = TimeSpan.FromSeconds(30);
-})
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-})
-.AddPolicyHandler(retryPolicy)
-.AddPolicyHandler(circuitBreakerPolicy);
+});
 
 builder.Services.AddHttpClient<IApiWorkingHourService, WorkingHourService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl!);
     client.Timeout = TimeSpan.FromSeconds(30);
-})
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-})
-.AddPolicyHandler(retryPolicy)
-.AddPolicyHandler(circuitBreakerPolicy);
+});
 
 var app = builder.Build();
 

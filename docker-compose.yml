@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: yasam_psikolog_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd123
+      - MSSQL_PID=Express
+    ports:
+      - "1434:1433"  # Farklı port kullanarak mevcut servisleri bozmuyoruz
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./YasamPsikologDb:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - yasam_network
+
+volumes:
+  sqlserver_data:
+    driver: local
+
+networks:
+  yasam_network:
+    driver: bridge
