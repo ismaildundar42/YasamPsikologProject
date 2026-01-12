@@ -9,6 +9,7 @@ namespace YasamPsikologProject.DataAccessLayer.Abstract
         IClientRepository ClientRepository { get; }
         IAppointmentRepository AppointmentRepository { get; }
         IWorkingHourRepository WorkingHourRepository { get; }
+        IBreakTimeRepository BreakTimeRepository { get; }
         IUnavailableTimeRepository UnavailableTimeRepository { get; }
         IAppointmentNotificationRepository AppointmentNotificationRepository { get; }
         IAuditLogRepository AuditLogRepository { get; }

@@ -38,18 +38,30 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
 
         public async Task<bool> HasConflictAsync(int psychologistId, DateTime startDate, DateTime endDate, int? excludeAppointmentId = null)
         {
-            var query = _context.Appointments
+            // Mevcut randevuları çek
+            var appointments = await _context.Appointments
                 .Where(a => a.PsychologistId == psychologistId
-                         && a.Status != AppointmentStatus.Cancelled
-                         && a.AppointmentDate < endDate  // Mevcut randevu, yeni randevu bitmeden başlıyorsa
-                         && a.AppointmentEndDate > startDate); // Mevcut randevu, yeni randevu başladıktan sonra bitiyorsa
+                         && a.Status != AppointmentStatus.Cancelled)
+                .ToListAsync();
 
             if (excludeAppointmentId.HasValue)
             {
-                query = query.Where(a => a.Id != excludeAppointmentId.Value);
+                appointments = appointments.Where(a => a.Id != excludeAppointmentId.Value).ToList();
             }
 
-            return await query.AnyAsync();
+            // Her randevu için DİNAMİK olarak bitiş saatini hesapla (buffer dahil)
+            foreach (var appointment in appointments)
+            {
+                var actualEndDate = appointment.AppointmentDate.AddMinutes((int)appointment.Duration + appointment.BreakDuration);
+                
+                // Çakışma kontrolü: Yeni randevu mevcut randevuyla çakışıyor mu?
+                if (startDate < actualEndDate && endDate > appointment.AppointmentDate)
+                {
+                    return true; // Çakışma var!
+                }
+            }
+
+            return false; // Çakışma yok
         }
 
         public async Task<IEnumerable<Appointment>> GetByPsychologistAsync(int psychologistId, DateTime? startDate = null, DateTime? endDate = null)

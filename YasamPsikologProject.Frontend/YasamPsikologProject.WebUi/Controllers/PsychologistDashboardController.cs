@@ -62,8 +62,9 @@ namespace YasamPsikologProject.WebUi.Controllers
 
                     var today = DateTime.Today;
 
-                    model.TotalAppointments = appointments.Count;
-                    model.TodayAppointments = appointments.Count(a => a.AppointmentDate.Date == today);
+                    // İPTAL EDİLENLERİ HARİÇ TUT!
+                    model.TotalAppointments = appointments.Count(a => a.Status != "Cancelled");
+                    model.TodayAppointments = appointments.Count(a => a.AppointmentDate.Date == today && a.Status != "Cancelled");
                     model.PendingAppointments = appointments.Count(a => a.Status == "Pending");
                     model.CompletedAppointments = appointments.Count(a => a.Status == "Completed");
 

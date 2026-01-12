@@ -301,12 +301,20 @@ namespace YasamPsikologProject.WebUi.Controllers
             {
                 ClientDto? client = null;
                 
-                // Try to find existing client by email
+                // Önce TELEFON numarasına göre kontrol et (telefon daha benzersiz)
                 var clientsResponse = await _clientService.GetAllAsync();
                 if (clientsResponse.Success && clientsResponse.Data != null)
                 {
+                    // 1. Önce telefona göre ara
                     client = clientsResponse.Data.FirstOrDefault(c => 
-                        c.User?.Email?.Equals(clientEmail, StringComparison.OrdinalIgnoreCase) == true);
+                        c.User?.PhoneNumber?.Equals(clientPhone, StringComparison.OrdinalIgnoreCase) == true);
+                    
+                    // 2. Telefon bulamazsa email'e göre ara
+                    if (client == null)
+                    {
+                        client = clientsResponse.Data.FirstOrDefault(c => 
+                            c.User?.Email?.Equals(clientEmail, StringComparison.OrdinalIgnoreCase) == true);
+                    }
                 }
 
                 // If client doesn't exist, we need to create a new user and client

@@ -63,7 +63,54 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (psychologist == null)
                 throw new Exception("Psikolog bulunamadı.");
 
+            // İlişkili kayıtları kontrol et
+            var appointments = await _unitOfWork.AppointmentRepository.GetAllAsync(a => a.PsychologistId == id);
+            var appointmentsList = appointments.ToList();
+
+            var activeAppointments = appointmentsList.Where(a => 
+                a.Status != EntityLayer.Enums.AppointmentStatus.Cancelled && 
+                a.AppointmentDate > DateTime.Now).ToList();
+
+            // Eğer gelecekte aktif randevusu varsa uyar (isteğe bağlı)
+            if (activeAppointments.Any())
+            {
+                throw new Exception($"Bu psikologun {activeAppointments.Count} adet gelecekteki aktif randevusu var. Önce bu randevuları iptal edin.");
+            }
+
+            // Psikolog'u soft delete yap
             _unitOfWork.PsychologistRepository.Delete(psychologist);
+
+            // İlişkili tüm randevuları soft delete yap (geçmiş randevular dahil - arşiv için)
+            foreach (var appointment in appointmentsList)
+            {
+                _unitOfWork.AppointmentRepository.Delete(appointment);
+            }
+
+            // İlişkili çalışma saatlerini soft delete yap
+            var workingHours = await _unitOfWork.WorkingHourRepository.GetAllAsync(w => w.PsychologistId == id);
+            var workingHoursList = workingHours.ToList();
+            foreach (var workingHour in workingHoursList)
+            {
+                _unitOfWork.WorkingHourRepository.Delete(workingHour);
+                
+                // Bu çalışma saatine ait mola sürelerini de soft delete yap
+                var breakTimes = await _unitOfWork.BreakTimeRepository.GetAllAsync(b => b.WorkingHourId == workingHour.Id);
+                foreach (var breakTime in breakTimes)
+                {
+                    _unitOfWork.BreakTimeRepository.Delete(breakTime);
+                }
+            }
+
+            // İlişkili uygun olmayan zamanları soft delete yap
+            var unavailableTimes = await _unitOfWork.UnavailableTimeRepository.GetAllAsync(u => u.PsychologistId == id);
+            foreach (var unavailableTime in unavailableTimes)
+            {
+                _unitOfWork.UnavailableTimeRepository.Delete(unavailableTime);
+            }
+
+            // NOT: Danışanları (Clients) silmiyoruz - başka psikologlarla randevuları olabilir
+            // AssignedPsychologistId null yapılabilir ama bu opsiyonel
+
             await _unitOfWork.SaveChangesAsync();
         }
     }

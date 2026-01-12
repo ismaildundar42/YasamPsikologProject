@@ -19,6 +19,7 @@ namespace YasamPsikologProject.DataAccessLayer.Concerete
             ClientRepository = new ClientRepository(_context);
             AppointmentRepository = new AppointmentRepository(_context);
             WorkingHourRepository = new WorkingHourRepository(_context);
+            BreakTimeRepository = new BreakTimeRepository(_context);
             UnavailableTimeRepository = new UnavailableTimeRepository(_context);
             AppointmentNotificationRepository = new AppointmentNotificationRepository(_context);
             AuditLogRepository = new AuditLogRepository(_context);
@@ -30,6 +31,7 @@ namespace YasamPsikologProject.DataAccessLayer.Concerete
         public IClientRepository ClientRepository { get; private set; }
         public IAppointmentRepository AppointmentRepository { get; private set; }
         public IWorkingHourRepository WorkingHourRepository { get; private set; }
+        public IBreakTimeRepository BreakTimeRepository { get; private set; }
         public IUnavailableTimeRepository UnavailableTimeRepository { get; private set; }
         public IAppointmentNotificationRepository AppointmentNotificationRepository { get; private set; }
         public IAuditLogRepository AuditLogRepository { get; private set; }

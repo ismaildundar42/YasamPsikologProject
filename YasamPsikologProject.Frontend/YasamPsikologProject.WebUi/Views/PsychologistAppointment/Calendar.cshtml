@@ -41,7 +41,7 @@
                     </div>
                     <div class="custom-control custom-checkbox">
                         <input class="custom-control-input status-filter" type="checkbox" 
-                               id="status_cancelled" value="Cancelled" checked>
+                               id="status_cancelled" value="Cancelled">
                         <label class="custom-control-label" for="status_cancelled">
                             <span class="badge badge-danger">İptal</span>
                         </label>
@@ -90,6 +90,21 @@
                 <div id="calendar"></div>
             </div>
         </div>
+
+        <!-- İptal Edilen Randevular -->
+        <div class="card card-danger mt-3">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-ban mr-2"></i>
+                    İptal Edilen Randevular
+                </h3>
+            </div>
+            <div class="card-body p-0">
+                <div id="cancelledAppointments">
+                    <p class="text-center text-muted p-3">Yükleniyor...</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -120,7 +135,7 @@
                 slotMinTime: '08:00:00',
                 slotMaxTime: '20:00:00',
                 slotDuration: '00:15:00', // 15 dakikalık dilimler
-                slotLabelInterval: '00:30:00', // Etiketler 30 dakikada bir
+                slotLabelInterval: '00:15:00', // Etiketler de 15 dakikada bir gösterilsin
                 allDaySlot: false,
                 editable: false,
                 selectable: true,
@@ -140,6 +155,9 @@
                             allEvents = data;
                             var filteredEvents = filterEvents(data);
                             successCallback(filteredEvents);
+                            
+                            // İptal edilen randevuları göster
+                            loadCancelledAppointments(data);
                         },
                         error: function() {
                             failureCallback();
@@ -163,6 +181,63 @@
             });
             
             calendar.render();
+
+            // İptal edilen randevuları yükle ve göster
+            function loadCancelledAppointments(events) {
+                var cancelledEvents = events.filter(function(event) {
+                    return event.extendedProps.status === 'Cancelled';
+                });
+                
+                var container = $('#cancelledAppointments');
+                
+                if (cancelledEvents.length === 0) {
+                    container.html('<p class="text-center text-muted p-3">İptal edilen randevu bulunmamaktadır.</p>');
+                    return;
+                }
+                
+                // Tarihe göre sırala (en yeni üstte)
+                cancelledEvents.sort(function(a, b) {
+                    return new Date(b.start) - new Date(a.start);
+                });
+                
+                var html = '<div class="table-responsive">';
+                html += '<table class="table table-sm table-hover">';
+                html += '<thead>';
+                html += '<tr>';
+                html += '<th>Tarih/Saat</th>';
+                html += '<th>Danışan</th>';
+                html += '<th>İptal Nedeni</th>';
+                html += '<th>İşlem</th>';
+                html += '</tr>';
+                html += '</thead>';
+                html += '<tbody>';
+                
+                cancelledEvents.forEach(function(event) {
+                    var eventStart = new Date(event.start);
+                    var eventEnd = new Date(event.end);
+                    var dateStr = eventStart.toLocaleDateString('tr-TR', {day: 'numeric', month: 'short', year: 'numeric'});
+                    var timeStr = eventStart.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}) + 
+                                  ' - ' + 
+                                  eventEnd.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
+                    
+                    html += '<tr>';
+                    html += '<td><strong>' + dateStr + '</strong><br><small class="text-muted">' + timeStr + '</small></td>';
+                    html += '<td>' + event.title + '</td>';
+                    html += '<td><small class="text-muted">' + (event.extendedProps.cancellationReason || 'Belirtilmemiş') + '</small></td>';
+                    html += '<td>';
+                    html += '<button class="btn btn-sm btn-info" onclick="showEventById(' + event.id + ')">';
+                    html += '<i class="fas fa-eye"></i> Görüntüle';
+                    html += '</button>';
+                    html += '</td>';
+                    html += '</tr>';
+                });
+                
+                html += '</tbody>';
+                html += '</table>';
+                html += '</div>';
+                
+                container.html(html);
+            }
 
             // Filtreleme fonksiyonu
             function filterEvents(events) {

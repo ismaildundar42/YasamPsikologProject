@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using YasamPsikologProject.DataAccessLayer.Abstract;
 using YasamPsikologProject.DataAccessLayer.EntityFramework;
 using YasamPsikologProject.EntityLayer.Concrete;
+using YasamPsikologProject.EntityLayer.Enums;
 
 namespace YasamPsikologProject.DataAccessLayer.Repositories
 {
@@ -17,9 +18,10 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
         public async Task<IEnumerable<Client>> GetAllAsync()
         {
             // Soft delete filtresi ile birlikte User ve AssignedPsychologist bilgilerini getir
-            // Sadece EN AZ 1 RANDEVUSU OLAN danışanları göster
+            // Sadece EN AZ 1 ONAYLANMIŞ veya BEKLEYENde RANDEVUSU OLAN danışanları göster (İptal edilenler hariç)
             return await _context.Clients
-                .Where(c => !c.IsDeleted && _context.Appointments.Any(a => a.ClientId == c.Id))
+                .Where(c => !c.IsDeleted && _context.Appointments.Any(a => 
+                    a.ClientId == c.Id && a.Status != AppointmentStatus.Cancelled))
                 .Include(c => c.User)
                 .Include(c => c.AssignedPsychologist)
                     .ThenInclude(p => p.User)
@@ -48,11 +50,12 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
 
         public async Task<IEnumerable<Client>> GetByPsychologistAsync(int psychologistId)
         {
-            // Sadece EN AZ 1 RANDEVUSU OLAN danışanları göster
+            // Sadece EN AZ 1 ONAYLANMIŞ veya BEKLEYENde RANDEVUSU OLAN danışanları göster (İptal edilenler hariç)
             return await _context.Clients
                 .Where(c => !c.IsDeleted 
                     && c.AssignedPsychologistId == psychologistId
-                    && _context.Appointments.Any(a => a.ClientId == c.Id))
+                    && _context.Appointments.Any(a => 
+                        a.ClientId == c.Id && a.Status != AppointmentStatus.Cancelled))
                 .Include(c => c.User)
                 .ToListAsync();
         }

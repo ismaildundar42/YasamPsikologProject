@@ -125,10 +125,8 @@
                                     <input type="datetime-local" class="form-control" asp-for="AppointmentDate" required />
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Ara Süresi (dakika)</label>
-                                    <input type="number" class="form-control" asp-for="BreakDuration" value="10" min="0" max="60" />
-                                </div>
+                                <!-- BreakDuration gizli alan - backend otomatik ayarlıyor -->
+                                <input type="hidden" asp-for="BreakDuration" />
 
                                 <div class="mb-3">
                                     <label class="form-label">Durum <span class="text-danger">*</span></label>

@@ -24,9 +24,9 @@ namespace YasamPsikologProject.WebUi.Controllers
         [HttpGet]
         [Route("")]
         [Route("Index")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? status = null)
         {
-            ViewData["PageTitle"] = "Randevularım";
+            ViewData["PageTitle"] = status == "Pending" ? "Bekleyen Randevular" : "Randevularım";
 
             try
             {
@@ -46,6 +46,13 @@ namespace YasamPsikologProject.WebUi.Controllers
                         .OrderByDescending(a => a.AppointmentDate)
                         .ToList();
 
+                    // Status filtresi varsa uygula
+                    if (!string.IsNullOrEmpty(status))
+                    {
+                        appointments = appointments.Where(a => a.Status == status).ToList();
+                    }
+
+                    ViewData["StatusFilter"] = status; // View'da kullanmak için
                     return View(appointments);
                 }
 

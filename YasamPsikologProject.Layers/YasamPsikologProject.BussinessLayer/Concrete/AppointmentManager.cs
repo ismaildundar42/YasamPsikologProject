@@ -48,6 +48,12 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
 
         public async Task<Appointment> CreateAsync(Appointment appointment)
         {
+            // GEÇMİŞ TARİH/SAAT KONTROLÜ - Geçmiş saatlere randevu alınamaz!
+            if (appointment.AppointmentDate <= DateTime.Now)
+            {
+                throw new Exception("Geçmiş tarihe veya saate randevu oluşturamazsınız.");
+            }
+
             // Client kontrolü
             var client = await _unitOfWork.ClientRepository.GetByIdAsync(appointment.ClientId);
             if (client == null)
@@ -136,6 +142,12 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (existing == null)
                 throw new Exception("Randevu bulunamadı.");
 
+            // GEÇMİŞ TARİH/SAAT KONTROLÜ - Geçmiş saatlere taşınamaz!
+            if (appointment.AppointmentDate <= DateTime.Now)
+            {
+                throw new Exception("Randevu geçmiş tarihe veya saate taşınamaz.");
+            }
+
             // Çalışma saatlerinden buffer süresini al
             var appointmentDayOfWeek = appointment.AppointmentDate.DayOfWeek == DayOfWeek.Sunday
                 ? WeekDay.Sunday
@@ -175,6 +187,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             var appointment = await _unitOfWork.AppointmentRepository.GetByIdAsync(id);
             if (appointment == null)
                 throw new Exception("Randevu bulunamadı.");
+
+            var oldStatus = appointment.Status;
+            
+            // İptal edilen randevuyu tekrar onaylarken ÇAKIŞMA KONTROLÜ yap!
+            if (oldStatus == AppointmentStatus.Cancelled && 
+                (status == AppointmentStatus.Confirmed || status == AppointmentStatus.Pending))
+            {
+                if (await _unitOfWork.AppointmentRepository.HasConflictAsync(
+                    appointment.PsychologistId,
+                    appointment.AppointmentDate,
+                    appointment.AppointmentEndDate,
+                    appointment.Id))
+                {
+                    throw new Exception("Bu saatte artık başka bir randevu bulunmaktadır. İptal edilen randevu tekrar aktif edilemiyor.");
+                }
+            }
 
             appointment.Status = status;
             if (status == AppointmentStatus.Cancelled && !string.IsNullOrWhiteSpace(reason))
