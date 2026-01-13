@@ -93,18 +93,25 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 throw new Exception("Bu saatte zaten bir randevu bulunmaktadır.");
             }
 
-            // Randevu, çalışma saatleri içinde mi kontrol et
+            // Randevu, çalışma saatleri içinde mi kontrol et (buffer dahil bitiş saati)
             var appointmentTime = appointment.AppointmentDate.TimeOfDay;
-            if (appointmentTime < workingHour.StartTime || appointment.AppointmentEndDate.TimeOfDay > workingHour.EndTime)
-                throw new Exception("Randevu saatleri çalışma saatleri dışındadır.");
+            var appointmentEndTime = appointment.AppointmentEndDate.TimeOfDay;
+            
+            if (appointmentTime < workingHour.StartTime)
+                throw new Exception("Randevu başlangıç saati çalışma saatlerinden önce.");
+            
+            if (appointmentEndTime > workingHour.EndTime)
+                throw new Exception("Randevu bitiş saati (buffer dahil) çalışma saatlerinden sonra.");
 
-            // Mola saatleri kontrolü - SADECE mola zamanı (mola bitince hemen randevu başlayabilir)
+            // Mola saatleri kontrolü - Randevunun HERHANGİ BİR KISMI mola zamanına denk gelmemeli
+            // Ancak randevu tam mola başlangıcında bitebilir (AppointmentEndDate == BreakStartTime)
             bool isInBreakTime = workingHour.BreakTimes.Any(b =>
             {
-                // Randevunun herhangi bir kısmı mola zamanına denk geliyorsa
-                return (appointment.AppointmentDate.TimeOfDay >= b.StartTime && appointment.AppointmentDate.TimeOfDay < b.EndTime) ||
-                       (appointment.AppointmentEndDate.TimeOfDay > b.StartTime && appointment.AppointmentEndDate.TimeOfDay <= b.EndTime) ||
-                       (appointment.AppointmentDate.TimeOfDay <= b.StartTime && appointment.AppointmentEndDate.TimeOfDay > b.StartTime);
+                // Çakışma kontrolü: Randevu [start, end] ile mola [breakStart, breakEnd] çakışıyor mu?
+                // Çakışma YOK ise: end <= breakStart VEYA start >= breakEnd
+                // Çakışma VAR ise: start < breakEnd VE end > breakStart
+                return appointment.AppointmentDate.TimeOfDay < b.EndTime && 
+                       appointment.AppointmentEndDate.TimeOfDay > b.StartTime;
             });
 
             if (isInBreakTime)
@@ -167,6 +174,29 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             int totalMinutes = durationMinutes + appointment.BreakDuration;
             appointment.AppointmentEndDate = appointment.AppointmentDate.AddMinutes(totalMinutes);
 
+            // Çalışma saatleri kontrolü
+            if (workingHour != null)
+            {
+                var appointmentTime = appointment.AppointmentDate.TimeOfDay;
+                var appointmentEndTime = appointment.AppointmentEndDate.TimeOfDay;
+                
+                if (appointmentTime < workingHour.StartTime)
+                    throw new Exception("Randevu başlangıç saati çalışma saatlerinden önce.");
+                
+                if (appointmentEndTime > workingHour.EndTime)
+                    throw new Exception("Randevu bitiş saati (buffer dahil) çalışma saatlerinden sonra.");
+                
+                // Mola saatleri kontrolü
+                bool isInBreakTime = workingHour.BreakTimes.Any(b =>
+                {
+                    return appointment.AppointmentDate.TimeOfDay < b.EndTime && 
+                           appointment.AppointmentEndDate.TimeOfDay > b.StartTime;
+                });
+
+                if (isInBreakTime)
+                    throw new Exception("Randevu saatleri psikologun mola saatlerine denk gelmektedir.");
+            }
+            
             // Çakışma kontrolü (kendi randevusu hariç)
             if (await _unitOfWork.AppointmentRepository.HasConflictAsync(
                 appointment.PsychologistId,
@@ -175,6 +205,15 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 appointment.Id))
             {
                 throw new Exception("Bu saatte zaten bir randevu bulunmaktadır.");
+            }
+            
+            // İzin günü kontrolü
+            if (await _unitOfWork.UnavailableTimeRepository.HasUnavailableTimeAsync(
+                appointment.PsychologistId,
+                appointment.AppointmentDate,
+                appointment.AppointmentEndDate))
+            {
+                throw new Exception("Psikolog bu tarihte müsait değildir.");
             }
 
             _unitOfWork.AppointmentRepository.Update(appointment);
@@ -276,44 +315,47 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
 
             int slotDuration = (int)duration;
             int bufferDuration = workingHour.BufferDuration; // Psikologun buffer süresi
-            int slotInterval = 1; // Her dakika kontrol et ama sadece uygun zamanları göster
+            int slotInterval = 5; // 5 dakika aralıklarla kontrol et
             
             var currentTime = date.Date.Add(workingHour.StartTime);
             var endTime = date.Date.Add(workingHour.EndTime);
-
-            while (currentTime.AddMinutes(slotDuration) <= endTime)
+            
+            // Eğer bugünse ve başlangıç saati geçmişte kalıyorsa, şu andan başla
+            var now = DateTime.Now;
+            if (date.Date == now.Date && currentTime < now)
             {
-                // Sadece 5'in katı saatleri göster (örn: 10:00, 10:05, 10:10, 10:15...)
-                if (currentTime.Minute % 5 != 0)
+                // Şimdiki zamandan sonraki ilk 5'in katı dakikayı bul
+                currentTime = now;
+                int remainder = currentTime.Minute % 5;
+                if (remainder != 0)
                 {
-                    currentTime = currentTime.AddMinutes(slotInterval);
-                    continue;
+                    currentTime = currentTime.AddMinutes(5 - remainder);
                 }
+                currentTime = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day, currentTime.Hour, currentTime.Minute, 0);
+            }
+
+            // While döngüsü: Buffer dahil bitiş saati çalışma saatini geçmemeli
+            while (currentTime.AddMinutes(slotDuration + bufferDuration) <= endTime)
+            {
                 
-                // Slot kontrolü için sadece randevu süresi (buffer AppointmentEndDate'te zaten var)
+                // Slot bitiş saati = Randevu süresi + Buffer süresi (gerçek bitiş zamanı)
                 var slotEnd = currentTime.AddMinutes(slotDuration);
+                var slotEndWithBuffer = currentTime.AddMinutes(slotDuration + bufferDuration);
                 
-                // Slot bitiş saati çalışma saatini geçmemeli
-                if (slotEnd > endTime)
-                    break;
-                
-                // Mola saatleri kontrolü - SADECE mola zamanı (mola bitince hemen randevu başlayabilir)
+                // Mola saatleri kontrolü - Randevunun HERHANGİ BİR KISMI (buffer dahil) mola zamanına denk gelmemeli
                 bool isInBreakTime = workingHour.BreakTimes.Any(b =>
                 {
                     var breakStart = date.Date.Add(b.StartTime);
                     var breakEnd = date.Date.Add(b.EndTime);
                     
-                    // Randevunun herhangi bir kısmı mola zamanına denk geliyorsa
-                    return (currentTime >= breakStart && currentTime < breakEnd) ||
-                           (slotEnd > breakStart && slotEnd <= breakEnd) ||
-                           (currentTime <= breakStart && slotEnd > breakStart);
+                    // Çakışma kontrolü: [currentTime, slotEndWithBuffer] ile [breakStart, breakEnd] çakışıyor mu?
+                    return currentTime < breakEnd && slotEndWithBuffer > breakStart;
                 });
 
                 // Mola zamanı değilse diğer kontrollere geç
                 if (!isInBreakTime)
                 {
-                    // Çakışma kontrolü - AppointmentEndDate'e GÜVENME, DİNAMİK HESAPLA!
-                    // Mevcut randevuların gerçek bitiş saatini hesapla (buffer dahil)
+                    // Çakışma kontrolü - Buffer dahil bitiş saatini kullan!
                     bool hasConflict = appointments.Any(a => 
                     {
                         if (a.Status == AppointmentStatus.Cancelled)
@@ -322,21 +364,24 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                         // Gerçek bitiş saati = Başlangıç + Duration + BreakDuration
                         var actualEndDate = a.AppointmentDate.AddMinutes((int)a.Duration + a.BreakDuration);
                         
-                        // Yeni slot başlangıcı, mevcut randevunun bitişinden ÖNCE mi?
-                        return currentTime < actualEndDate;
+                        // İki zaman dilimi çakışıyor mu kontrol et:
+                        // Yeni slot (BUFFER DAHİL): [currentTime, slotEndWithBuffer]
+                        // Mevcut randevu: [appointmentDate, actualEndDate]
+                        return currentTime < actualEndDate && slotEndWithBuffer > a.AppointmentDate;
                     });
 
                     if (!hasConflict)
                     {
+                        // İzin günü kontrolü - buffer dahil bitiş saatini kullan
                         if (!await _unitOfWork.UnavailableTimeRepository.HasUnavailableTimeAsync(
-                            psychologistId, currentTime, slotEnd))
+                            psychologistId, currentTime, slotEndWithBuffer))
                         {
                             availableSlots.Add(currentTime);
                         }
                     }
                 }
 
-                // Sabit aralıklarla ilerle (10 dakika) - böylece her olası başlangıç saatini kontrol ederiz
+                // 5 dakika aralıklarla ilerle
                 currentTime = currentTime.AddMinutes(slotInterval);
             }
 

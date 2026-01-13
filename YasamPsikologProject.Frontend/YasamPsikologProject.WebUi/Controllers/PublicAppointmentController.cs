@@ -372,6 +372,11 @@ namespace YasamPsikologProject.WebUi.Controllers
                     _logger.LogInformation("Existing client found with ID: {ClientId}", client.Id);
                 }
 
+                // Yeni oluşturulan client mi kontrol et (rollback için)
+                bool isNewlyCreatedClient = client.Id > 0 && 
+                    client.Notes?.Contains("Randevu talebi ile oluşturuldu") == true;
+                int newClientId = client.Id;
+
                 // Create appointment with "Pending" status (frontend customer request)
                 var appointmentDto = new AppointmentDto
                 {
@@ -397,6 +402,22 @@ namespace YasamPsikologProject.WebUi.Controllers
                 else
                 {
                     _logger.LogError("Failed to create appointment: {Message}", response.Message);
+                    
+                    // Randevu oluşturamazsa ve yeni client oluşturulmuşsa, client'ı sil (rollback)
+                    if (isNewlyCreatedClient)
+                    {
+                        try
+                        {
+                            _logger.LogWarning("Rolling back newly created client with ID: {ClientId}", newClientId);
+                            await _clientService.DeleteAsync(newClientId);
+                            _logger.LogInformation("Successfully rolled back client with ID: {ClientId}", newClientId);
+                        }
+                        catch (Exception rollbackEx)
+                        {
+                            _logger.LogError(rollbackEx, "Failed to rollback newly created client with ID: {ClientId}", newClientId);
+                        }
+                    }
+                    
                     TempData["ErrorMessage"] = response.Message ?? "Randevu oluşturulamadı.";
                     return RedirectToAction(nameof(ConfirmAppointment), new
                     {
