@@ -11,13 +11,16 @@ namespace YasamPsikologProject.WebUi.Controllers
     public class PsychologistProfileController : Controller
     {
         private readonly IApiPsychologistService _psychologistService;
+        private readonly IApiUserService _userService;
         private readonly ILogger<PsychologistProfileController> _logger;
 
         public PsychologistProfileController(
             IApiPsychologistService psychologistService,
+            IApiUserService userService,
             ILogger<PsychologistProfileController> logger)
         {
             _psychologistService = psychologistService;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -146,8 +149,10 @@ namespace YasamPsikologProject.WebUi.Controllers
         [HttpPost]
         [Route("ChangePassword")]
         [ValidateAntiForgeryToken]
-        public IActionResult ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword)
         {
+            ViewData["PageTitle"] = "Şifre Değiştir";
+
             if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
             {
                 TempData["ErrorMessage"] = "Tüm alanları doldurunuz.";
@@ -168,8 +173,25 @@ namespace YasamPsikologProject.WebUi.Controllers
 
             try
             {
-                // TODO: Backend'de şifre değiştirme endpoint'i eklenecek
-                TempData["InfoMessage"] = "Şifre değiştirme özelliği yakında eklenecektir.";
+                // Session'dan user ID'sini al
+                var userId = HttpContext.Session.GetUserId();
+                if (!userId.HasValue)
+                {
+                    _logger.LogWarning("User ID bulunamadı");
+                    return RedirectToAction("Login", "Account");
+                }
+
+                var response = await _userService.ChangePasswordAsync(userId.Value, currentPassword, newPassword);
+                
+                if (response.Success)
+                {
+                    TempData["SuccessMessage"] = "Şifreniz başarıyla değiştirildi. Lütfen yeni şifrenizle tekrar giriş yapınız.";
+                    // Kullanıcıyı çıkış yaptır
+                    HttpContext.Session.Clear();
+                    return RedirectToAction("Login", "Account");
+                }
+
+                TempData["ErrorMessage"] = response.Message ?? "Şifre değiştirilemedi.";
                 return View();
             }
             catch (Exception ex)

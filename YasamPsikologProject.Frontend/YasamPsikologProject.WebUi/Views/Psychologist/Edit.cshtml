@@ -70,8 +70,16 @@
                                 <small class="form-text text-muted">Format: 05551234567 (11 hane)</small>
                                 <span class="text-danger field-validation-valid" data-valmsg-for="User.PhoneNumber" data-valmsg-replace="true"></span>
                             </div>
-                        </div>
-                    </div>
+                        </div>                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Yeni Şifre</label>
+                                <input type="password" class="form-control" name="User.Password" 
+                                       data-val-minlength="Şifre en az 6 karakter olmalıdır" 
+                                       data-val-minlength-min="6" minlength="6">
+                                <small class="form-text text-muted">Değiştirmek istemiyorsanız boş bırakın (En az 6 karakter)</small>
+                                <span class="text-danger field-validation-valid" data-valmsg-for="User.Password" data-valmsg-replace="true"></span>
+                            </div>
+                        </div>                    </div>
 
                     <!-- Psikolog Bilgileri -->
                     <hr>

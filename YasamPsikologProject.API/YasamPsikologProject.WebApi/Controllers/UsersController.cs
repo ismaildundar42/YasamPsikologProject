@@ -110,5 +110,67 @@ namespace YasamPsikologProject.WebApi.Controllers
             var exists = await _userService.PhoneExistsAsync(phone, excludeUserId);
             return Ok(new { exists });
         }
+
+        [HttpPost("{id}/change-password")]
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Geçersiz veri.", errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
+            }
+
+            try
+            {
+                var user = await _userService.GetByIdAsync(id);
+                if (user == null)
+                    return NotFound(new { message = "Kullanıcı bulunamadı." });
+
+                // Mevcut şifreyi kontrol et - Hem BCrypt hem de düz metin desteği
+                bool isCurrentPasswordValid = false;
+                
+                try
+                {
+                    if (user.PasswordHash.StartsWith("$2"))
+                    {
+                        // BCrypt hash formatı
+                        isCurrentPasswordValid = BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash);
+                    }
+                    else
+                    {
+                        // Düz metin şifre
+                        isCurrentPasswordValid = user.PasswordHash == dto.CurrentPassword;
+                    }
+                }
+                catch
+                {
+                    // BCrypt hatası olursa düz metin kontrolü yap
+                    isCurrentPasswordValid = user.PasswordHash == dto.CurrentPassword;
+                }
+
+                if (!isCurrentPasswordValid)
+                {
+                    return BadRequest(new { message = "Mevcut şifre yanlış." });
+                }
+
+                // Yeni şifreyi kaydet
+                user.PasswordHash = dto.NewPassword; // Geçici olarak hashlemeden direkt string
+                // user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+                user.UpdatedAt = DateTime.UtcNow;
+                
+                await _userService.UpdateAsync(user);
+                
+                return Ok(new { message = "Şifre başarıyla değiştirildi." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+    }
+
+    public class ChangePasswordDto
+    {
+        public string CurrentPassword { get; set; } = null!;
+        public string NewPassword { get; set; } = null!;
     }
 }

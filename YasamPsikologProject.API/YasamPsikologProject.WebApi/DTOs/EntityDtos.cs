@@ -20,6 +20,10 @@ namespace YasamPsikologProject.WebApi.DTOs
         [Required(ErrorMessage = "Telefon alanı zorunludur")]
         [RegularExpression(@"^0[0-9]{10}$", ErrorMessage = "Telefon numarası 0 ile başlamalı ve 11 haneli olmalıdır")]
         public string PhoneNumber { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Şifre alanı zorunludur")]
+        [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır")]
+        public string Password { get; set; } = null!;
 
         // Psychologist bilgileri
         [RegularExpression(@"^#[0-9A-Fa-f]{6}$", ErrorMessage = "Renk kodu hex formatında olmalıdır")]
@@ -34,6 +38,10 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
+        
+        [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır")]
+        public string? Password { get; set; }
+        
         public string? CalendarColor { get; set; }
         public bool IsActive { get; set; }
     }

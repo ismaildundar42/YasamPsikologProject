@@ -12,13 +12,16 @@ namespace YasamPsikologProject.WebApi.Controllers
     {
         private readonly IPsychologistService _psychologistService;
         private readonly IUserService _userService;
+        private readonly ILogger<PsychologistsController> _logger;
 
         public PsychologistsController(
             IPsychologistService psychologistService,
-            IUserService userService)
+            IUserService userService,
+            ILogger<PsychologistsController> logger)
         {
             _psychologistService = psychologistService;
             _userService = userService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -114,6 +117,8 @@ namespace YasamPsikologProject.WebApi.Controllers
 
             try
             {
+                _logger.LogInformation($"Creating psychologist: Email={dto.Email}, Password=[{dto.Password}], PasswordLength={dto.Password?.Length}");
+                
                 // Önce User oluştur
                 var user = new User
                 {
@@ -121,13 +126,18 @@ namespace YasamPsikologProject.WebApi.Controllers
                     LastName = dto.LastName,
                     Email = dto.Email,
                     PhoneNumber = dto.PhoneNumber,
-                    PasswordHash = "Temp123!", // Geçici şifre - Test için hashlenmeden
+                    PasswordHash = dto.Password, // Geçici olarak hashlemeden direkt string
+                    // PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                     Role = UserRole.Psychologist,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 };
 
+                _logger.LogInformation($"User object created with PasswordHash=[{user.PasswordHash}]");
+
                 var createdUser = await _userService.CreateAsync(user);
+                
+                _logger.LogInformation($"User saved to DB with ID={createdUser.Id}, PasswordHash=[{createdUser.PasswordHash}]");
 
                 // Sonra Psychologist oluştur
                 var psychologist = new Psychologist
@@ -191,6 +201,14 @@ namespace YasamPsikologProject.WebApi.Controllers
                     user.LastName = dto.LastName;
                     user.Email = dto.Email;
                     user.PhoneNumber = dto.PhoneNumber;
+                    
+                    // Şifre güncelleme (eğer verilmişse)
+                    if (!string.IsNullOrWhiteSpace(dto.Password))
+                    {
+                        user.PasswordHash = dto.Password; // Geçici olarak hashlemeden direkt string
+                        // user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                    }
+                    
                     user.UpdatedAt = DateTime.UtcNow;
                     
                     await _userService.UpdateAsync(user);

@@ -1,22 +1,20 @@
 @model YasamPsikologProject.WebUi.Models.DTOs.PsychologistDto
 @{
-    Layout = "_AdminLayout";
-    ViewData["PageTitle"] = Model?.Id > 0 ? "Psikolog Düzenle" : "Yeni Psikolog";
-    var isEdit = Model?.Id > 0;
+    ViewData["Title"] = "Profil Düzenle";
+    Layout = "~/Views/Shared/_PsychologistLayout.cshtml";
 }
 
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">@ViewData["PageTitle"]</h3>
+                <h3 class="card-title">
+                    <i class="fas fa-user-edit"></i> Profil Bilgilerini Düzenle
+                </h3>
             </div>
-            <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
-                @if (isEdit)
-                {
-                    <input type="hidden" asp-for="Id" />
-                    <input type="hidden" asp-for="UserId" />
-                }
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="UserId" />
                 
                 <div class="card-body">
                     @if (TempData["ErrorMessage"] != null)
@@ -31,7 +29,9 @@
                     
                     <div asp-validation-summary="All" class="text-danger"></div>
                     
-                    <!-- Kullanıcı Bilgileri -->
+                    <!-- Kişisel Bilgiler -->
+                    <h5 class="mb-3"><i class="fas fa-user"></i> Kişisel Bilgiler</h5>
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -70,21 +70,11 @@
                                 <small class="form-text text-muted">Format: 05551234567 (11 hane)</small>
                                 <span class="text-danger field-validation-valid" data-valmsg-for="User.PhoneNumber" data-valmsg-replace="true"></span>
                             </div>
-                        </div>                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Şifre *</label>
-                                <input type="password" class="form-control" name="User.Password" 
-                                       data-val="true" data-val-required="Şifre alanı zorunludur" 
-                                       data-val-minlength="Şifre en az 6 karakter olmalıdır" 
-                                       data-val-minlength-min="6" minlength="6" required>
-                                <small class="form-text text-muted">En az 6 karakter</small>
-                                <span class="text-danger field-validation-valid" data-valmsg-for="User.Password" data-valmsg-replace="true"></span>
-                            </div>
-                        </div>                    </div>
+                        </div>
+                    </div>
 
-                    <!-- Psikolog Bilgileri -->
                     <hr>
-                    <h5 class="mb-3">Görsel Ayarlar</h5>
+                    <h5 class="mb-3"><i class="fas fa-cog"></i> Görsel Ayarlar</h5>
 
                     <div class="row">
                         <div class="col-md-6">
@@ -92,16 +82,14 @@
                                 <label>Takvim Rengi *</label>
                                 <input type="color" class="form-control" asp-for="CalendarColor" 
                                        value="@(Model?.CalendarColor ?? "#4CAF50")" required>
-                                <small class="form-text text-muted">Randevu rengi</small>
+                                <small class="form-text text-muted">Randevularınızda görünecek renk</small>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" asp-for="IsActive" checked>
-                            <label class="custom-control-label" for="IsActive">Aktif</label>
-                        </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Not:</strong> Şifrenizi değiştirmek için <a asp-action="ChangePassword" class="alert-link">Şifre Değiştir</a> sayfasını kullanın.
                     </div>
                 </div>
 

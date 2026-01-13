@@ -62,6 +62,12 @@ builder.Services.AddHttpClient<IApiWorkingHourService, WorkingHourService>(clien
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+builder.Services.AddHttpClient<IApiUserService, UserService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl!);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

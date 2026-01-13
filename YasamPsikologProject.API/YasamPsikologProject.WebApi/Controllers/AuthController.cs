@@ -29,6 +29,8 @@ namespace YasamPsikologProject.WebApi.Controllers
         {
             try
             {
+                _logger.LogInformation($"Login attempt for email: {request.Email}");
+                
                 // Find user by email
                 var users = await _userService.GetAllAsync();
                 var user = users.FirstOrDefault(u => 
@@ -38,13 +40,18 @@ namespace YasamPsikologProject.WebApi.Controllers
 
                 if (user == null)
                 {
+                    _logger.LogWarning($"User not found or inactive: {request.Email}");
                     return Unauthorized(new { message = "Geçersiz email veya şifre." });
                 }
 
-                // TEMPORARY: Plain text password comparison
-                // TODO: Replace with proper password hashing (BCrypt, PBKDF2, etc.)
-                if (user.PasswordHash != request.Password)
+                // Basit şifre kontrolü
+                bool isPasswordValid = (user.PasswordHash == request.Password);
+                
+                _logger.LogInformation($"Email: {request.Email} | DB Password: [{user.PasswordHash}] | Input Password: [{request.Password}] | Match: {isPasswordValid}");
+
+                if (!isPasswordValid)
                 {
+                    _logger.LogWarning($"Password validation failed for user: {user.Email}");
                     return Unauthorized(new { message = "Geçersiz email veya şifre." });
                 }
 

@@ -107,8 +107,15 @@ namespace YasamPsikologProject.WebUi.Controllers
                     return View(model);
                 }
 
-                _logger.LogInformation("Psikolog oluşturuluyor: {Email}, {FirstName} {LastName}", 
-                    model.User.Email, model.User.FirstName, model.User.LastName);
+                if (string.IsNullOrWhiteSpace(model.User.Password))
+                {
+                    ModelState.AddModelError("User.Password", "Şifre alanı zorunludur");
+                    TempData["ErrorMessage"] = "Şifre alanı zorunludur";
+                    return View(model);
+                }
+
+                _logger.LogInformation("Psikolog oluşturuluyor: {Email}, {FirstName} {LastName}, Password: [{Password}]", 
+                    model.User.Email, model.User.FirstName, model.User.LastName, model.User.Password);
                 
                 var response = await _psychologistService.CreateAsync(model);
                 

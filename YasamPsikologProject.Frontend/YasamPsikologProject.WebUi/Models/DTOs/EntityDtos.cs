@@ -22,6 +22,9 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         [RegularExpression(@"^0[0-9]{10}$", ErrorMessage = "Telefon numarası 0 ile başlamalı ve 11 haneli olmalıdır (örn: 05551234567)")]
         public string PhoneNumber { get; set; } = null!;
         
+        [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır")]
+        public string? Password { get; set; }
+        
         public string? Role { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public bool IsActive { get; set; }
