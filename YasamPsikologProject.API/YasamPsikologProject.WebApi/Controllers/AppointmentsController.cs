@@ -275,11 +275,11 @@ namespace YasamPsikologProject.WebApi.Controllers
         }
 
         [HttpGet("available-slots")]
-        public async Task<IActionResult> GetAvailableSlots([FromQuery] int psychologistId, [FromQuery] DateTime date, [FromQuery] int duration)
+        public async Task<IActionResult> GetAvailableSlots([FromQuery] int psychologistId, [FromQuery] DateTime date, [FromQuery] int duration, [FromQuery] string? clientEmail = null, [FromQuery] string? clientPhone = null)
         {
             try
             {
-                _logger.LogInformation($"GetAvailableSlots called: psychologistId={psychologistId}, date={date:yyyy-MM-dd}, duration={duration}");
+                _logger.LogInformation($"GetAvailableSlots called: psychologistId={psychologistId}, date={date:yyyy-MM-dd}, duration={duration}, clientEmail={clientEmail}, clientPhone={clientPhone}");
                 
                 AppointmentDuration durationEnum;
                 
@@ -295,7 +295,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                     return BadRequest(new { message = "Geçersiz süre değeri. Lütfen 50, 90 veya 120 seçiniz." });
                 }
 
-                var slots = await _appointmentService.GetAvailableSlotsAsync(psychologistId, date, durationEnum);
+                var slots = await _appointmentService.GetAvailableSlotsAsync(psychologistId, date, durationEnum, clientEmail, clientPhone);
                 var slotsList = slots.ToList();
                 
                 _logger.LogInformation($"Found {slotsList.Count} available slots");

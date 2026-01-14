@@ -10,7 +10,7 @@ namespace YasamPsikologProject.WebUi.Services
         Task<ApiResponse<List<AppointmentDto>>> GetAllAsync();
         Task<ApiResponse<AppointmentDto>> GetByIdAsync(int id);
         Task<ApiResponse<List<AppointmentDto>>> GetByPsychologistAsync(int psychologistId);
-        Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, int duration);
+        Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, int duration, string? clientEmail = null, string? clientPhone = null);
         Task<ApiResponse<AppointmentDto>> CreateAsync(AppointmentDto appointment);
         Task<ApiResponse<AppointmentDto>> UpdateAsync(int id, AppointmentDto appointment);
         Task<ApiResponse> UpdateStatusAsync(int id, string status, string? reason = null);
@@ -39,9 +39,20 @@ namespace YasamPsikologProject.WebUi.Services
             return await GetAsync<List<AppointmentDto>>($"api/appointments/psychologist/{psychologistId}");
         }
 
-        public async Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, int duration)
+        public async Task<ApiResponse<List<DateTime>>> GetAvailableSlotsAsync(int psychologistId, DateTime date, int duration, string? clientEmail = null, string? clientPhone = null)
         {
-            return await GetAsync<List<DateTime>>($"api/appointments/available-slots?psychologistId={psychologistId}&date={date:yyyy-MM-dd}&duration={duration}");
+            var url = $"api/appointments/available-slots?psychologistId={psychologistId}&date={date:yyyy-MM-dd}&duration={duration}";
+            
+            if (!string.IsNullOrWhiteSpace(clientEmail))
+            {
+                url += $"&clientEmail={Uri.EscapeDataString(clientEmail)}";
+            }
+            else if (!string.IsNullOrWhiteSpace(clientPhone))
+            {
+                url += $"&clientPhone={Uri.EscapeDataString(clientPhone)}";
+            }
+            
+            return await GetAsync<List<DateTime>>(url);
         }
 
         public async Task<ApiResponse<AppointmentDto>> CreateAsync(AppointmentDto appointment)

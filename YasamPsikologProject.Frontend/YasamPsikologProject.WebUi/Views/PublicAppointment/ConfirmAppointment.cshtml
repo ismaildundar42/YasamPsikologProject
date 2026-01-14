@@ -11,6 +11,8 @@
     <title>Randevu Onayı - Yaşam Psikoloji</title>
     <link rel="stylesheet" href="~/css/appointment-theme.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
 
@@ -246,8 +248,24 @@
     </div>
 </div>
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="~/js/appointment.js"></script>
 <script>
+    // TempData mesajlarını göster
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <text>
+        Swal.fire({
+            icon: 'error',
+            title: 'Randevu Oluşturulamadı',
+            text: '@Html.Raw(TempData["ErrorMessage"])',
+            confirmButtonText: 'Tamam',
+            confirmButtonColor: '#6c5ce7'
+        });
+        </text>
+    }
+
     // Form validasyonu
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.querySelector('form');
@@ -358,11 +376,29 @@
                 isValid = false;
             }
             
+            // KVKK kontrolü
+            const kvkkConsent = document.getElementById('kvkkConsent');
+            if (!kvkkConsent.checked) {
+                errorMessage += '• KVKK onayı zorunludur\n';
+                isValid = false;
+            }
+            
             if (!isValid) {
                 e.preventDefault();
-                alert('Lütfen aşağıdaki hataları düzeltin:\n\n' + errorMessage);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Eksik veya Hatalı Bilgiler',
+                    html: errorMessage.split('\n').filter(m => m).join('<br>'),
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#6c5ce7'
+                });
                 return false;
             }
+            
+            // Form geçerliyse normal submit (loading göster)
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Randevu Oluşturuluyor...';
         });
     });
 </script>

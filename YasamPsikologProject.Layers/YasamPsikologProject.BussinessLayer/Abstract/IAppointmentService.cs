@@ -16,6 +16,6 @@ namespace YasamPsikologProject.BussinessLayer.Abstract
         Task<Appointment> UpdateStatusAsync(int id, AppointmentStatus status, string? reason = null);
         Task CancelAsync(int id, string reason);
         Task<bool> HasConflictAsync(int psychologistId, DateTime startDate, DateTime endDate, int? excludeAppointmentId = null);
-        Task<IEnumerable<DateTime>> GetAvailableSlotsAsync(int psychologistId, DateTime date, AppointmentDuration duration);
+        Task<IEnumerable<DateTime>> GetAvailableSlotsAsync(int psychologistId, DateTime date, AppointmentDuration duration, string? clientEmail = null, string? clientPhone = null);
     }
 }

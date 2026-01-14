@@ -131,12 +131,12 @@ namespace YasamPsikologProject.WebUi.Controllers
         [HttpGet]
         [Route("PublicAppointment/GetAvailableSlots")]
         [Route("Admin/PublicAppointment/GetAvailableSlots")]
-        public async Task<IActionResult> GetAvailableSlots(int psychologistId, string date, int duration)
+        public async Task<IActionResult> GetAvailableSlots(int psychologistId, string date, int duration, string? clientEmail = null, string? clientPhone = null)
         {
             try
             {
-                _logger.LogInformation("GetAvailableSlots called: PsychologistId={PsychologistId}, Date={Date}, Duration={Duration}", 
-                    psychologistId, date, duration);
+                _logger.LogInformation("GetAvailableSlots called: PsychologistId={PsychologistId}, Date={Date}, Duration={Duration}, ClientEmail={ClientEmail}, ClientPhone={ClientPhone}", 
+                    psychologistId, date, duration, clientEmail, clientPhone);
                 
                 // Validate inputs
                 if (psychologistId <= 0)
@@ -171,7 +171,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                 }
                 
                 // API artık doğru formatı döndürüyor: {success: true/false, slots: [...] veya message: "..."}
-                var response = await _appointmentService.GetAvailableSlotsAsync(psychologistId, appointmentDate, duration);
+                var response = await _appointmentService.GetAvailableSlotsAsync(psychologistId, appointmentDate, duration, clientEmail, clientPhone);
                 
                 _logger.LogInformation("GetAvailableSlots response: Success={Success}, DataCount={Count}", 
                     response.Success, response.Data?.Count ?? 0);

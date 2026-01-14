@@ -133,7 +133,7 @@
                     day: 'Gün'
                 },
                 slotMinTime: '08:00:00',
-                slotMaxTime: '20:00:00',
+                slotMaxTime: '23:00:00', // İptal edilen randevular için genişletildi
                 slotDuration: '00:15:00', // 15 dakikalık dilimler
                 slotLabelInterval: '00:15:00', // Etiketler de 15 dakikada bir gösterilsin
                 allDaySlot: false,
@@ -248,6 +248,29 @@
                 
                 return events.filter(function(event) {
                     return selectedStatuses.length === 0 || selectedStatuses.includes(event.extendedProps.status);
+                }).map(function(event) {
+                    // İptal edilen randevuları mesai sonrasına taşı (21:30'dan başlat)
+                    if (event.extendedProps.status === 'Cancelled') {
+                        var originalDate = new Date(event.start);
+                        var cancelledDate = new Date(originalDate);
+                        cancelledDate.setHours(21, 30, 0, 0);
+                        
+                        var eventDuration = (new Date(event.end) - new Date(event.start)) / 60000; // dakika cinsinden
+                        
+                        return {
+                            ...event,
+                            start: cancelledDate.toISOString(),
+                            end: new Date(cancelledDate.getTime() + eventDuration * 60000).toISOString(),
+                            backgroundColor: '#dc3545',
+                            borderColor: '#dc3545',
+                            extendedProps: {
+                                ...event.extendedProps,
+                                originalTime: originalDate.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})
+                            }
+                        };
+                    }
+                    
+                    return event;
                 });
             }
             
@@ -345,15 +368,19 @@
                 var event = info.event;
                 var props = event.extendedProps;
                 
+                var timeDisplay = props.status === 'Cancelled' && props.originalTime 
+                    ? props.originalTime + ' - ' + new Date(new Date(event.start).getTime() + ((new Date(event.end) - new Date(event.start)))).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}) + ' <span class="badge badge-danger">İPTAL</span>'
+                    : event.start.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}) + ' - ' + event.end.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
+                
                 var html = `
                     <div style="text-align: left;">
                         <p><strong>Danışan:</strong> ${event.title}</p>
                         <p><strong>Tarih:</strong> ${event.start.toLocaleDateString('tr-TR')}</p>
-                        <p><strong>Saat:</strong> ${event.start.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} - 
-                           ${event.end.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}</p>
+                        <p><strong>Saat:</strong> ${timeDisplay}</p>
                         <p><strong>Durum:</strong> ${getStatusLabel(props.status)}</p>
                         <p><strong>Süre:</strong> ${props.duration} dk</p>
                         <p><strong>Tür:</strong> ${props.isOnline ? 'Online' : 'Yüz Yüze'}</p>
+                        ${props.cancellationReason ? `<p><strong>İptal Nedeni:</strong> <span class="text-danger">${props.cancellationReason}</span></p>` : ''}
                     </div>
                 `;
                 

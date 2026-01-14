@@ -84,13 +84,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             int totalMinutes = durationMinutes + appointment.BreakDuration;
             appointment.AppointmentEndDate = appointment.AppointmentDate.AddMinutes(totalMinutes);
 
-            // Çakışma kontrolü
+            // Psikolog için çakışma kontrolü
             if (await _unitOfWork.AppointmentRepository.HasConflictAsync(
                 appointment.PsychologistId, 
                 appointment.AppointmentDate, 
                 appointment.AppointmentEndDate))
             {
-                throw new Exception("Bu saatte zaten bir randevu bulunmaktadır.");
+                throw new Exception("Bu saatte psikolog için zaten bir randevu bulunmaktadır.");
+            }
+
+            // Danışan için çakışma kontrolü - aynı danışanın çakışan randevusu olamaz
+            if (await _unitOfWork.AppointmentRepository.HasClientConflictAsync(
+                appointment.ClientId, 
+                appointment.AppointmentDate, 
+                appointment.AppointmentEndDate))
+            {
+                throw new Exception("Bu saatte zaten bir randevunuz bulunmaktadır. Lütfen başka bir saat seçiniz.");
             }
 
             // Randevu, çalışma saatleri içinde mi kontrol et (buffer dahil bitiş saati)
@@ -197,14 +206,24 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                     throw new Exception("Randevu saatleri psikologun mola saatlerine denk gelmektedir.");
             }
             
-            // Çakışma kontrolü (kendi randevusu hariç)
+            // Psikolog için çakışma kontrolü (kendi randevusu hariç)
             if (await _unitOfWork.AppointmentRepository.HasConflictAsync(
                 appointment.PsychologistId,
                 appointment.AppointmentDate,
                 appointment.AppointmentEndDate,
                 appointment.Id))
             {
-                throw new Exception("Bu saatte zaten bir randevu bulunmaktadır.");
+                throw new Exception("Bu saatte psikolog için zaten bir randevu bulunmaktadır.");
+            }
+
+            // Danışan için çakışma kontrolü (kendi randevusu hariç)
+            if (await _unitOfWork.AppointmentRepository.HasClientConflictAsync(
+                appointment.ClientId,
+                appointment.AppointmentDate,
+                appointment.AppointmentEndDate,
+                appointment.Id))
+            {
+                throw new Exception("Bu saatte zaten bir randevunuz bulunmaktadır. Lütfen başka bir saat seçiniz.");
             }
             
             // İzin günü kontrolü
@@ -233,13 +252,24 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (oldStatus == AppointmentStatus.Cancelled && 
                 (status == AppointmentStatus.Confirmed || status == AppointmentStatus.Pending))
             {
+                // Psikolog için çakışma kontrolü
                 if (await _unitOfWork.AppointmentRepository.HasConflictAsync(
                     appointment.PsychologistId,
                     appointment.AppointmentDate,
                     appointment.AppointmentEndDate,
                     appointment.Id))
                 {
-                    throw new Exception("Bu saatte artık başka bir randevu bulunmaktadır. İptal edilen randevu tekrar aktif edilemiyor.");
+                    throw new Exception("Bu saatte artık psikolog için başka bir randevu bulunmaktadır. İptal edilen randevu tekrar aktif edilemiyor.");
+                }
+
+                // Danışan için çakışma kontrolü
+                if (await _unitOfWork.AppointmentRepository.HasClientConflictAsync(
+                    appointment.ClientId,
+                    appointment.AppointmentDate,
+                    appointment.AppointmentEndDate,
+                    appointment.Id))
+                {
+                    throw new Exception("Bu saatte artık bir randevunuz bulunmaktadır. İptal edilen randevu tekrar aktif edilemiyor.");
                 }
             }
 
@@ -295,9 +325,34 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             return await _unitOfWork.AppointmentRepository.HasConflictAsync(psychologistId, startDate, endDate, excludeAppointmentId);
         }
 
-        public async Task<IEnumerable<DateTime>> GetAvailableSlotsAsync(int psychologistId, DateTime date, AppointmentDuration duration)
+        public async Task<IEnumerable<DateTime>> GetAvailableSlotsAsync(int psychologistId, DateTime date, AppointmentDuration duration, string? clientEmail = null, string? clientPhone = null)
         {
             var availableSlots = new List<DateTime>();
+            
+            // Client ID'yi bul (eğer email/telefon varsa)
+            int? clientId = null;
+            if (!string.IsNullOrWhiteSpace(clientEmail) || !string.IsNullOrWhiteSpace(clientPhone))
+            {
+                var clients = await _unitOfWork.ClientRepository.GetAllAsync();
+                
+                // Önce email'e göre ara
+                var client = clients.FirstOrDefault(c => 
+                    !string.IsNullOrWhiteSpace(clientEmail) && 
+                    c.User?.Email?.Equals(clientEmail, StringComparison.OrdinalIgnoreCase) == true);
+                
+                // Email yoksa telefona göre ara
+                if (client == null && !string.IsNullOrWhiteSpace(clientPhone))
+                {
+                    client = clients.FirstOrDefault(c => 
+                        c.User?.PhoneNumber?.Equals(clientPhone, StringComparison.OrdinalIgnoreCase) == true);
+                }
+                
+                if (client != null)
+                {
+                    clientId = client.Id;
+                }
+            }
+            
             // C# DayOfWeek: Sunday=0, Monday=1, ... Saturday=6
             // Our WeekDay: Monday=1, Tuesday=2, ... Sunday=7
             var dayOfWeek = date.DayOfWeek == DayOfWeek.Sunday 
@@ -312,6 +367,16 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 psychologistId, 
                 date.Date, 
                 date.Date.AddDays(1));
+            
+            // Eğer clientId varsa, o client'ın randevularını da al
+            List<Appointment> clientAppointments = new List<Appointment>();
+            if (clientId.HasValue)
+            {
+                var clientAppts = await _unitOfWork.AppointmentRepository.GetByClientAsync(clientId.Value);
+                clientAppointments = clientAppts
+                    .Where(a => a.AppointmentDate.Date == date.Date && a.Status != AppointmentStatus.Cancelled)
+                    .ToList();
+            }
 
             int slotDuration = (int)duration;
             int bufferDuration = workingHour.BufferDuration; // Psikologun buffer süresi
@@ -355,7 +420,7 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 // Mola zamanı değilse diğer kontrollere geç
                 if (!isInBreakTime)
                 {
-                    // Çakışma kontrolü - Buffer dahil bitiş saatini kullan!
+                    // Psikolog için çakışma kontrolü - Buffer dahil bitiş saatini kullan!
                     bool hasConflict = appointments.Any(a => 
                     {
                         if (a.Status == AppointmentStatus.Cancelled)
@@ -369,8 +434,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                         // Mevcut randevu: [appointmentDate, actualEndDate]
                         return currentTime < actualEndDate && slotEndWithBuffer > a.AppointmentDate;
                     });
+                    
+                    // Client için çakışma kontrolü (eğer clientId varsa)
+                    bool hasClientConflict = false;
+                    if (clientId.HasValue && clientAppointments.Any())
+                    {
+                        hasClientConflict = clientAppointments.Any(a =>
+                        {
+                            // Gerçek bitiş saati = Başlangıç + Duration + BreakDuration
+                            var actualEndDate = a.AppointmentDate.AddMinutes((int)a.Duration + a.BreakDuration);
+                            
+                            // İki zaman dilimi çakışıyor mu kontrol et
+                            return currentTime < actualEndDate && slotEndWithBuffer > a.AppointmentDate;
+                        });
+                    }
 
-                    if (!hasConflict)
+                    if (!hasConflict && !hasClientConflict)
                     {
                         // İzin günü kontrolü - buffer dahil bitiş saatini kullan
                         if (!await _unitOfWork.UnavailableTimeRepository.HasUnavailableTimeAsync(
