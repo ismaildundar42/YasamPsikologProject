@@ -204,6 +204,18 @@
                     return;
                 }
 
+                // Geçmiş tarih kontrolü
+                var selectedDate = new Date(date);
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                selectedDate.setHours(0, 0, 0, 0);
+                
+                if (selectedDate < today) {
+                    $('#timeSlotSelect').prop('disabled', true).html('<option value="">Geçmiş tarih seçilemez</option>');
+                    toastr.error('Geçmiş tarih için randevu oluşturulamaz');
+                    return;
+                }
+
                 $('#loadingSlots').show();
                 $('#timeSlotSelect').prop('disabled', true);
 
@@ -266,6 +278,16 @@
                 if (!appointmentDate || !timeSlot) {
                     e.preventDefault();
                     toastr.error('Lütfen tarih ve saat seçiniz');
+                    return false;
+                }
+
+                // Geçmiş saat kontrolü
+                var selectedDateTime = new Date(timeSlot);
+                var now = new Date();
+                
+                if (selectedDateTime <= now) {
+                    e.preventDefault();
+                    toastr.error('Geçmiş tarih/saat için randevu oluşturulamaz');
                     return false;
                 }
 

@@ -49,9 +49,17 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
         public async Task<Appointment> CreateAsync(Appointment appointment)
         {
             // GEÇMİŞ TARİH/SAAT KONTROLÜ - Geçmiş saatlere randevu alınamaz!
-            if (appointment.AppointmentDate <= DateTime.Now)
+            // Türkiye saat dilimini kullan (UTC+3)
+            var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+            var currentTimeInTurkey = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, turkeyTimeZone);
+            var minimumAppointmentTime = currentTimeInTurkey.AddMinutes(5);
+            
+            // appointment.AppointmentDate UTC olarak geliyor, Türkiye saatine çevir
+            var appointmentDateInTurkey = TimeZoneInfo.ConvertTimeFromUtc(appointment.AppointmentDate, turkeyTimeZone);
+            
+            if (appointmentDateInTurkey <= minimumAppointmentTime)
             {
-                throw new Exception("Geçmiş tarihe veya saate randevu oluşturamazsınız.");
+                throw new Exception($"Geçmiş tarihe veya saate randevu oluşturamazsınız. Randevu en erken {minimumAppointmentTime:dd.MM.yyyy HH:mm} için oluşturulabilir. (Şu an: {currentTimeInTurkey:HH:mm})");
             }
 
             // Client kontrolü
@@ -159,9 +167,17 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 throw new Exception("Randevu bulunamadı.");
 
             // GEÇMİŞ TARİH/SAAT KONTROLÜ - Geçmiş saatlere taşınamaz!
-            if (appointment.AppointmentDate <= DateTime.Now)
+            // Türkiye saat dilimini kullan (UTC+3)
+            var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+            var currentTimeInTurkey = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, turkeyTimeZone);
+            var minimumAppointmentTime = currentTimeInTurkey.AddMinutes(5);
+            
+            // appointment.AppointmentDate UTC olarak geliyor, Türkiye saatine çevir
+            var appointmentDateInTurkey = TimeZoneInfo.ConvertTimeFromUtc(appointment.AppointmentDate, turkeyTimeZone);
+            
+            if (appointmentDateInTurkey <= minimumAppointmentTime)
             {
-                throw new Exception("Randevu geçmiş tarihe veya saate taşınamaz.");
+                throw new Exception($"Randevu geçmiş tarihe veya saate taşınamaz. Randevu en erken {minimumAppointmentTime:dd.MM.yyyy HH:mm} için ayarlanabilir. (Şu an: {currentTimeInTurkey:HH:mm})");
             }
 
             // Çalışma saatlerinden buffer süresini al
@@ -329,6 +345,16 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
         {
             var availableSlots = new List<DateTime>();
             
+            // Türkiye saat dilimini kullan (UTC+3)
+            var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+            var currentTimeInTurkey = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, turkeyTimeZone);
+            
+            // GEÇMİŞ TARİH KONTROLÜ - Geçmiş günler için müsait saat döndürme
+            if (date.Date < currentTimeInTurkey.Date)
+            {
+                return availableSlots; // Boş liste döndür
+            }
+            
             // Client ID'yi bul (eğer email/telefon varsa)
             int? clientId = null;
             if (!string.IsNullOrWhiteSpace(clientEmail) || !string.IsNullOrWhiteSpace(clientPhone))
@@ -385,12 +411,14 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             var currentTime = date.Date.Add(workingHour.StartTime);
             var endTime = date.Date.Add(workingHour.EndTime);
             
-            // Eğer bugünse ve başlangıç saati geçmişte kalıyorsa, şu andan başla
-            var now = DateTime.Now;
-            if (date.Date == now.Date && currentTime < now)
+            // Eğer bugünse ve başlangıç saati geçmişte kalıyorsa, şu andan itibaren başla
+            // En az 5 dakika sonrası için müsait saat göster (Türkiye saati kullan)
+            var minimumTime = currentTimeInTurkey.AddMinutes(5);
+            
+            if (date.Date == currentTimeInTurkey.Date && currentTime < minimumTime)
             {
-                // Şimdiki zamandan sonraki ilk 5'in katı dakikayı bul
-                currentTime = now;
+                // Şimdiki zamandan en az 5 dakika sonraki ilk 5'in katı dakikayı bul
+                currentTime = minimumTime;
                 int remainder = currentTime.Minute % 5;
                 if (remainder != 0)
                 {
