@@ -41,6 +41,10 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (existing != null)
                 throw new Exception("Bu kullanıcı için zaten psikolog kaydı bulunmaktadır.");
 
+            // Renk kontrolü
+            if (await IsColorInUseAsync(psychologist.CalendarColor))
+                throw new Exception("Bu renk başka bir psikolog tarafından kullanılmaktadır. Lütfen farklı bir renk seçiniz.");
+
             await _unitOfWork.PsychologistRepository.AddAsync(psychologist);
             await _unitOfWork.SaveChangesAsync();
             return psychologist;
@@ -51,6 +55,10 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             var existing = await _unitOfWork.PsychologistRepository.GetByIdAsync(psychologist.Id);
             if (existing == null)
                 throw new Exception("Psikolog bulunamadı.");
+
+            // Renk kontrolü (kendi ID'si hariç)
+            if (await IsColorInUseAsync(psychologist.CalendarColor, psychologist.Id))
+                throw new Exception("Bu renk başka bir psikolog tarafından kullanılmaktadır. Lütfen farklı bir renk seçiniz.");
 
             _unitOfWork.PsychologistRepository.Update(psychologist);
             await _unitOfWork.SaveChangesAsync();
@@ -112,6 +120,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             // AssignedPsychologistId null yapılabilir ama bu opsiyonel
 
             await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<bool> IsColorInUseAsync(string color, int? excludePsychologistId = null)
+        {
+            var psychologists = await _unitOfWork.PsychologistRepository.GetAllAsync();
+            var psychologistsList = psychologists.Where(p => !p.DeletedAt.HasValue).ToList();
+
+            if (excludePsychologistId.HasValue)
+            {
+                return psychologistsList.Any(p => 
+                    p.Id != excludePsychologistId.Value && 
+                    p.CalendarColor.Equals(color, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return psychologistsList.Any(p => 
+                p.CalendarColor.Equals(color, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -10,5 +10,6 @@ namespace YasamPsikologProject.BussinessLayer.Abstract
         Task<Psychologist> CreateAsync(Psychologist psychologist);
         Task<Psychologist> UpdateAsync(Psychologist psychologist);
         Task DeleteAsync(int id);
+        Task<bool> IsColorInUseAsync(string color, int? excludePsychologistId = null);
     }
 }
