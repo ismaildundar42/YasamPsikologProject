@@ -45,6 +45,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (workingHour.StartTime >= workingHour.EndTime)
                 throw new Exception("Bitiş saati başlangıç saatinden önce olamaz.");
 
+            // Mola saatleri kontrolü - Molalar çalışma saatleri içinde olmalı
+            if (workingHour.BreakTimes != null && workingHour.BreakTimes.Any())
+            {
+                foreach (var breakTime in workingHour.BreakTimes)
+                {
+                    if (breakTime.StartTime < workingHour.StartTime)
+                        throw new Exception($"Mola başlangıç saati ({breakTime.StartTime:hh\\:mm}) çalışma başlangıç saatinden ({workingHour.StartTime:hh\\:mm}) önce olamaz.");
+                    
+                    if (breakTime.EndTime > workingHour.EndTime)
+                        throw new Exception($"Mola bitiş saati ({breakTime.EndTime:hh\\:mm}) çalışma bitiş saatinden ({workingHour.EndTime:hh\\:mm}) sonra olamaz.");
+                    
+                    if (breakTime.StartTime >= breakTime.EndTime)
+                        throw new Exception($"Mola bitiş saati ({breakTime.EndTime:hh\\:mm}) başlangıç saatinden ({breakTime.StartTime:hh\\:mm}) önce veya eşit olamaz.");
+                }
+            }
+
             await _unitOfWork.WorkingHourRepository.AddAsync(workingHour);
             await _unitOfWork.SaveChangesAsync();
             return workingHour;
@@ -58,6 +74,22 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
 
             if (workingHour.StartTime >= workingHour.EndTime)
                 throw new Exception("Bitiş saati başlangıç saatinden önce olamaz.");
+
+            // Mola saatleri kontrolü - Molalar çalışma saatleri içinde olmalı
+            if (workingHour.BreakTimes != null && workingHour.BreakTimes.Any())
+            {
+                foreach (var breakTime in workingHour.BreakTimes)
+                {
+                    if (breakTime.StartTime < workingHour.StartTime)
+                        throw new Exception($"Mola başlangıç saati ({breakTime.StartTime:hh\\:mm}) çalışma başlangıç saatinden ({workingHour.StartTime:hh\\:mm}) önce olamaz.");
+                    
+                    if (breakTime.EndTime > workingHour.EndTime)
+                        throw new Exception($"Mola bitiş saati ({breakTime.EndTime:hh\\:mm}) çalışma bitiş saatinden ({workingHour.EndTime:hh\\:mm}) sonra olamaz.");
+                    
+                    if (breakTime.StartTime >= breakTime.EndTime)
+                        throw new Exception($"Mola bitiş saati ({breakTime.EndTime:hh\\:mm}) başlangıç saatinden ({breakTime.StartTime:hh\\:mm}) önce veya eşit olamaz.");
+                }
+            }
 
             _unitOfWork.WorkingHourRepository.Update(workingHour);
             await _unitOfWork.SaveChangesAsync();

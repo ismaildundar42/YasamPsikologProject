@@ -228,5 +228,49 @@
                 e.target.closest('.break-time-item').remove();
             }
         });
+
+        // Form submit edilmeden önce validasyon
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const startTime = document.querySelector('input[name="StartTime"]').value;
+            const endTime = document.querySelector('input[name="EndTime"]').value;
+            const breakTimes = document.querySelectorAll('.break-time-item');
+            
+            if (!startTime || !endTime) {
+                return true; // Temel validasyon zaten var
+            }
+
+            // Mola saatlerini kontrol et
+            let hasError = false;
+            breakTimes.forEach((breakItem) => {
+                const breakStart = breakItem.querySelector('input[name*="StartTime"]').value;
+                const breakEnd = breakItem.querySelector('input[name*="EndTime"]').value;
+                
+                if (breakStart && breakEnd && !hasError) {
+                    // Mola başlangıç çalışma başlangıcından önce mi?
+                    if (breakStart < startTime) {
+                        e.preventDefault();
+                        toastr.error(`Mola başlangıç saati (${breakStart}) çalışma başlangıç saatinden (${startTime}) önce olamaz.`);
+                        hasError = true;
+                        return;
+                    }
+                    
+                    // Mola bitiş çalışma bitişinden sonra mı?
+                    if (breakEnd > endTime) {
+                        e.preventDefault();
+                        toastr.error(`Mola bitiş saati (${breakEnd}) çalışma bitiş saatinden (${endTime}) sonra olamaz.`);
+                        hasError = true;
+                        return;
+                    }
+                    
+                    // Mola bitiş başlangıçtan önce mi?
+                    if (breakStart >= breakEnd) {
+                        e.preventDefault();
+                        toastr.error(`Mola bitiş saati (${breakEnd}) başlangıç saatinden (${breakStart}) önce veya eşit olamaz.`);
+                        hasError = true;
+                        return;
+                    }
+                }
+            });
+        });
     </script>
 }
