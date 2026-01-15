@@ -435,14 +435,23 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 var slotEnd = currentTime.AddMinutes(slotDuration);
                 var slotEndWithBuffer = currentTime.AddMinutes(slotDuration + bufferDuration);
                 
-                // Mola saatleri kontrolü - Randevunun HERHANGİ BİR KISMI (buffer dahil) mola zamanına denk gelmemeli
+                // Mola saatleri kontrolü
+                // ÖNEMLİ: Eğer randevu tam mola başında bitiyorsa (slotEnd == breakStart), 
+                // buffer'a gerek yok çünkü psikolog zaten molada olacak
                 bool isInBreakTime = workingHour.BreakTimes.Any(b =>
                 {
                     var breakStart = date.Date.Add(b.StartTime);
                     var breakEnd = date.Date.Add(b.EndTime);
                     
-                    // Çakışma kontrolü: [currentTime, slotEndWithBuffer] ile [breakStart, breakEnd] çakışıyor mu?
-                    return currentTime < breakEnd && slotEndWithBuffer > breakStart;
+                    // Randevunun kendisi (buffer hariç) mola ile çakışıyor mu?
+                    bool appointmentOverlapsBreak = currentTime < breakEnd && slotEnd > breakStart;
+                    
+                    // Eğer randevu tam mola başında bitiyorsa, bu kabul edilebilir
+                    if (slotEnd == breakStart)
+                        return false;
+                    
+                    // Buffer'lı kontrolü sadece randevu molaya denk gelmiyorsa yap
+                    return appointmentOverlapsBreak || (currentTime < breakEnd && slotEndWithBuffer > breakStart);
                 });
 
                 // Mola zamanı değilse diğer kontrollere geç
