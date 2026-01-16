@@ -104,6 +104,10 @@ namespace YasamPsikologProject.WebApi.DTOs
 
         public bool IsAvailable { get; set; } = true;
         public int BufferDuration { get; set; } = 10;
+        
+        [Range(1, 50, ErrorMessage = "Maksimum danışan sayısı 1-50 arasında olmalıdır")]
+        public int? MaxDailyPatients { get; set; }
+        
         public List<BreakTimeDto>? BreakTimes { get; set; }
         public string? Notes { get; set; }
     }
@@ -121,6 +125,10 @@ namespace YasamPsikologProject.WebApi.DTOs
 
         public bool IsAvailable { get; set; } = true;
         public int BufferDuration { get; set; } = 10;
+        
+        [Range(1, 50, ErrorMessage = "Maksimum danışan sayısı 1-50 arasında olmalıdır")]
+        public int? MaxDailyPatients { get; set; }
+        
         public List<BreakTimeDto>? BreakTimes { get; set; }
         public string? Notes { get; set; }
     }

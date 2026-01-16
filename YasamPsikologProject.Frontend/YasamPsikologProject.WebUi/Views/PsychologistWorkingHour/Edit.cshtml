@@ -56,6 +56,16 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="form-group">
+                                <label asp-for="MaxDailyPatients">Maksimum Günlük Danışan Sayısı</label>
+                                <input asp-for="MaxDailyPatients" type="number" min="1" max="50" class="form-control" placeholder="Boş bırakırsanız sınırsız olur" />
+                                <small class="form-text text-muted">Bu günde almak istediğiniz maksimum danışan sayısı (1-50 arası, boş bırakırsanız sınırsız)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
                                 <label>Molalar</label>
                                 <button type="button" class="btn btn-sm btn-success mb-2" id="addBreakBtn">
                                     <i class="fas fa-plus"></i> Mola Ekle

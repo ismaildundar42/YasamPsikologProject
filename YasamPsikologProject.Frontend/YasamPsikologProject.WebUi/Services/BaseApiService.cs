@@ -182,10 +182,29 @@ namespace YasamPsikologProject.WebUi.Services
                 }
 
                 _logger.LogWarning($"API PATCH failed: {endpoint} - Status: {response.StatusCode}");
+                _logger.LogWarning($"API PATCH Response Content: {responseContent}");
+                
+                // API'den gelen hata mesajını parse et
+                string errorMessage = $"Güncelleme başarısız: {response.StatusCode}";
+                try
+                {
+                    var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+                    if (errorResponse?.message != null)
+                    {
+                        errorMessage = errorResponse.message.ToString();
+                        _logger.LogWarning($"API Error Message: {errorMessage}");
+                    }
+                }
+                catch
+                {
+                    // JSON parse edilemezse raw content kullan
+                    errorMessage = responseContent;
+                }
+                
                 return new ApiResponse<TResponse>
                 {
                     Success = false,
-                    Message = $"Güncelleme başarısız: {response.StatusCode}",
+                    Message = errorMessage,
                     Errors = new List<string> { responseContent }
                 };
             }

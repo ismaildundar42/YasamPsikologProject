@@ -66,6 +66,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                     EndTime = workingHour.EndTime.ToString(@"hh\:mm"),
                     workingHour.IsAvailable,
                     workingHour.BufferDuration,
+                    workingHour.MaxDailyPatients,
                     BreakTimes = workingHour.BreakTimes.Select(b => new
                     {
                         b.Id,
@@ -99,6 +100,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                     EndTime = w.EndTime.ToString(@"hh\:mm"),
                     w.IsAvailable,
                     w.BufferDuration,
+                    w.MaxDailyPatients,
                     BreakTimes = w.BreakTimes.Select(b => new
                     {
                         b.Id,
@@ -145,6 +147,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                     EndTime = TimeSpan.Parse(dto.EndTime),
                     IsAvailable = dto.IsAvailable,
                     BufferDuration = dto.BufferDuration,
+                    MaxDailyPatients = dto.MaxDailyPatients,
                     Notes = dto.Notes
                 };
 
@@ -173,6 +176,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                     EndTime = created.EndTime.ToString(@"hh\:mm"),
                     created.IsAvailable,
                     created.BufferDuration,
+                    created.MaxDailyPatients,
                     BreakTimes = created.BreakTimes.Select(b => new
                     {
                         b.Id,
@@ -211,6 +215,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 existing.EndTime = TimeSpan.Parse(dto.EndTime);
                 existing.IsAvailable = dto.IsAvailable;
                 existing.BufferDuration = dto.BufferDuration;
+                existing.MaxDailyPatients = dto.MaxDailyPatients;
                 existing.Notes = dto.Notes;
 
                 // BreakTimes'ı güncelle - eskilerini sil, yenilerini ekle
@@ -239,6 +244,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                     EndTime = updated.EndTime.ToString(@"hh\:mm"),
                     updated.IsAvailable,
                     updated.BufferDuration,
+                    updated.MaxDailyPatients,
                     BreakTimes = updated.BreakTimes.Select(b => new
                     {
                         b.Id,

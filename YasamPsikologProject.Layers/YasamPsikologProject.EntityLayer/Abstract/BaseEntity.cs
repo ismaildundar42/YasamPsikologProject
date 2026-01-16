@@ -15,6 +15,6 @@ namespace YasamPsikologProject.EntityLayer.Abstract
         public bool IsActive { get; set; } = true;
         
         // Optimistic Concurrency Control
-        public byte[] RowVersion { get; set; } = null!;
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     }
 }

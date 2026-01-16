@@ -370,6 +370,29 @@ namespace YasamPsikologProject.WebUi.Controllers
                 else
                 {
                     _logger.LogInformation("Existing client found with ID: {ClientId}", client.Id);
+                    
+                    // Mevcut client için beklemede veya onaylanmış randevu kontrolü
+                    var existingAppointmentsResponse = await _appointmentService.GetAllAsync();
+                    if (existingAppointmentsResponse.Success && existingAppointmentsResponse.Data != null)
+                    {
+                        var clientAppointments = existingAppointmentsResponse.Data
+                            .Where(a => a.ClientId == client.Id && 
+                                       (a.Status == "Pending" || a.Status == "Confirmed"))
+                            .ToList();
+                        
+                        if (clientAppointments.Any())
+                        {
+                            _logger.LogWarning("Client {ClientId} already has pending or confirmed appointments", client.Id);
+                            TempData["ErrorMessage"] = "Zaten beklemede veya onaylanmış bir randevunuz bulunmaktadır. Lütfen mevcut randevunuz tamamlandıktan sonra yeni randevu talebinde bulununuz.";
+                            return RedirectToAction(nameof(ConfirmAppointment), new
+                            {
+                                psychologistId = psychologistId,
+                                appointmentDate = appointmentDate,
+                                duration = duration,
+                                isOnline = isOnline
+                            });
+                        }
+                    }
                 }
 
                 // Yeni oluşturulan client mi kontrol et (rollback için)

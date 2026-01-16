@@ -26,7 +26,36 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public string? Password { get; set; }
         
         public string? Role { get; set; }
+        public int Gender { get; set; }
         public DateTime? DateOfBirth { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class SuperAdminDto
+    {
+        public int Id { get; set; }
+        
+        [Required(ErrorMessage = "Ad alanı zorunludur")]
+        [StringLength(50, ErrorMessage = "Ad en fazla 50 karakter olabilir")]
+        public string FirstName { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Soyad alanı zorunludur")]
+        [StringLength(50, ErrorMessage = "Soyad en fazla 50 karakter olabilir")]
+        public string LastName { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Email alanı zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
+        public string Email { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Telefon alanı zorunludur")]
+        [RegularExpression(@"^0[0-9]{10}$", ErrorMessage = "Telefon numarası 0 ile başlamalı ve 11 haneli olmalıdır (örn: 05551234567)")]
+        public string PhoneNumber { get; set; } = null!;
+        
+        [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır")]
+        public string? Password { get; set; }
+        
+        public int Gender { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }
@@ -116,6 +145,7 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public TimeSpan EndTime { get; set; }
         public bool IsAvailable { get; set; }
         public int BufferDuration { get; set; } = 10;
+        public int? MaxDailyPatients { get; set; }
         public List<BreakTimeDto>? BreakTimes { get; set; }
         public string? Notes { get; set; }
     }

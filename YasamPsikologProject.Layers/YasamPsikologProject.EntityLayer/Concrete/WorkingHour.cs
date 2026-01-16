@@ -32,6 +32,10 @@ namespace YasamPsikologProject.EntityLayer.Concrete
         // Randevular arası buffer süresi (dakika) - varsayılan 10
         public int BufferDuration { get; set; } = 10;
 
+        // Bir günde alabileceği maksimum danışan sayısı (null = sınırsız)
+        [Range(1, 50, ErrorMessage = "Maksimum danışan sayısı 1-50 arasında olmalıdır")]
+        public int? MaxDailyPatients { get; set; }
+
         // Molalar (birden fazla mola olabilir)
         public virtual ICollection<BreakTime> BreakTimes { get; set; } = new List<BreakTime>();
 

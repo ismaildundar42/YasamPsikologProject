@@ -110,6 +110,28 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 throw new Exception("Bu saatte zaten bir randevunuz bulunmaktadır. Lütfen başka bir saat seçiniz.");
             }
 
+            // MAKSIMUM GÜNLÜK DANIŞAN SAYISI KONTROLÜ
+            if (workingHour.MaxDailyPatients.HasValue && workingHour.MaxDailyPatients.Value > 0)
+            {
+                // O gün için bekleyen + onaylanmış randevuları say
+                var appointmentDate = appointment.AppointmentDate.Date;
+                var startOfDay = new DateTime(appointmentDate.Year, appointmentDate.Month, appointmentDate.Day, 0, 0, 0, DateTimeKind.Utc);
+                var endOfDay = startOfDay.AddDays(1);
+
+                var existingAppointments = await _unitOfWork.AppointmentRepository.GetByPsychologistAsync(
+                    appointment.PsychologistId,
+                    startOfDay,
+                    endOfDay);
+
+                var dailyAppointmentCount = existingAppointments
+                    .Count(a => a.Status == AppointmentStatus.Pending || a.Status == AppointmentStatus.Confirmed);
+
+                if (dailyAppointmentCount >= workingHour.MaxDailyPatients.Value)
+                {
+                    throw new Exception($"Psikolog bu gün için maksimum danışan sayısına ulaşmıştır ({workingHour.MaxDailyPatients.Value} danışan). Lütfen başka bir gün seçiniz.");
+                }
+            }
+
             // Randevu, çalışma saatleri içinde mi kontrol et (buffer dahil bitiş saati)
             var appointmentTime = appointment.AppointmentDate.TimeOfDay;
             var appointmentEndTime = appointment.AppointmentEndDate.TimeOfDay;
@@ -240,6 +262,32 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
                 appointment.Id))
             {
                 throw new Exception("Bu saatte zaten bir randevunuz bulunmaktadır. Lütfen başka bir saat seçiniz.");
+            }
+
+            // MAKSIMUM GÜNLÜK DANIŞAN SAYISI KONTROLÜ (tarih değiştiğinde kontrol et)
+            if (workingHour != null && workingHour.MaxDailyPatients.HasValue && workingHour.MaxDailyPatients.Value > 0)
+            {
+                // Sadece tarih değişmişse kontrol et
+                if (existing.AppointmentDate.Date != appointment.AppointmentDate.Date)
+                {
+                    var appointmentDate = appointment.AppointmentDate.Date;
+                    var startOfDay = new DateTime(appointmentDate.Year, appointmentDate.Month, appointmentDate.Day, 0, 0, 0, DateTimeKind.Utc);
+                    var endOfDay = startOfDay.AddDays(1);
+
+                    var existingAppointments = await _unitOfWork.AppointmentRepository.GetByPsychologistAsync(
+                        appointment.PsychologistId,
+                        startOfDay,
+                        endOfDay);
+
+                    var dailyAppointmentCount = existingAppointments
+                        .Where(a => a.Id != appointment.Id) // Kendi randevusunu hariç tut
+                        .Count(a => a.Status == AppointmentStatus.Pending || a.Status == AppointmentStatus.Confirmed);
+
+                    if (dailyAppointmentCount >= workingHour.MaxDailyPatients.Value)
+                    {
+                        throw new Exception($"Psikolog bu gün için maksimum danışan sayısına ulaşmıştır ({workingHour.MaxDailyPatients.Value} danışan). Lütfen başka bir gün seçiniz.");
+                    }
+                }
             }
             
             // İzin günü kontrolü
@@ -388,6 +436,24 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             var workingHour = await _unitOfWork.WorkingHourRepository.GetByPsychologistAndDayAsync(psychologistId, dayOfWeek);
             if (workingHour == null || !workingHour.IsAvailable)
                 return availableSlots;
+            
+            // MAKSİMUM DANIŞAN SAYISI KONTROLÜ - Sınıra ulaşıldıysa o gün için hiç slot gösterme
+            if (workingHour.MaxDailyPatients.HasValue)
+            {
+                var dayStart = date.Date;
+                var dayEnd = date.Date.AddDays(1);
+                var existingAppointments = await _unitOfWork.AppointmentRepository.GetByPsychologistAsync(psychologistId, dayStart, dayEnd);
+                
+                var dailyAppointmentCount = existingAppointments.Count(a => 
+                    a.Status == AppointmentStatus.Pending || 
+                    a.Status == AppointmentStatus.Confirmed);
+                
+                if (dailyAppointmentCount >= workingHour.MaxDailyPatients.Value)
+                {
+                    // Maksimum sayıya ulaşıldı, boş liste döndür
+                    return availableSlots;
+                }
+            }
 
             var appointments = await _unitOfWork.AppointmentRepository.GetByPsychologistAsync(
                 psychologistId, 

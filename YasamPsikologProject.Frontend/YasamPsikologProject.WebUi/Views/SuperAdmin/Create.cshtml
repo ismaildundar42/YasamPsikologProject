@@ -1,0 +1,229 @@
+@model YasamPsikologProject.WebUi.Models.DTOs.SuperAdminDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = Model?.Id > 0 ? "Süper Admin Düzenle" : "Yeni Süper Admin";
+    var isEdit = Model?.Id > 0;
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card card-danger">
+            <div class="card-header">
+                <h3 class="card-title">@ViewData["PageTitle"]</h3>
+            </div>
+            <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+                @if (isEdit)
+                {
+                    <input type="hidden" asp-for="Id" />
+                }
+                
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+                    
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    
+                    <!-- Kullanıcı Bilgileri -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="FirstName">Ad *</label>
+                                <input type="text" class="form-control" asp-for="FirstName" 
+                                       data-val="true" data-val-required="Ad alanı zorunludur" required>
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="LastName">Soyad *</label>
+                                <input type="text" class="form-control" asp-for="LastName" 
+                                       data-val="true" data-val-required="Soyad alanı zorunludur" required>
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Email">Email *</label>
+                                <input type="email" class="form-control" asp-for="Email" 
+                                       data-val="true" data-val-required="Email alanı zorunludur" 
+                                       data-val-email="Geçerli bir email adresi giriniz" required>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PhoneNumber">Telefon *</label>
+                                <input type="tel" class="form-control" asp-for="PhoneNumber" 
+                                       pattern="0[0-9]{10}" placeholder="05551234567"
+                                       data-val="true" data-val-required="Telefon alanı zorunludur" required>
+                                <small class="form-text text-muted">Format: 05551234567 (11 hane)</small>
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!isEdit)
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Password">Şifre *</label>
+                                    <input type="password" class="form-control" asp-for="Password" id="Password"
+                                           data-val="true" data-val-required="Şifre alanı zorunludur" 
+                                           data-val-minlength="Şifre en az 6 karakter olmalıdır" 
+                                           data-val-minlength-min="6" minlength="6" required autocomplete="new-password">
+                                    <small class="form-text text-muted">En az 6 karakter</small>
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ConfirmPassword">Şifre (Tekrar) *</label>
+                                    <input type="password" class="form-control" id="ConfirmPassword" 
+                                           minlength="6" required autocomplete="new-password">
+                                    <small class="form-text text-muted">Şifre doğrulaması</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Gender">Cinsiyet *</label>
+                                    <select class="form-control" asp-for="Gender" required>
+                                        <option value="">Seçiniz...</option>
+                                        <option value="0">Erkek</option>
+                                        <option value="1">Kadın</option>
+                                        <option value="2">Belirtmek İstemiyorum</option>
+                                    </select>
+                                    <span asp-validation-for="Gender" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Gender">Cinsiyet *</label>
+                                    <select class="form-control" asp-for="Gender" required>
+                                        <option value="">Seçiniz...</option>
+                                        <option value="0">Erkek</option>
+                                        <option value="1">Kadın</option>
+                                        <option value="2">Belirtmek İstemiyorum</option>
+                                    </select>
+                                    <span asp-validation-for="Gender" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="IsActive">Durum</label>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" asp-for="IsActive" id="isActiveSwitch">
+                                        <label class="custom-control-label" for="isActiveSwitch">Aktif</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> <strong>Önemli:</strong> Süper admin yetkisi olan kullanıcılar sistemdeki tüm verilere erişebilir ve değişiklik yapabilir.
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-save"></i> @(isEdit ? "Güncelle" : "Kaydet")
+                    </button>
+                    <a asp-action="Index" class="btn btn-default">
+                        <i class="fas fa-times"></i> İptal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Form validation
+            $('form').on('submit', function(e) {
+                var isValid = true;
+                
+                // Password confirmation check
+                var password = $('#Password').val();
+                var confirmPassword = $('#ConfirmPassword').val();
+                
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: 'Şifreler eşleşmiyor!'
+                    });
+                    $('#Password, #ConfirmPassword').addClass('is-invalid');
+                    return false;
+                }
+                
+                if (password.length < 6) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: 'Şifre en az 6 karakter olmalıdır!'
+                    });
+                    $('#Password').addClass('is-invalid');
+                    return false;
+                }
+                
+                // Required fields check
+                $(this).find('[required]').each(function() {
+                    if (!$(this).val()) {
+                        isValid = false;
+                        $(this).addClass('is-invalid');
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: 'Lütfen tüm zorunlu alanları doldurunuz.'
+                    });
+                }
+            });
+
+            // Remove invalid class on input
+            $('input, select').on('input change', function() {
+                $(this).removeClass('is-invalid');
+            });
+
+            // Success message
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Başarılı!',
+                    text: '@TempData["SuccessMessage"]',
+                    timer: 3000
+                });
+                </text>
+            }
+        });
+    </script>
+}

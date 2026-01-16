@@ -83,6 +83,55 @@ namespace YasamPsikologProject.WebApi.Controllers
             }
         }
 
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdatePartial(int id, [FromBody] System.Text.Json.JsonElement userData)
+        {
+            try
+            {
+                var user = await _userService.GetByIdAsync(id);
+                if (user == null)
+                    return NotFound(new { message = "Kullanıcı bulunamadı." });
+
+                // Sadece gönderilen alanları güncelle
+                if (userData.TryGetProperty("FirstName", out var firstName))
+                    user.FirstName = firstName.GetString() ?? user.FirstName;
+                
+                if (userData.TryGetProperty("LastName", out var lastName))
+                    user.LastName = lastName.GetString() ?? user.LastName;
+                
+                if (userData.TryGetProperty("Email", out var email))
+                    user.Email = email.GetString() ?? user.Email;
+                
+                if (userData.TryGetProperty("PhoneNumber", out var phoneNumber))
+                    user.PhoneNumber = phoneNumber.GetString() ?? user.PhoneNumber;
+                
+                if (userData.TryGetProperty("Gender", out var gender))
+                    user.Gender = (YasamPsikologProject.EntityLayer.Enums.Gender)gender.GetInt32();
+                
+                if (userData.TryGetProperty("IsActive", out var isActive))
+                    user.IsActive = isActive.GetBoolean();
+                
+                // Şifre varsa güncelle
+                if (userData.TryGetProperty("PasswordHash", out var passwordHash))
+                {
+                    var passwordValue = passwordHash.GetString();
+                    if (!string.IsNullOrWhiteSpace(passwordValue))
+                    {
+                        user.PasswordHash = passwordValue;
+                    }
+                }
+                
+                user.UpdatedAt = DateTime.UtcNow;
+                
+                var updatedUser = await _userService.UpdateAsync(user);
+                return Ok(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
