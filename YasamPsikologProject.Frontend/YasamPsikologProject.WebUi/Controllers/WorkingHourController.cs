@@ -10,15 +10,18 @@ namespace YasamPsikologProject.WebUi.Controllers
     {
         private readonly IApiWorkingHourService _workingHourService;
         private readonly IApiPsychologistService _psychologistService;
+        private readonly IApiAppointmentService _appointmentService;
         private readonly ILogger<WorkingHourController> _logger;
 
         public WorkingHourController(
             IApiWorkingHourService workingHourService,
             IApiPsychologistService psychologistService,
+            IApiAppointmentService appointmentService,
             ILogger<WorkingHourController> logger)
         {
             _workingHourService = workingHourService;
             _psychologistService = psychologistService;
+            _appointmentService = appointmentService;
             _logger = logger;
         }
 
@@ -49,6 +52,9 @@ namespace YasamPsikologProject.WebUi.Controllers
 
                     // Psikolog isimlerini ID ile eşleştirmek için dictionary oluştur
                     ViewBag.PsychologistNames = psychologistList.ToDictionary(p => p.Id, p => p.FullName);
+                    
+                    // Takvim için de psikolog listesi
+                    ViewBag.PsychologistList = psychologistsResponse.Data;
                 }
 
                 if (psychologistId.HasValue)
@@ -107,6 +113,9 @@ namespace YasamPsikologProject.WebUi.Controllers
                     "Id",
                     "FullName",
                     psychologistId);
+                
+                // Takvim için de psikolog listesi
+                ViewBag.PsychologistList = psychologistsResponse.Data;
             }
 
             // Haftanın günleri - WeekDay enum string isimleri kullanılıyor (API bunu bekliyor)
@@ -130,6 +139,48 @@ namespace YasamPsikologProject.WebUi.Controllers
             };
 
             return View(model);
+        }
+        
+        [HttpGet]
+        [Route("GetCalendarEvents")]
+        public async Task<IActionResult> GetCalendarEvents()
+        {
+            try
+            {
+                // Tüm randevuları getir
+                var appointmentsResponse = await _appointmentService.GetAllAsync();
+                if (!appointmentsResponse.Success || appointmentsResponse.Data == null)
+                {
+                    return Json(new List<object>());
+                }
+
+                var events = appointmentsResponse.Data.Select(a => new
+                {
+                    id = a.Id,
+                    title = $"{a.Client?.User?.FirstName} {a.Client?.User?.LastName}",
+                    start = a.AppointmentDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    end = a.AppointmentEndDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    backgroundColor = a.Psychologist?.CalendarColor ?? "#3788d8",
+                    borderColor = a.Psychologist?.CalendarColor ?? "#3788d8",
+                    textColor = "#fff",
+                    extendedProps = new
+                    {
+                        psychologist = $"{a.Psychologist?.User?.FirstName} {a.Psychologist?.User?.LastName}",
+                        psychologistId = a.PsychologistId,
+                        client = $"{a.Client?.User?.FirstName} {a.Client?.User?.LastName}",
+                        status = a.Status,
+                        notes = a.Notes,
+                        cancellationReason = a.CancellationReason
+                    }
+                }).ToList();
+
+                return Json(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Takvim eventleri alınırken hata");
+                return Json(new List<object>());
+            }
         }
 
         [HttpPost]
