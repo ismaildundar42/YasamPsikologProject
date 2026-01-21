@@ -71,24 +71,13 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (psychologist == null)
                 throw new Exception("Psikolog bulunamadı.");
 
-            // İlişkili kayıtları kontrol et
-            var appointments = await _unitOfWork.AppointmentRepository.GetAllAsync(a => a.PsychologistId == id);
-            var appointmentsList = appointments.ToList();
-
-            var activeAppointments = appointmentsList.Where(a => 
-                a.Status != EntityLayer.Enums.AppointmentStatus.Cancelled && 
-                a.AppointmentDate > DateTime.Now).ToList();
-
-            // Eğer gelecekte aktif randevusu varsa uyar (isteğe bağlı)
-            if (activeAppointments.Any())
-            {
-                throw new Exception($"Bu psikologun {activeAppointments.Count} adet gelecekteki aktif randevusu var. Önce bu randevuları iptal edin.");
-            }
-
             // Psikolog'u soft delete yap
             _unitOfWork.PsychologistRepository.Delete(psychologist);
 
-            // İlişkili tüm randevuları soft delete yap (geçmiş randevular dahil - arşiv için)
+            // İlişkili tüm randevuları soft delete yap (tüm durumlar - herhangi bir sınırlama yok)
+            var appointments = await _unitOfWork.AppointmentRepository.GetAllAsync(a => a.PsychologistId == id);
+            var appointmentsList = appointments.ToList();
+            
             foreach (var appointment in appointmentsList)
             {
                 _unitOfWork.AppointmentRepository.Delete(appointment);

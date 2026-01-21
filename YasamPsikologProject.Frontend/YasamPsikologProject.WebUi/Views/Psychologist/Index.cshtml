@@ -59,7 +59,11 @@
                                         <a asp-action="Edit" asp-route-id="@psychologist.Id" class="btn btn-primary btn-sm" title="Düzenle">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="btn btn-danger btn-sm btn-delete" data-id="@psychologist.Id" title="Sil">
+                                        <button type="button" class="btn btn-danger btn-sm btn-delete" 
+                                                data-id="@psychologist.Id" 
+                                                data-name="@psychologist.User?.FirstName @psychologist.User?.LastName"
+                                                data-email="@psychologist.User?.Email"
+                                                title="Sil">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -74,6 +78,20 @@
 </div>
 
 @section Scripts {
+    <style>
+        .swal-wide {
+            width: 600px !important;
+        }
+        
+        .swal2-html-container {
+            overflow: visible !important;
+        }
+        
+        .btn-group .btn {
+            margin: 0 2px;
+        }
+    </style>
+    
     <script>
         $(document).ready(function() {
             // DataTable
@@ -89,33 +107,78 @@
             // Delete confirmation
             $(document).on('click', '.btn-delete', function() {
                 var id = $(this).data('id');
+                var name = $(this).data('name');
+                var email = $(this).data('email');
                 
                 Swal.fire({
-                    title: 'Emin misiniz?',
-                    text: "Bu psikolog silinecek!",
+                    title: '<strong>⚠️ Psikolog Silinecek!</strong>',
+                    html: `
+                        <div style="text-align: left; padding: 20px;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <p style="margin: 5px 0;"><strong>👤 Ad Soyad:</strong> ${name}</p>
+                                <p style="margin: 5px 0;"><strong>📧 Email:</strong> ${email}</p>
+                            </div>
+                            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                <p style="margin: 0; color: #856404;">
+                                    <strong>⚠️ Dikkat:</strong> Bu işlem geri alınamaz!
+                                </p>
+                                <p style="margin: 5px 0 0 0; color: #856404; font-size: 0.9em;">
+                                    • Psikoloğa ait tüm randevular silinecek<br>
+                                    • Tüm çalışma saatleri silinecek<br>
+                                    • İlişkili tüm veriler kaldırılacak
+                                </p>
+                            </div>
+                        </div>
+                    `,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Evet, Sil!',
-                    cancelButtonText: 'İptal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-trash"></i> Evet, Sil!',
+                    cancelButtonText: '<i class="fas fa-times"></i> İptal',
+                    customClass: {
+                        popup: 'swal-wide',
+                        confirmButton: 'btn btn-danger btn-lg',
+                        cancelButton: 'btn btn-secondary btn-lg'
+                    },
+                    buttonsStyling: false,
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return $.ajax({
                             url: '@Url.Action("Delete")/' + id,
                             type: 'POST',
                             success: function(response) {
-                                if (response.success) {
-                                    toastr.success(response.message);
-                                    setTimeout(() => location.reload(), 1000);
-                                } else {
-                                    toastr.error(response.message);
-                                }
+                                return response;
                             },
                             error: function() {
-                                toastr.error('İşlem sırasında hata oluştu.');
+                                Swal.showValidationMessage('İşlem sırasında hata oluştu.');
                             }
                         });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (result.value.success) {
+                            Swal.fire({
+                                title: '✅ Başarılı!',
+                                html: `<p style="font-size: 1.1em;">${result.value.message}</p>`,
+                                icon: 'success',
+                                confirmButtonColor: '#28a745',
+                                confirmButtonText: 'Tamam',
+                                timer: 2000,
+                                timerProgressBar: true
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: '❌ Hata!',
+                                text: result.value.message,
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'Tamam'
+                            });
+                        }
                     }
                 });
             });
