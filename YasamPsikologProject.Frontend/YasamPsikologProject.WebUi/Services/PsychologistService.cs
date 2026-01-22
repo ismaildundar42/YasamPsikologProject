@@ -48,6 +48,8 @@ namespace YasamPsikologProject.WebUi.Services
                     PhoneNumber = psychologist.User?.PhoneNumber ?? throw new ArgumentNullException(nameof(psychologist.User.PhoneNumber), "Telefon alanı boş olamaz"),
                     Password = psychologist.User?.Password ?? throw new ArgumentNullException(nameof(psychologist.User.Password), "Şifre alanı boş olamaz"),
                     CalendarColor = psychologist.CalendarColor ?? "#4CAF50",
+                    IsOnlineConsultationAvailable = psychologist.IsOnlineConsultationAvailable,
+                    IsInPersonConsultationAvailable = psychologist.IsInPersonConsultationAvailable,
                     IsActive = psychologist.IsActive
                 };
                 
@@ -79,6 +81,8 @@ namespace YasamPsikologProject.WebUi.Services
                 PhoneNumber = psychologist.User?.PhoneNumber ?? throw new ArgumentNullException(nameof(psychologist.User.PhoneNumber)),
                 Password = psychologist.User?.Password, // Opsiyonel - boş ise güncellenmez
                 CalendarColor = psychologist.CalendarColor ?? "#4CAF50",
+                IsOnlineConsultationAvailable = psychologist.IsOnlineConsultationAvailable,
+                IsInPersonConsultationAvailable = psychologist.IsInPersonConsultationAvailable,
                 IsActive = psychologist.IsActive
             };
             

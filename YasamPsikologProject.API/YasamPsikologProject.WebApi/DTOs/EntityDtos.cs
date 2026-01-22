@@ -29,6 +29,9 @@ namespace YasamPsikologProject.WebApi.DTOs
         [RegularExpression(@"^#[0-9A-Fa-f]{6}$", ErrorMessage = "Renk kodu hex formatında olmalıdır")]
         public string? CalendarColor { get; set; }
         
+        public bool IsOnlineConsultationAvailable { get; set; } = true;
+        public bool IsInPersonConsultationAvailable { get; set; } = true;
+        
         public bool IsActive { get; set; } = true;
     }
 
@@ -43,6 +46,8 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string? Password { get; set; }
         
         public string? CalendarColor { get; set; }
+        public bool IsOnlineConsultationAvailable { get; set; } = true;
+        public bool IsInPersonConsultationAvailable { get; set; } = true;
         public bool IsActive { get; set; }
     }
 

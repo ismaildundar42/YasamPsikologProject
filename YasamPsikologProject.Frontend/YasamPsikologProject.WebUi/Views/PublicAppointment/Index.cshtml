@@ -44,19 +44,17 @@
                         </div>
                     </div>
 
-                    <!-- Online Filtresi -->
+                    <!-- Randevu Tipi Filtresi -->
                     <div class="filter-item">
                         <label class="form-label-appointment">
-                            <i class="fas fa-video"></i> Randevu Tipi
+                            <i class="fas fa-filter"></i> Randevu Tipi
                         </label>
-                        <div class="custom-checkbox">
-                            <input type="checkbox" 
-                                   name="onlineOnly" 
-                                   id="onlineOnlyFilter" 
-                                   value="true" 
-                                   checked="@(Model.OnlineOnly == true)" />
-                            <label for="onlineOnlyFilter">Sadece Online</label>
-                        </div>
+                        <select name="consultationType" class="form-control-appointment">
+                            <option value="">Tümü</option>
+                            <option value="online" selected="@(Model.ConsultationType == "online")">Sadece Online</option>
+                            <option value="inperson" selected="@(Model.ConsultationType == "inperson")">Sadece Yüz Yüze</option>
+                            <option value="both" selected="@(Model.ConsultationType == "both")">Her İkisi</option>
+                        </select>
                     </div>
 
                     <!-- Filtrele Butonu -->

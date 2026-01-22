@@ -51,6 +51,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                         CreatedAt = p.User.CreatedAt
                     },
                     CalendarColor = p.CalendarColor,
+                    IsOnlineConsultationAvailable = p.IsOnlineConsultationAvailable,
+                    IsInPersonConsultationAvailable = p.IsInPersonConsultationAvailable,
                     IsActive = p.IsActive
                 }).ToList();
                 
@@ -88,6 +90,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                         CreatedAt = psychologist.User.CreatedAt
                     },
                     CalendarColor = psychologist.CalendarColor,
+                    IsOnlineConsultationAvailable = psychologist.IsOnlineConsultationAvailable,
+                    IsInPersonConsultationAvailable = psychologist.IsInPersonConsultationAvailable,
                     IsActive = psychologist.IsActive
                 };
 
@@ -147,6 +151,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                 {
                     UserId = createdUser.Id,
                     CalendarColor = dto.CalendarColor ?? "#4CAF50",
+                    IsOnlineConsultationAvailable = dto.IsOnlineConsultationAvailable,
+                    IsInPersonConsultationAvailable = dto.IsInPersonConsultationAvailable,
                     IsActive = dto.IsActive
                 };
 
@@ -169,6 +175,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                         CreatedAt = createdUser.CreatedAt
                     },
                     CalendarColor = createdPsychologist.CalendarColor,
+                    IsOnlineConsultationAvailable = createdPsychologist.IsOnlineConsultationAvailable,
+                    IsInPersonConsultationAvailable = createdPsychologist.IsInPersonConsultationAvailable,
                     IsActive = createdPsychologist.IsActive
                 };
                 
@@ -219,6 +227,8 @@ namespace YasamPsikologProject.WebApi.Controllers
 
                 // Psychologist bilgilerini güncelle
                 existing.CalendarColor = dto.CalendarColor ?? "#4CAF50";
+                existing.IsOnlineConsultationAvailable = dto.IsOnlineConsultationAvailable;
+                existing.IsInPersonConsultationAvailable = dto.IsInPersonConsultationAvailable;
                 existing.IsActive = dto.IsActive;
                 existing.UpdatedAt = DateTime.UtcNow;
 
@@ -241,6 +251,8 @@ namespace YasamPsikologProject.WebApi.Controllers
                         CreatedAt = user.CreatedAt
                     },
                     CalendarColor = updatedPsychologist.CalendarColor,
+                    IsOnlineConsultationAvailable = updatedPsychologist.IsOnlineConsultationAvailable,
+                    IsInPersonConsultationAvailable = updatedPsychologist.IsInPersonConsultationAvailable,
                     IsActive = updatedPsychologist.IsActive
                 };
                 

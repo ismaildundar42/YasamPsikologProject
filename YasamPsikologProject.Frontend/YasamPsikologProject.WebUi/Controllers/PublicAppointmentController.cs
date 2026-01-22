@@ -30,14 +30,14 @@ namespace YasamPsikologProject.WebUi.Controllers
 
         // GET: /PublicAppointment/Index - Psikolog Listesi
         [HttpGet]
-        public async Task<IActionResult> Index(string? search, bool? onlineOnly)
+        public async Task<IActionResult> Index(string? search, string? consultationType)
         {
             ViewData["PageTitle"] = "Randevu Al";
 
             var model = new PsychologistListViewModel
             {
                 SearchTerm = search,
-                OnlineOnly = onlineOnly
+                ConsultationType = consultationType
             };
 
             try
@@ -47,7 +47,7 @@ namespace YasamPsikologProject.WebUi.Controllers
                 {
                     var psychologists = response.Data.Where(p => p.IsActive).ToList();
 
-                    // Filtreleme
+                    // İsim filtreleme
                     if (!string.IsNullOrEmpty(search))
                     {
                         var searchLower = search.ToLower();
@@ -57,9 +57,16 @@ namespace YasamPsikologProject.WebUi.Controllers
                         ).ToList();
                     }
 
-                    if (onlineOnly == true)
+                    // Randevu tipi filtreleme
+                    if (!string.IsNullOrEmpty(consultationType))
                     {
-                        psychologists = psychologists.Where(p => p.IsOnlineConsultationAvailable).ToList();
+                        psychologists = consultationType.ToLower() switch
+                        {
+                            "online" => psychologists.Where(p => p.IsOnlineConsultationAvailable && !p.IsInPersonConsultationAvailable).ToList(),
+                            "inperson" => psychologists.Where(p => p.IsInPersonConsultationAvailable && !p.IsOnlineConsultationAvailable).ToList(),
+                            "both" => psychologists.Where(p => p.IsOnlineConsultationAvailable && p.IsInPersonConsultationAvailable).ToList(),
+                            _ => psychologists
+                        };
                     }
 
                     model.Psychologists = psychologists;

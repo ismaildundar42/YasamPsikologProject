@@ -6,7 +6,7 @@ namespace YasamPsikologProject.WebUi.Models.ViewModels
     {
         public List<PsychologistDto> Psychologists { get; set; } = new();
         public string? SearchTerm { get; set; }
-        public bool? OnlineOnly { get; set; }
+        public string? ConsultationType { get; set; } // "online", "inperson", "both", null/empty for all
     }
 
     public class AppointmentBookingViewModel

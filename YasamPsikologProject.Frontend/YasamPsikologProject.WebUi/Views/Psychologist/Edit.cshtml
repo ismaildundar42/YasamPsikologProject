@@ -96,6 +96,52 @@
                         </div>
                     </div>
 
+                    <hr>
+                    <h5 class="mb-3">Randevu Tipleri</h5>
+                    
+                    <div class="form-group">
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-info-circle"></i> Psikologun kabul edeceği randevu tiplerini seçiniz
+                        </p>
+                        
+                        <div class="custom-control custom-radio mb-2">
+                            <input type="radio" class="custom-control-input" name="consultationType" 
+                                   id="consultationBoth" value="both" 
+                                   checked="@(Model.IsOnlineConsultationAvailable && Model.IsInPersonConsultationAvailable)"
+                                   onclick="updateConsultationType('both')">
+                            <label class="custom-control-label" for="consultationBoth">
+                                <i class="fas fa-check-double text-success"></i> <strong>Her İkisi</strong> (Online ve Yüz Yüze)
+                            </label>
+                        </div>
+                        
+                        <div class="custom-control custom-radio mb-2">
+                            <input type="radio" class="custom-control-input" name="consultationType" 
+                                   id="consultationOnline" value="online"
+                                   checked="@(Model.IsOnlineConsultationAvailable && !Model.IsInPersonConsultationAvailable)"
+                                   onclick="updateConsultationType('online')">
+                            <label class="custom-control-label" for="consultationOnline">
+                                <i class="fas fa-video text-primary"></i> Sadece Online Görüşme
+                            </label>
+                        </div>
+                        
+                        <div class="custom-control custom-radio mb-2">
+                            <input type="radio" class="custom-control-input" name="consultationType" 
+                                   id="consultationInPerson" value="inperson"
+                                   checked="@(!Model.IsOnlineConsultationAvailable && Model.IsInPersonConsultationAvailable)"
+                                   onclick="updateConsultationType('inperson')">
+                            <label class="custom-control-label" for="consultationInPerson">
+                                <i class="fas fa-user text-info"></i> Sadece Yüz Yüze Görüşme
+                            </label>
+                        </div>
+                        
+                        <!-- Hidden inputs for actual form submission -->
+                        <input type="hidden" asp-for="IsOnlineConsultationAvailable" id="IsOnlineConsultationAvailable" value="@Model.IsOnlineConsultationAvailable.ToString().ToLower()" />
+                        <input type="hidden" asp-for="IsInPersonConsultationAvailable" id="IsInPersonConsultationAvailable" value="@Model.IsInPersonConsultationAvailable.ToString().ToLower()" />
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">Diğer Ayarlar</h5>
+
                     <div class="form-group">
                         <div class="custom-control custom-switch">
                             <input type="checkbox" class="custom-control-input" asp-for="IsActive" checked>
@@ -120,6 +166,27 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
+        // Randevu tipi güncellemesi
+        function updateConsultationType(type) {
+            var onlineInput = document.getElementById('IsOnlineConsultationAvailable');
+            var inPersonInput = document.getElementById('IsInPersonConsultationAvailable');
+            
+            switch(type) {
+                case 'both':
+                    onlineInput.value = 'true';
+                    inPersonInput.value = 'true';
+                    break;
+                case 'online':
+                    onlineInput.value = 'true';
+                    inPersonInput.value = 'false';
+                    break;
+                case 'inperson':
+                    onlineInput.value = 'false';
+                    inPersonInput.value = 'true';
+                    break;
+            }
+        }
+        
         $(document).ready(function() {
             // Form submit handler
             $('form').on('submit', function(e) {
