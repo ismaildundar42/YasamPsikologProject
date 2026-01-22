@@ -24,7 +24,11 @@ namespace YasamPsikologProject.DataAccessLayer.Concerete
             AppointmentNotificationRepository = new AppointmentNotificationRepository(_context);
             AuditLogRepository = new AuditLogRepository(_context);
             SystemSettingRepository = new SystemSettingRepository(_context);
+            PsychologistArchiveRepository = new PsychologistArchiveRepository(_context);
         }
+
+        // Arşiv için direkt Context erişimi
+        public AppDbContext Context => _context;
 
         public IUserRepository UserRepository { get; private set; }
         public IPsychologistRepository PsychologistRepository { get; private set; }
@@ -36,6 +40,7 @@ namespace YasamPsikologProject.DataAccessLayer.Concerete
         public IAppointmentNotificationRepository AppointmentNotificationRepository { get; private set; }
         public IAuditLogRepository AuditLogRepository { get; private set; }
         public ISystemSettingRepository SystemSettingRepository { get; private set; }
+        public IPsychologistArchiveRepository PsychologistArchiveRepository { get; private set; }
 
         public async Task<int> SaveChangesAsync()
         {

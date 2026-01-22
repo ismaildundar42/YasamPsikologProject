@@ -96,7 +96,56 @@ namespace YasamPsikologProject.WebApi.Controllers
         public async Task<IActionResult> GetByPsychologist(int psychologistId, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
         {
             var appointments = await _appointmentService.GetByPsychologistAsync(psychologistId, startDate, endDate);
-            return Ok(appointments);
+            
+            var appointmentDtos = appointments.Select(a => new
+            {
+                a.Id,
+                a.PsychologistId,
+                Psychologist = a.Psychologist != null ? new
+                {
+                    a.Psychologist.Id,
+                    a.Psychologist.UserId,
+                    User = a.Psychologist.User != null ? new
+                    {
+                        a.Psychologist.User.Id,
+                        a.Psychologist.User.FirstName,
+                        a.Psychologist.User.LastName,
+                        a.Psychologist.User.Email,
+                        a.Psychologist.User.PhoneNumber
+                    } : null,
+                    a.Psychologist.CalendarColor
+                } : null,
+                a.ClientId,
+                Client = a.Client != null ? new
+                {
+                    a.Client.Id,
+                    a.Client.UserId,
+                    User = a.Client.User != null ? new
+                    {
+                        a.Client.User.Id,
+                        a.Client.User.FirstName,
+                        a.Client.User.LastName,
+                        a.Client.User.Email,
+                        a.Client.User.PhoneNumber
+                    } : null
+                } : null,
+                a.AppointmentDate,
+                a.AppointmentEndDate,
+                Duration = (int)a.Duration,
+                a.IsOnline,
+                Status = a.Status.ToString(), // Enum'u string'e çevir
+                ClientNotes = a.ClientNotes,
+                PsychologistNotes = a.PsychologistNotes,
+                Notes = a.PsychologistNotes,
+                a.CancellationReason,
+                a.CancelledAt,
+                a.ReminderSent,
+                a.MeetingLink,
+                a.CreatedAt,
+                a.UpdatedAt
+            }).ToList();
+            
+            return Ok(appointmentDtos);
         }
 
         [HttpGet("client/{clientId}")]

@@ -12,6 +12,7 @@ namespace YasamPsikologProject.WebUi.Services
         Task<ApiResponse<PsychologistDto>> CreateAsync(PsychologistDto psychologist);
         Task<ApiResponse<PsychologistDto>> UpdateAsync(int id, PsychologistDto psychologist);
         Task<ApiResponse> DeleteAsync(int id);
+        Task<ApiResponse<List<PsychologistArchiveDto>>> GetArchivedAsync();
     }
 
     public class PsychologistService : BaseApiService, IApiPsychologistService
@@ -87,6 +88,11 @@ namespace YasamPsikologProject.WebUi.Services
         public async Task<ApiResponse> DeleteAsync(int id)
         {
             return await DeleteAsync($"api/psychologists/{id}");
+        }
+
+        public async Task<ApiResponse<List<PsychologistArchiveDto>>> GetArchivedAsync()
+        {
+            return await GetAsync<List<PsychologistArchiveDto>>("api/psychologists/archived");
         }
     }
 }

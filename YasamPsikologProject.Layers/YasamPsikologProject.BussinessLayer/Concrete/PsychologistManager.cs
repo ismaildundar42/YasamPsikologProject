@@ -71,17 +71,28 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             if (psychologist == null)
                 throw new Exception("Psikolog bulunamadı.");
 
-            // Psikolog'u soft delete yap
+            // ✅ 1. ADIM: Psikolog bilgilerini ARŞİVE KOPYALA
+            var archive = new EntityLayer.Concrete.PsychologistArchive
+            {
+                OriginalPsychologistId = psychologist.Id,
+                FirstName = psychologist.User?.FirstName ?? "",
+                LastName = psychologist.User?.LastName ?? "",
+                Email = psychologist.User?.Email ?? "",
+                PhoneNumber = psychologist.User?.PhoneNumber,
+                CalendarColor = psychologist.CalendarColor,
+                AutoApproveAppointments = psychologist.AutoApproveAppointments,
+                ArchivedAt = DateTime.UtcNow,
+                ArchivedReason = "Psikolog silindi",
+                OriginalCreatedAt = psychologist.CreatedAt
+            };
+
+            await _unitOfWork.Context.PsychologistArchive.AddAsync(archive);
+
+            // ✅ 2. ADIM: Psikolog'u soft delete yap
             _unitOfWork.PsychologistRepository.Delete(psychologist);
 
-            // İlişkili tüm randevuları soft delete yap (tüm durumlar - herhangi bir sınırlama yok)
-            var appointments = await _unitOfWork.AppointmentRepository.GetAllAsync(a => a.PsychologistId == id);
-            var appointmentsList = appointments.ToList();
-            
-            foreach (var appointment in appointmentsList)
-            {
-                _unitOfWork.AppointmentRepository.Delete(appointment);
-            }
+            // ✅ 3. ADIM: RANDEVULARA DOKUNMA! 
+            // Arşiv tablosu sayesinde eski randevularda psikolog bilgisi görünecek
 
             // İlişkili çalışma saatlerini soft delete yap
             var workingHours = await _unitOfWork.WorkingHourRepository.GetAllAsync(w => w.PsychologistId == id);

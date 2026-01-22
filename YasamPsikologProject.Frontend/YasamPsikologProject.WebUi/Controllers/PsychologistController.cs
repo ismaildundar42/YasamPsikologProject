@@ -8,13 +8,16 @@ namespace YasamPsikologProject.WebUi.Controllers
     public class PsychologistController : Controller
     {
         private readonly IApiPsychologistService _psychologistService;
+        private readonly IApiAppointmentService _appointmentService;
         private readonly ILogger<PsychologistController> _logger;
 
         public PsychologistController(
             IApiPsychologistService psychologistService,
+            IApiAppointmentService appointmentService,
             ILogger<PsychologistController> logger)
         {
             _psychologistService = psychologistService;
+            _appointmentService = appointmentService;
             _logger = logger;
         }
 
@@ -289,6 +292,71 @@ namespace YasamPsikologProject.WebUi.Controllers
             {
                 _logger.LogError(ex, "Psikolog silinirken hata");
                 return Json(new { success = false, message = "İşlem sırasında hata oluştu." });
+            }
+        }
+
+        [HttpGet]
+        [Route("Archive")]
+        public async Task<IActionResult> Archive()
+        {
+            ViewData["PageTitle"] = "Arşivlenmiş Psikologlar";
+            
+            try
+            {
+                var response = await _psychologistService.GetArchivedAsync();
+                if (response.Success && response.Data != null)
+                {
+                    return View(response.Data);
+                }
+                
+                TempData["ErrorMessage"] = response.Message;
+                return View(new List<PsychologistArchiveDto>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Arşivlenmiş psikologlar listelenirken hata");
+                TempData["ErrorMessage"] = "Veriler yüklenirken hata oluştu.";
+                return View(new List<PsychologistArchiveDto>());
+            }
+        }
+
+        [HttpGet]
+        [Route("ArchiveAppointments")]
+        public async Task<IActionResult> ArchiveAppointments(int psychologistId)
+        {
+            ViewData["PageTitle"] = "Arşiv Psikolog Randevuları";
+            
+            try
+            {
+                // Arşivlenmiş psikolog bilgisini al
+                var archiveResponse = await _psychologistService.GetArchivedAsync();
+                var archivedPsychologist = archiveResponse.Data?.FirstOrDefault(p => p.OriginalPsychologistId == psychologistId);
+                
+                if (archivedPsychologist == null)
+                {
+                    TempData["ErrorMessage"] = "Arşivlenmiş psikolog bulunamadı.";
+                    return RedirectToAction("Archive");
+                }
+
+                ViewBag.PsychologistName = $"{archivedPsychologist.FirstName} {archivedPsychologist.LastName}";
+                ViewBag.PsychologistId = psychologistId;
+
+                // Bu psikologa ait tüm randevuları getir
+                var appointmentsResponse = await _appointmentService.GetByPsychologistAsync(psychologistId);
+                
+                if (appointmentsResponse.Success && appointmentsResponse.Data != null)
+                {
+                    return View(appointmentsResponse.Data);
+                }
+                
+                TempData["ErrorMessage"] = appointmentsResponse.Message;
+                return View(new List<AppointmentDto>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Arşiv psikolog randevuları listelenirken hata");
+                TempData["ErrorMessage"] = "Veriler yüklenirken hata oluştu.";
+                return View(new List<AppointmentDto>());
             }
         }
     }

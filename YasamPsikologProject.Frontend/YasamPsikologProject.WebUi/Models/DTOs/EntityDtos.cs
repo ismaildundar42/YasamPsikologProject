@@ -170,4 +170,18 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public int? PsychologistId { get; set; }
         public int? ClientId { get; set; }
     }
+
+    public class PsychologistArchiveDto
+    {
+        public int Id { get; set; }
+        public int OriginalPsychologistId { get; set; }
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string? PhoneNumber { get; set; }
+        public string? CalendarColor { get; set; }
+        public DateTime ArchivedAt { get; set; }
+        public string? ArchivedReason { get; set; }
+        public DateTime? OriginalCreatedAt { get; set; }
+    }
 }

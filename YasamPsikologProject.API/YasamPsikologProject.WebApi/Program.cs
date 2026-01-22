@@ -27,6 +27,7 @@ builder.Services.AddScoped<IUnavailableTimeRepository, UnavailableTimeRepository
 builder.Services.AddScoped<IAppointmentNotificationRepository, AppointmentNotificationRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
+builder.Services.AddScoped<IPsychologistArchiveRepository, PsychologistArchiveRepository>();
 
 // Business Services
 builder.Services.AddScoped<IUserService, UserManager>();
@@ -35,6 +36,7 @@ builder.Services.AddScoped<IClientService, ClientManager>();
 builder.Services.AddScoped<IAppointmentService, AppointmentManager>();
 builder.Services.AddScoped<IWorkingHourService, WorkingHourManager>();
 builder.Services.AddScoped<INotificationService, NotificationManager>();
+builder.Services.AddScoped<IPsychologistArchiveService, PsychologistArchiveManager>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

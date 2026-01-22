@@ -1,0 +1,166 @@
+@model List<YasamPsikologProject.WebUi.Models.DTOs.AppointmentDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Arşiv Psikolog Randevuları";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-calendar-alt"></i> 
+                    <strong>@ViewBag.PsychologistName</strong> - Tüm Randevuları
+                </h3>
+                <div class="card-tools">
+                    <a asp-action="Archive" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Arşive Dön
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <i class="icon fas fa-ban"></i> @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    Bu psikolog silinmiş olsa da randevuları sistemde korunmaktadır.
+                    <strong>Toplam @Model.Count randevu</strong> bulunmaktadır.
+                </div>
+
+                <table id="appointmentsTable" class="table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Danışan</th>
+                            <th>Tarih & Saat</th>
+                            <th>Süre</th>
+                            <th>Tür</th>
+                            <th>Durum</th>
+                            <th>Oluşturulma</th>
+                            <th>Notlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appointment in Model)
+                        {
+                            <tr>
+                                <td>@appointment.Id</td>
+                                <td>
+                                    @if (appointment.Client?.User != null)
+                                    {
+                                        <strong>@appointment.Client.User.FirstName @appointment.Client.User.LastName</strong>
+                                        <br />
+                                        <small class="text-muted">@appointment.Client.User.Email</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Danışan bilgisi yok</span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@appointment.AppointmentDate.ToString("dd.MM.yyyy")</strong>
+                                    <br />
+                                    <span class="badge badge-primary">
+                                        @appointment.AppointmentDate.ToString("HH:mm") - @appointment.AppointmentEndDate.ToString("HH:mm")
+                                    </span>
+                                </td>
+                                <td>
+                                    @{
+                                        var duration = (appointment.AppointmentEndDate - appointment.AppointmentDate).TotalMinutes;
+                                    }
+                                    @duration dk
+                                </td>
+                                <td>
+                                    @if (appointment.IsOnline)
+                                    {
+                                        <span class="badge badge-info">
+                                            <i class="fas fa-video"></i> Online
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-user"></i> Yüz Yüze
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (appointment.Status == "Pending")
+                                    {
+                                        <span class="badge badge-warning">Beklemede</span>
+                                    }
+                                    else if (appointment.Status == "Confirmed")
+                                    {
+                                        <span class="badge badge-success">Onaylandı</span>
+                                    }
+                                    else if (appointment.Status == "Completed")
+                                    {
+                                        <span class="badge badge-primary">Tamamlandı</span>
+                                    }
+                                    else if (appointment.Status == "Cancelled")
+                                    {
+                                        <span class="badge badge-danger">İptal Edildi</span>
+                                    }
+                                    else if (appointment.Status == "NoShow")
+                                    {
+                                        <span class="badge badge-dark">Gelmedi</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">@appointment.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@appointment.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(appointment.Notes))
+                                    {
+                                        <small>@appointment.Notes</small>
+                                    }
+                                    else if (!string.IsNullOrEmpty(appointment.CancellationReason))
+                                    {
+                                        <small class="text-danger">
+                                            <strong>İptal:</strong> @appointment.CancellationReason
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#appointmentsTable').DataTable({
+                responsive: true,
+                pageLength: 25,
+                order: [[2, 'desc']], // Tarih sütununa göre azalan sırada (en yeni üstte)
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+                },
+                columnDefs: [
+                    {
+                        targets: [2, 6], // Tarih sütunları
+                        type: 'date'
+                    }
+                ]
+            });
+        });
+    </script>
+}

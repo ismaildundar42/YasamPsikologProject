@@ -20,6 +20,7 @@ namespace YasamPsikologProject.DataAccessLayer.EntityFramework
         public DbSet<AppointmentNotification> AppointmentNotifications { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }
+        public DbSet<PsychologistArchive> PsychologistArchive { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

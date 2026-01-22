@@ -12,15 +12,18 @@ namespace YasamPsikologProject.WebApi.Controllers
     {
         private readonly IPsychologistService _psychologistService;
         private readonly IUserService _userService;
+        private readonly IPsychologistArchiveService _archiveService;
         private readonly ILogger<PsychologistsController> _logger;
 
         public PsychologistsController(
             IPsychologistService psychologistService,
             IUserService userService,
+            IPsychologistArchiveService archiveService,
             ILogger<PsychologistsController> logger)
         {
             _psychologistService = psychologistService;
             _userService = userService;
+            _archiveService = archiveService;
             _logger = logger;
         }
 
@@ -260,6 +263,35 @@ namespace YasamPsikologProject.WebApi.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("archived")]
+        public async Task<IActionResult> GetArchived()
+        {
+            try
+            {
+                var archivedPsychologists = await _archiveService.GetAllArchivedAsync();
+                
+                var dtos = archivedPsychologists.Select(pa => new
+                {
+                    Id = pa.Id,
+                    OriginalPsychologistId = pa.OriginalPsychologistId,
+                    FirstName = pa.FirstName,
+                    LastName = pa.LastName,
+                    Email = pa.Email,
+                    PhoneNumber = pa.PhoneNumber,
+                    CalendarColor = pa.CalendarColor,
+                    ArchivedAt = pa.ArchivedAt,
+                    ArchivedReason = pa.ArchivedReason,
+                    OriginalCreatedAt = pa.OriginalCreatedAt
+                }).ToList();
+
+                return Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Arşivlenmiş psikologlar listelenirken hata oluştu: {ex.Message}" });
             }
         }
     }
