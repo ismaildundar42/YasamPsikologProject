@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using YasamPsikologProject.DataAccessLayer.Abstract;
 using YasamPsikologProject.EntityLayer.Concrete;
+using YasamPsikologProject.WebApi.DTOs;
 
 namespace YasamPsikologProject.WebApi.Controllers
 {
@@ -19,7 +20,15 @@ namespace YasamPsikologProject.WebApi.Controllers
         public async Task<IActionResult> GetAll()
         {
             var settings = await _unitOfWork.SystemSettingRepository.GetAllAsync();
-            return Ok(settings);
+            var dtos = settings.Select(s => new SystemSettingDto
+            {
+                Id = s.Id,
+                Key = s.Key,
+                Value = s.Value,
+                Description = s.Description,
+                Category = s.Category
+            }).ToList();
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
@@ -29,7 +38,15 @@ namespace YasamPsikologProject.WebApi.Controllers
             if (setting == null)
                 return NotFound(new { message = "Ayar bulunamadı." });
 
-            return Ok(setting);
+            var dto = new SystemSettingDto
+            {
+                Id = setting.Id,
+                Key = setting.Key,
+                Value = setting.Value,
+                Description = setting.Description,
+                Category = setting.Category
+            };
+            return Ok(dto);
         }
 
         [HttpGet("key/{key}")]
@@ -39,7 +56,15 @@ namespace YasamPsikologProject.WebApi.Controllers
             if (setting == null)
                 return NotFound(new { message = "Ayar bulunamadı." });
 
-            return Ok(setting);
+            var dto = new SystemSettingDto
+            {
+                Id = setting.Id,
+                Key = setting.Key,
+                Value = setting.Value,
+                Description = setting.Description,
+                Category = setting.Category
+            };
+            return Ok(dto);
         }
 
         [HttpGet("key/{key}/value")]
@@ -79,16 +104,25 @@ namespace YasamPsikologProject.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] SystemSetting setting)
+        public async Task<IActionResult> Update(int id, [FromBody] SystemSettingDto dto)
         {
-            if (id != setting.Id)
+            if (id != dto.Id)
                 return BadRequest(new { message = "ID uyuşmazlığı." });
 
             try
             {
+                var setting = await _unitOfWork.SystemSettingRepository.GetByIdAsync(id);
+                if (setting == null)
+                    return NotFound(new { message = "Ayar bulunamadı." });
+
+                setting.Value = dto.Value;
+                setting.Description = dto.Description;
+                setting.Category = dto.Category;
+                setting.UpdatedAt = DateTime.UtcNow;
+
                 _unitOfWork.SystemSettingRepository.Update(setting);
                 await _unitOfWork.SaveChangesAsync();
-                return Ok(setting);
+                return Ok(dto);
             }
             catch (Exception ex)
             {

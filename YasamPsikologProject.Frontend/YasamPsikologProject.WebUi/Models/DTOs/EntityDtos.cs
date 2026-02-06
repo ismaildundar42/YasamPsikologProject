@@ -158,6 +158,7 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public DateTime EndDateTime { get; set; }
         public string Reason { get; set; } = null!;
         public bool IsAllDay { get; set; }
+        public string? Notes { get; set; }
     }
 
     public class LoginResponseDto
@@ -183,5 +184,14 @@ namespace YasamPsikologProject.WebUi.Models.DTOs
         public DateTime ArchivedAt { get; set; }
         public string? ArchivedReason { get; set; }
         public DateTime? OriginalCreatedAt { get; set; }
+    }
+
+    public class SystemSettingDto
+    {
+        public int Id { get; set; }
+        public string Key { get; set; } = null!;
+        public string Value { get; set; } = null!;
+        public string? Description { get; set; }
+        public string Category { get; set; } = null!;
     }
 }

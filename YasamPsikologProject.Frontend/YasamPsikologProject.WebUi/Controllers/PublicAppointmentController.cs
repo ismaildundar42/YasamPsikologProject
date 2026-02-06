@@ -378,19 +378,20 @@ namespace YasamPsikologProject.WebUi.Controllers
                 {
                     _logger.LogInformation("Existing client found with ID: {ClientId}", client.Id);
                     
-                    // Mevcut client için beklemede veya onaylanmış randevu kontrolü
+                    // Aynı gün içinde beklemede veya onaylanmış randevu kontrolü (farklı günlerde sınırsız randevu alabilir)
                     var existingAppointmentsResponse = await _appointmentService.GetAllAsync();
                     if (existingAppointmentsResponse.Success && existingAppointmentsResponse.Data != null)
                     {
                         var clientAppointments = existingAppointmentsResponse.Data
                             .Where(a => a.ClientId == client.Id && 
-                                       (a.Status == "Pending" || a.Status == "Confirmed"))
+                                       (a.Status == "Pending" || a.Status == "Confirmed") &&
+                                       a.AppointmentDate.Date == appointmentDate.Date)
                             .ToList();
                         
                         if (clientAppointments.Any())
                         {
-                            _logger.LogWarning("Client {ClientId} already has pending or confirmed appointments", client.Id);
-                            TempData["ErrorMessage"] = "Zaten beklemede veya onaylanmış bir randevunuz bulunmaktadır. Lütfen mevcut randevunuz tamamlandıktan sonra yeni randevu talebinde bulununuz.";
+                            _logger.LogWarning("Client {ClientId} already has an appointment on this date: {Date}", client.Id, appointmentDate.Date);
+                            TempData["ErrorMessage"] = "Bu tarihte zaten bir randevunuz bulunmaktadır. Lütfen farklı bir gün seçiniz.";
                             return RedirectToAction(nameof(ConfirmAppointment), new
                             {
                                 psychologistId = psychologistId,

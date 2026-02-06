@@ -17,7 +17,7 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
         public async Task<IEnumerable<UnavailableTime>> GetByPsychologistAsync(int psychologistId, DateTime? startDate = null, DateTime? endDate = null)
         {
             var query = _context.UnavailableTimes
-                .Where(u => u.PsychologistId == psychologistId);
+                .Where(u => u.PsychologistId == psychologistId && !u.IsDeleted);
 
             if (startDate.HasValue)
                 query = query.Where(u => u.EndDateTime >= startDate.Value);
@@ -34,6 +34,7 @@ namespace YasamPsikologProject.DataAccessLayer.Repositories
         {
             return await _context.UnavailableTimes
                 .AnyAsync(u => u.PsychologistId == psychologistId
+                            && !u.IsDeleted
                             && u.StartDateTime < endDate
                             && u.EndDateTime > startDate);
         }

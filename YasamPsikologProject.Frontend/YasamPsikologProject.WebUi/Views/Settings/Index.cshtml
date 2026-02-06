@@ -1,0 +1,146 @@
+@model List<YasamPsikologProject.WebUi.Models.DTOs.SystemSettingDto>
+@{
+    ViewData["Title"] = "Sistem Ayarları";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6>Sistem Ayarları</h6>
+                        <p class="text-sm text-muted mb-0">Sistemin genel ayarlarını buradan yönetebilirsiniz</p>
+                    </div>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show mx-3" role="alert">
+                            <strong>✓ Başarılı!</strong> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show mx-3" role="alert">
+                            <strong>✕ Hata!</strong> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="px-3">
+                        @foreach (var categoryGroup in Model.GroupBy(s => s.Category).OrderBy(g => g.Key))
+                        {
+                            <div class="mb-4">
+                                <h6 class="text-uppercase text-xs font-weight-bolder mb-3">
+                                    @(categoryGroup.Key == "Appointment" ? "Randevu Ayarları" : categoryGroup.Key)
+                                </h6>
+                                
+                                @foreach (var setting in categoryGroup)
+                                {
+                                    <div class="card mb-2">
+                                        <div class="card-body p-3">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-6">
+                                                    <p class="text-sm font-weight-bold mb-1">
+                                                        @(setting.Key == "SlotInterval" ? "Randevu Saat Aralığı" : setting.Key)
+                                                    </p>
+                                                    <p class="text-xs text-muted mb-0">@setting.Description</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    @if (setting.Key == "SlotInterval")
+                                                    {
+                                                        <select class="form-select form-select-sm setting-value" 
+                                                                data-id="@setting.Id"
+                                                                data-key="@setting.Key">
+                                                            <option value="5" selected="@(setting.Value == "5")">5 Dakika</option>
+                                                            <option value="10" selected="@(setting.Value == "10")">10 Dakika</option>
+                                                            <option value="15" selected="@(setting.Value == "15")">15 Dakika</option>
+                                                            <option value="30" selected="@(setting.Value == "30")">30 Dakika</option>
+                                                        </select>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" 
+                                                               class="form-control form-control-sm setting-value" 
+                                                               data-id="@setting.Id"
+                                                               data-key="@setting.Key"
+                                                               value="@setting.Value" />
+                                                    }
+                                                </div>
+                                                <div class="col-md-2 text-end">
+                                                    <button class="btn btn-sm btn-success save-setting" 
+                                                            data-id="@setting.Id"
+                                                            data-key="@setting.Key">
+                                                        <i class="fas fa-save me-1"></i> Kaydet
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.save-setting').on('click', function() {
+                const button = $(this);
+                const id = button.data('id');
+                const key = button.data('key');
+                const cardBody = button.closest('.card-body');
+                const value = cardBody.find('.setting-value').val();
+                const category = cardBody.closest('.mb-4').find('.text-uppercase').text().trim();
+                const description = cardBody.find('.text-muted').text();
+
+                // Buton durumunu değiştir
+                button.prop('disabled', true);
+                const originalText = button.html();
+                button.html('<i class="fas fa-spinner fa-spin me-1"></i> Kaydediliyor...');
+
+                $.ajax({
+                    url: '/Admin/Settings/Update',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        id: id,
+                        key: key,
+                        value: value,
+                        category: category === 'RANDEVU AYARLARI' ? 'Appointment' : category,
+                        description: description
+                    }),
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success('Ayar başarıyla kaydedildi!');
+                        } else {
+                            toastr.error(response.message || 'Kaydetme işlemi başarısız oldu');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Bir hata oluştu, lütfen tekrar deneyiniz');
+                    },
+                    complete: function() {
+                        button.prop('disabled', false);
+                        button.html(originalText);
+                    }
+                });
+            });
+
+            // Enter tuşu ile kaydet
+            $('.setting-value').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $(this).closest('.card-body').find('.save-setting').click();
+                }
+            });
+        });
+    </script>
+}

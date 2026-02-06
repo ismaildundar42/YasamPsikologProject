@@ -74,6 +74,18 @@ builder.Services.AddHttpClient<IApiSuperAdminService, SuperAdminService>(client 
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+builder.Services.AddHttpClient<IApiUnavailableTimeService, UnavailableTimeService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl!);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+builder.Services.AddHttpClient<IApiSystemSettingService, SystemSettingService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl!);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

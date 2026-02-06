@@ -33,12 +33,22 @@ namespace YasamPsikologProject.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] UnavailableTime unavailableTime)
+        public async Task<IActionResult> Create([FromBody] CreateUnavailableTimeDto dto)
         {
             try
             {
-                if (unavailableTime.StartDateTime >= unavailableTime.EndDateTime)
+                if (dto.StartDateTime >= dto.EndDateTime)
                     return BadRequest(new { message = "Bitiş tarihi başlangıç tarihinden önce olamaz." });
+
+                var unavailableTime = new UnavailableTime
+                {
+                    PsychologistId = dto.PsychologistId,
+                    StartDateTime = dto.StartDateTime,
+                    EndDateTime = dto.EndDateTime,
+                    Reason = dto.Reason,
+                    IsAllDay = dto.IsAllDay,
+                    Notes = dto.Notes
+                };
 
                 await _unitOfWork.UnavailableTimeRepository.AddAsync(unavailableTime);
                 await _unitOfWork.SaveChangesAsync();
@@ -96,5 +106,15 @@ namespace YasamPsikologProject.WebApi.Controllers
             var isUnavailable = await _unitOfWork.UnavailableTimeRepository.HasUnavailableTimeAsync(psychologistId, startDate, endDate);
             return Ok(new { isUnavailable });
         }
+    }
+
+    public class CreateUnavailableTimeDto
+    {
+        public int PsychologistId { get; set; }
+        public DateTime StartDateTime { get; set; }
+        public DateTime EndDateTime { get; set; }
+        public string Reason { get; set; } = string.Empty;
+        public bool IsAllDay { get; set; }
+        public string? Notes { get; set; }
     }
 }

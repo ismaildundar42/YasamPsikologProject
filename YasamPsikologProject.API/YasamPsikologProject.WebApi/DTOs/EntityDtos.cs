@@ -181,4 +181,19 @@ namespace YasamPsikologProject.WebApi.DTOs
         
         public string? Notes { get; set; }
     }
+
+    public class SystemSettingDto
+    {
+        public int Id { get; set; }
+        
+        [Required]
+        public string Key { get; set; } = null!;
+        
+        [Required]
+        public string Value { get; set; } = null!;
+        
+        public string? Description { get; set; }
+        
+        public string? Category { get; set; }
+    }
 }

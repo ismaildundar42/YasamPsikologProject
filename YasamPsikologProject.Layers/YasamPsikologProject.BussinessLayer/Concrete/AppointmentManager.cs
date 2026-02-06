@@ -472,7 +472,10 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
 
             int slotDuration = (int)duration;
             int bufferDuration = workingHour.BufferDuration; // Psikologun buffer süresi
-            int slotInterval = 5; // 5 dakika aralıklarla kontrol et
+            
+            // SlotInterval ayarını sistemden oku
+            var slotIntervalSetting = await _unitOfWork.SystemSettingRepository.GetValueAsync("SlotInterval");
+            int slotInterval = int.TryParse(slotIntervalSetting, out int interval) ? interval : 5;
             
             var currentTime = date.Date.Add(workingHour.StartTime);
             var endTime = date.Date.Add(workingHour.EndTime);
@@ -483,12 +486,12 @@ namespace YasamPsikologProject.BussinessLayer.Concrete
             
             if (date.Date == currentTimeInTurkey.Date && currentTime < minimumTime)
             {
-                // Şimdiki zamandan en az 5 dakika sonraki ilk 5'in katı dakikayı bul
+                // Şimdiki zamandan en az 5 dakika sonraki ilk slotInterval'ın katı dakikayı bul
                 currentTime = minimumTime;
-                int remainder = currentTime.Minute % 5;
+                int remainder = currentTime.Minute % slotInterval;
                 if (remainder != 0)
                 {
-                    currentTime = currentTime.AddMinutes(5 - remainder);
+                    currentTime = currentTime.AddMinutes(slotInterval - remainder);
                 }
                 currentTime = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day, currentTime.Hour, currentTime.Minute, 0);
             }
