@@ -149,14 +149,27 @@ namespace YasamPsikologProject.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateClientDto dto)
         {
+            Console.WriteLine("=== API ClientsController.Create START ===");
+            Console.WriteLine($"DTO null mu: {dto == null}");
+            
+            if (dto != null)
+            {
+                Console.WriteLine($"FirstName: {dto.FirstName}");
+                Console.WriteLine($"LastName: {dto.LastName}");
+                Console.WriteLine($"Email: {dto.Email}");
+                Console.WriteLine($"PhoneNumber: {dto.PhoneNumber}");
+            }
+            
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                Console.WriteLine($"ModelState geçersiz. Hatalar: {string.Join(", ", errors)}");
                 return BadRequest(new { message = "Geçersiz veri.", errors = errors });
             }
 
             try
             {
+                Console.WriteLine("User oluşturuluyor...");
                 // Önce User oluştur
                 var user = new User
                 {
@@ -171,8 +184,10 @@ namespace YasamPsikologProject.WebApi.Controllers
                 };
 
                 var createdUser = await _userService.CreateAsync(user);
+                Console.WriteLine($"User oluşturuldu. ID: {createdUser.Id}");
 
                 // Sonra Client oluştur
+                Console.WriteLine("Client oluşturuluyor...");
                 var client = new Client
                 {
                     UserId = createdUser.Id,
@@ -185,6 +200,7 @@ namespace YasamPsikologProject.WebApi.Controllers
                 };
 
                 var createdClient = await _clientService.CreateAsync(client);
+                Console.WriteLine($"Client oluşturuldu. ID: {createdClient.Id}");
                 
                 // DTO formatında dön
                 var responseDto = new
@@ -211,11 +227,18 @@ namespace YasamPsikologProject.WebApi.Controllers
                     IsActive = createdClient.IsActive
                 };
                 
+                Console.WriteLine("Başarılı response dönülüyor...");
                 return CreatedAtAction(nameof(GetById), new { id = createdClient.Id }, responseDto);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                Console.WriteLine($"HATA: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                return BadRequest(new { message = ex.Message, details = ex.InnerException?.Message });
             }
         }
 

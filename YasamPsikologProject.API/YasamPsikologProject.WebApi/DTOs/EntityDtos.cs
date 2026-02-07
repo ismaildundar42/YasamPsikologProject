@@ -57,6 +57,8 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
+        
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Telefon numarası 11 haneli olmalıdır")]
         public string PhoneNumber { get; set; } = null!;
 
         // Client bilgileri
@@ -72,6 +74,8 @@ namespace YasamPsikologProject.WebApi.DTOs
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
+        
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Telefon numarası 11 haneli olmalıdır")]
         public string PhoneNumber { get; set; } = null!;
         public int? AssignedPsychologistId { get; set; }
         public string? EmergencyContactName { get; set; }

@@ -38,6 +38,15 @@ namespace YasamPsikologProject.WebUi.Services
 
         public async Task<ApiResponse<ClientDto>> CreateAsync(ClientDto client)
         {
+            _logger.LogInformation("=== ClientService.CreateAsync START ===");
+            _logger.LogInformation("Client.User null mu: {IsNull}", client.User == null);
+            
+            if (client.User != null)
+            {
+                _logger.LogInformation("User Bilgileri - Ad: {FirstName}, Soyad: {LastName}, Email: {Email}, Telefon: {Phone}",
+                    client.User.FirstName, client.User.LastName, client.User.Email, client.User.PhoneNumber);
+            }
+            
             // DTO'yu API'nin beklediği formata dönüştür
             var createDto = new
             {
@@ -50,7 +59,13 @@ namespace YasamPsikologProject.WebUi.Services
                 KvkkConsent = client.KvkkConsent
             };
             
-            return await PostAsync<object, ClientDto>("api/clients", createDto);
+            _logger.LogInformation("API'ye gönderilecek DTO: {Dto}", System.Text.Json.JsonSerializer.Serialize(createDto));
+            
+            var result = await PostAsync<object, ClientDto>("api/clients", createDto);
+            
+            _logger.LogInformation("API Response - Success: {Success}, Message: {Message}", result.Success, result.Message);
+            
+            return result;
         }
 
         public async Task<ApiResponse<ClientDto>> UpdateAsync(int id, ClientDto client)

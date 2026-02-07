@@ -61,31 +61,69 @@ namespace YasamPsikologProject.WebUi.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ClientDto model)
         {
-            if (!ModelState.IsValid)
+            _logger.LogInformation("=== Create Client START ===");
+            _logger.LogInformation("Model State Valid: {Valid}", ModelState.IsValid);
+            _logger.LogInformation("Model.User null mu: {IsNull}", model.User == null);
+            
+            if (model.User == null)
             {
-                TempData["ErrorMessage"] = "Lütfen tüm alanları doğru şekilde doldurunuz.";
+                model.User = new UserDto();
+            }
+            
+            // Form verilerini al
+            var firstName = Request.Form["User.FirstName"].ToString();
+            var lastName = Request.Form["User.LastName"].ToString();
+            var email = Request.Form["User.Email"].ToString();
+            var phoneNumber = Request.Form["User.PhoneNumber"].ToString();
+            
+            _logger.LogInformation("Form Verileri - Ad: {FirstName}, Soyad: {LastName}, Email: {Email}, Telefon: {Phone}",
+                firstName, lastName, email, phoneNumber);
+            
+            // User nesnesini doldur
+            model.User.FirstName = firstName;
+            model.User.LastName = lastName;
+            model.User.Email = email;
+            model.User.PhoneNumber = phoneNumber;
+            
+            _logger.LogInformation("Model.User dolduruldu - Ad: {FirstName}, Soyad: {LastName}",
+                model.User.FirstName, model.User.LastName);
+
+            // Basit validasyon
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) ||
+                string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                TempData["ErrorMessage"] = "Lütfen tüm zorunlu alanları doldurunuz.";
+                _logger.LogWarning("Zorunlu alanlar eksik");
+                await LoadPsychologists();
+                return View(model);
+            }
+            
+            // Telefon numarası validasyonu
+            if (phoneNumber.Length != 11 || !phoneNumber.All(char.IsDigit))
+            {
+                TempData["ErrorMessage"] = "Telefon numarası 11 haneli olmalıdır (örn: 05551234567).";
+                _logger.LogWarning("Geçersiz telefon numarası: {Phone}", phoneNumber);
                 await LoadPsychologists();
                 return View(model);
             }
 
             try
             {
-                // User bilgilerini kontrol et
-                if (model.User == null)
-                {
-                    TempData["ErrorMessage"] = "Kullanıcı bilgileri eksik.";
-                    await LoadPsychologists();
-                    return View(model);
-                }
-
+                _logger.LogInformation("API isteği gönderiliyor...");
                 var response = await _clientService.CreateAsync(model);
+                
+                _logger.LogInformation("API Response - Success: {Success}, Message: {Message}",
+                    response.Success, response.Message);
+                
                 if (response.Success)
                 {
                     TempData["SuccessMessage"] = "Danışan başarıyla oluşturuldu.";
+                    _logger.LogInformation("Danışan başarıyla oluşturuldu, yönlendiriliyor...");
                     return RedirectToAction("Index", "Client");
                 }
 
                 TempData["ErrorMessage"] = response.Message ?? "Danışan oluşturulamadı.";
+                _logger.LogWarning("API başarısız: {Message}", response.Message);
                 await LoadPsychologists();
                 return View(model);
             }

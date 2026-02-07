@@ -7,7 +7,7 @@ namespace YasamPsikologProject.WebUi.Services
     public class BaseApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly ILogger<BaseApiService> _logger;
+        protected readonly ILogger<BaseApiService> _logger;
 
         public BaseApiService(HttpClient httpClient, ILogger<BaseApiService> logger)
         {
@@ -58,10 +58,17 @@ namespace YasamPsikologProject.WebUi.Services
             try
             {
                 var json = JsonConvert.SerializeObject(data);
+                _logger.LogInformation("=== API POST Request ===");
+                _logger.LogInformation("Endpoint: {Endpoint}", endpoint);
+                _logger.LogInformation("Request JSON: {Json}", json);
+                
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 
                 var response = await _httpClient.PostAsync(endpoint, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
+                
+                _logger.LogInformation("Response Status: {StatusCode}", response.StatusCode);
+                _logger.LogInformation("Response Content: {Content}", responseContent.Length > 1000 ? responseContent.Substring(0, 1000) + "..." : responseContent);
 
                 if (response.IsSuccessStatusCode)
                 {
