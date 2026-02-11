@@ -1,10 +1,20 @@
 using Serilog;
+using Microsoft.AspNetCore.HttpOverrides;
 using YasamPsikologProject.WebUi.Services;
 using YasamPsikologProject.WebUi.Filters;
 using Polly;
 using Polly.Extensions.Http;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 // Serilog Configuration
 Log.Logger = new LoggerConfiguration()
@@ -87,6 +97,8 @@ builder.Services.AddHttpClient<IApiSystemSettingService, SystemSettingService>(c
 });
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
