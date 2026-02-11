@@ -74,7 +74,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 app.UseForwardedHeaders();
-app.UsePathBase("/admin");
+app.UsePathBase("/portal");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
