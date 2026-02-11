@@ -99,6 +99,10 @@ builder.Services.AddHttpClient<IApiSystemSettingService, SystemSettingService>(c
 var app = builder.Build();
 
 app.UseForwardedHeaders();
+app.UsePathBase("/admin");
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -110,10 +114,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
-
 app.UseSession();
-app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "admin",
